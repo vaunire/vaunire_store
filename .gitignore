@@ -1,0 +1,14 @@
+# Файлы окружения
+.env
+.env.*
+
+# IDE и редакторы
+.idea/
+.vscode/
+
+# Статические и медиафайлы
+static/
+media/
+
+# Кэш Python
+__pycache__/
