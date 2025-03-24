@@ -1,14 +1,19 @@
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.db import models
-from unfold.admin import ModelAdmin, TabularInline
-from unfold.contrib.filters.admin import MultipleRelatedDropdownFilter, RelatedDropdownFilter, RangeDateFilter
-from unfold.contrib.forms.widgets import WysiwygWidget
-from django.urls import reverse
 from django.utils.html import format_html
 
-from .models import Album, Artist, Genre, ImageGallery, MediaType, Member, Style, PriceList, PriceListItem
+# Нестандартные импорты от Unfold: улучшенная админка, кастомные фильтры и WYSIWYG-редактор
+from unfold.admin import ModelAdmin, TabularInline
+from unfold.contrib.filters.admin import (
+    MultipleRelatedDropdownFilter,  
+    RangeDateFilter,              
+    RelatedDropdownFilter          
+)
+from unfold.contrib.forms.widgets import WysiwygWidget  # Мини-Word для текстовых полей
 
+from .models import (Album, Artist, Genre, ImageGallery, MediaType, Member,
+                     PriceList, PriceListItem, Style)
 
 class BaseAdmin(ModelAdmin):
     list_filter_submit = True 
@@ -16,42 +21,18 @@ class BaseAdmin(ModelAdmin):
         models.TextField: {"widget": WysiwygWidget},  
     }
 
-
 class PriceListItemInLine(TabularInline):
     model = PriceListItem
-    extra = 1
-    fields = ('content_type', 'object_id', 'content_object_link', 'artist', 'genre', 'price')
-    readonly_fields = ('content_object_link', 'artist', 'genre')
-
-    def content_object_link(self, obj):
-        if obj.content_object:
-            url = reverse(
-                f"admin:{obj.content_type.app_label}_{obj.content_type.model}_change",
-                args=[obj.object_id]
-            )
-            return format_html('<a href="{}">{}</a>', url, obj.display_name())
-        return "-"
-    content_object_link.short_description = 'Товар'
-
-    def artist(self, obj):
-        return obj.get_additional_field('artist')
-    artist.short_description = 'Исполнитель'
-
-    def genre(self, obj):
-        return obj.get_additional_field('genre')
-    genre.short_description = 'Жанр/Категория'
-
+    fields = ('album', 'price')
 
 class MembersInLine(TabularInline):
     model = Artist.members.through  
     verbose_name = 'Участник'
     verbose_name_plural = 'Участники'
 
-
 class ImageGalleryInLine(GenericTabularInline):
     model = ImageGallery 
     readonly_fields = ('image_url',)  
-
 
 @admin.register(MediaType)
 class MediaTypeAdmin(BaseAdmin):
@@ -59,13 +40,11 @@ class MediaTypeAdmin(BaseAdmin):
     search_fields = ('name',) 
     list_filter = ()  
 
-
 @admin.register(Genre)
 class GenreAdmin(BaseAdmin):
     list_display = ('name',)  
     search_fields = ('name',) 
     list_filter = () 
-
 
 @admin.register(Style)
 class StyleAdmin(BaseAdmin):
@@ -74,7 +53,6 @@ class StyleAdmin(BaseAdmin):
     list_filter = (
         ('genre', RelatedDropdownFilter),  
     )
-
 
 @admin.register(Artist)
 class ArtistAdmin(BaseAdmin):
@@ -87,7 +65,6 @@ class ArtistAdmin(BaseAdmin):
     )
     inlines = [MembersInLine, ImageGalleryInLine]
     exclude = ('members',)  
-
 
 @admin.register(Member)
 class MemberAdmin(BaseAdmin):
@@ -120,13 +97,12 @@ class MemberAdmin(BaseAdmin):
         return "-"
     get_artists.short_description = 'Исполнитель/Группа' 
 
-
 @admin.register(Album)
 class AlbumAdmin(BaseAdmin):
-    list_display = ('name', 'artist', 'release_date', 'price', 'stock')  
+    list_display = ('name', 'artist', 'release_date', 'get_current_price', 'stock')  
     search_fields = ('name', 'artist__name')  
     list_filter = (
-        'release_date',  
+        ('release_date', RangeDateFilter),
         ('artist', RelatedDropdownFilter), 
         ('genre', RelatedDropdownFilter),  
         ('media_type', RelatedDropdownFilter),  
@@ -169,9 +145,8 @@ class AlbumAdmin(BaseAdmin):
                 'tracklist',
             )
         }),
-        ('Цена и наличие', {
+        ('Наличие', {
             'fields': (
-                'price',
                 'condition',
                 'stock',
                 'offer_of_the_week', 
@@ -186,6 +161,9 @@ class AlbumAdmin(BaseAdmin):
         }),
     )
 
+    def get_current_price(self, obj):
+        return obj.current_price
+    get_current_price.short_description = 'Текущая цена'
 
 @admin.register(PriceList)
 class PriceListAdmin(BaseAdmin):
@@ -200,71 +178,18 @@ class PriceListAdmin(BaseAdmin):
 
 @admin.register(PriceListItem)
 class PriceListItemAdmin(BaseAdmin):
-    list_display = ('display_name', 'artist', 'genre', 'price_list', 'price')
-    search_fields = ('price_list__number', 'content_object__name', 'content_object__artist__name')  
+    list_display = ('album', 'price_list', 'price')
+    search_fields = ('album__name', 'price_list__number')  
     list_filter = (
         ('price_list', RelatedDropdownFilter),
-        'content_type',
+        ('album__artist', RelatedDropdownFilter),
     )
     fieldsets = (
         ('Основная информация', {
             'fields': (
                 'price_list',
-                'content_type',
-                'object_id',
+                'album',
                 'price',
             )
         }),
-        ('Информация о товаре', {
-            'fields': (
-                'content_object_link',
-                'display_artist',
-                'display_genre',
-            ),
-            'classes': ('collapse',),
-        }),
-    )
-    readonly_fields = ('content_object_link', 'display_artist', 'display_genre')
-
-    def content_object_link(self, obj):
-        if obj.content_object:
-            url = reverse(
-                f"admin:{obj.content_type.app_label}_{obj.content_type.model}_change",
-                args=[obj.object_id]
-            )
-            return format_html('<a href="{}">{}</a>', url, obj.display_name())
-        return "-"
-    content_object_link.short_description = 'Товар'
-
-    def display_name(self, obj):
-        return obj.display_name()
-    display_name.short_description = 'Товар'
-
-    def artist(self, obj):
-        return obj.get_additional_field('artist')
-    artist.short_description = 'Исполнитель'
-
-    def genre(self, obj):
-        return obj.get_additional_field('genre')
-    genre.short_description = 'Жанр/Категория'
-
-    def display_artist(self, obj):
-        return obj.get_additional_field('artist')
-    display_artist.short_description = 'Исполнитель'
-
-    def display_genre(self, obj):
-        return obj.get_additional_field('genre')
-    display_genre.short_description = 'Жанр/Категория'
-
-    def display_format(self, obj):
-        return obj.get_additional_field('format')
-    display_format.short_description = 'Формат'
-
-
-@admin.register(ImageGallery)
-class ImageGalleryAdmin(BaseAdmin):
-    list_display = ('content_object', 'use_in_slider')  
-    search_fields = ('content_object__name',)  
-    list_filter = (
-        'use_in_slider', 
     )
