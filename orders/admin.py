@@ -1,3 +1,89 @@
 from django.contrib import admin
+from django.db import models
+from unfold.admin import ModelAdmin, TabularInline
+from unfold.contrib.filters.admin import ChoicesDropdownFilter, RangeDateFilter, RelatedDropdownFilter
+from unfold.contrib.forms.widgets import WysiwygWidget
 
-# Register your models here.
+from .models import Order, Payment
+
+class BaseAdmin(ModelAdmin):
+    list_filter_submit = True
+    formfield_overrides = {
+        models.TextField: {"widget": WysiwygWidget},
+    }
+
+class PaymentInline(TabularInline):
+    model = Payment
+    fields = ('amount', 'payment_id', 'payment_date', 'status', 'payment_method')
+    extra = 1
+
+@admin.register(Order)
+class OrderAdmin(BaseAdmin):
+    list_display = ('id', 'customer', 'created_at', 'status', 'buying_type', 'paid')
+    search_fields = ('customer__user__username', 'phone', 'email', 'address')
+    list_filter = (
+        ('status', ChoicesDropdownFilter),
+        ('buying_type', ChoicesDropdownFilter),
+        'paid',
+        ('customer', RelatedDropdownFilter),
+        ('created_at', RangeDateFilter),
+        ('order_date', RangeDateFilter),
+    )
+    inlines = [PaymentInline]
+    fieldsets = (
+        ('Основная информация', {
+            'fields': (
+                'customer',
+                'cart',
+                'status',
+                'buying_type',
+                'paid',  
+            )
+        }),
+        ('Данные клиента', {
+            'fields': (
+                'first_name',
+                'last_name',
+                'phone',
+                'email',
+                'address',
+            )
+        }),
+        ('Даты', {
+            'fields': (
+                'created_at',
+                'order_date',
+            ),
+            'classes': ('collapse',),
+        }),
+        ('Комментарий', {
+            'fields': ('comment',),
+        }),
+    )
+    readonly_fields = ('created_at',)
+
+@admin.register(Payment)
+class PaymentAdmin(BaseAdmin):
+    list_display = ('payment_id', 'order', 'amount', 'payment_date', 'status', 'payment_method')
+    search_fields = ('payment_id', 'order__id', 'payment_method')
+    list_filter = (
+        ('status', ChoicesDropdownFilter),
+        ('order', RelatedDropdownFilter),
+        ('payment_date', RangeDateFilter),
+    )
+    fieldsets = (
+        ('Основная информация', {
+            'fields': (
+                'order',
+                'amount',
+                'status',
+            )
+        }),
+        ('Детали платежа', {
+            'fields': (
+                'payment_id',
+                'payment_date',
+                'payment_method',
+            )
+        }),
+    )

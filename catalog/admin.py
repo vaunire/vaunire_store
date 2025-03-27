@@ -1,16 +1,14 @@
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.db import models
-from django.utils.html import format_html
 
-# Нестандартные импорты от Unfold: улучшенная админка, кастомные фильтры и WYSIWYG-редактор
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.contrib.filters.admin import (
     MultipleRelatedDropdownFilter,  
     RangeDateFilter,              
     RelatedDropdownFilter          
 )
-from unfold.contrib.forms.widgets import WysiwygWidget  # Мини-Word для текстовых полей
+from unfold.contrib.forms.widgets import WysiwygWidget
 
 from .models import (Album, Artist, Genre, ImageGallery, MediaType, Member,
                      PriceList, PriceListItem, Style)
@@ -24,11 +22,11 @@ class BaseAdmin(ModelAdmin):
 class PriceListItemInLine(TabularInline):
     model = PriceListItem
     fields = ('album', 'price')
+    extra = 1
 
 class MembersInLine(TabularInline):
     model = Artist.members.through  
-    verbose_name = 'Участник'
-    verbose_name_plural = 'Участники'
+    extra = 1 
 
 class ImageGalleryInLine(GenericTabularInline):
     model = ImageGallery 

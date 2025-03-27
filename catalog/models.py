@@ -161,7 +161,7 @@ class Album(models.Model):
     format_edition = models.CharField(max_length = 100, verbose_name = 'Издание', blank = True, null = True,
                                       help_text = 'Пример: Reissue (переиздание), Expanded Edition (расширенное издание), Limited Edition (ограниченное издание)')  
     format_color = models.CharField(max_length = 100, verbose_name = 'Цвет носителя', blank = True, null = True,
-                                    help_text = 'Пример: White (белый), Black (чёрный), Transparent (прозрачный), Colored Vinyl (цветной винил)')  
+                                    help_text = 'Пример: White (белый), Black (чёрный), Transparent (прозрачный), Multicolor (многоцветный), или любой другой')  
 
     def __str__(self):
         return f"{self.id} | {self.artist.name} | {self.name}"
