@@ -16,36 +16,56 @@ class BaseAdmin(ModelAdmin):
         models.TextField: {"widget": WysiwygWidget},
     }
 
-class NotificationsInline(TabularInline):
-    model = Notifications
-    fields = ('created_at', 'text', 'is_read')
-    readonly_fields = ('created_at',)
-    extra = 1
-
 class OrdersInline(TabularInline):
     model = Order
-    fields = ('id', 'status', 'buying_type', 'created_at', 'cart_link', 'payment_status')
-    readonly_fields = ('created_at', 'cart_link', 'payment_status')
-    extra = 1
-    can_delete = False
+    fields = ('order_number', 'divider', 'order', 'id', 'status', 'buying_type', 'created_at', 'cart_link', 'payment_status', 'order_amount')
+    extra = 0
+
+    def get_readonly_fields(self, request, obj=None):
+        return self.fields # Делаем все поля read-only автоматически
+
+    def has_add_permission(self, request, obj):
+        return False # Запрещаем добавление новых заказов через инлайн
+
+    def order_number(self, obj):
+        return obj.id
+    order_number.short_description = 'ID'
+
+    def divider(self, obj):
+        return "┃"
+    divider.short_description = ''
+
+    def order(self, obj):
+        """Отображает ссылку на заказ"""
+        url = reverse('admin:orders_order_change', args=[obj.id])
+        return format_html('<a href="{}" style = "text-decoration: underline;"> Нажмите, чтобы перейти</a>', url, obj.id)
+    order.short_description = 'Заказ (ссылка)'
 
     def cart_link(self, obj):
         """Отображает ссылку на корзину заказа"""
         if obj.cart:
-            url = reverse('admin:cart_cart_change', args=[obj.cart.id])
-            return format_html('<a href="{}">Корзина #{}</a>', url, obj.cart.id)
+            url = reverse('admin:cart_cart_change', args = [obj.cart.id])
+            return format_html('<a href="{}" style = "text-decoration: underline;">Нажмите, чтобы перейти</a>', url, obj.cart.id)
         return "-"
-    cart_link.short_description = 'Корзина'
+    cart_link.short_description = 'Корзина (ссылка)'
 
     def payment_status(self, obj):
         """Отображает статус оплаты заказа"""
         if obj.paid:
-            return "Оплачен"  # Если paid = True, сразу возвращаем "Оплачен"
+            return "Заказ оплачен"  # Если paid = True, сразу возвращаем "Оплачен"
         elif obj.payments.exists():
             payment = obj.payments.first()
             return payment.get_status_display()  # Иначе берём статус из Payment
-        return "Не оплачен"
+        return "Заказ не оплачен"
     payment_status.short_description = 'Статус оплаты'
+
+    def order_amount(self, obj):
+        """Отображает сумму заказа"""
+        if obj.payments.exists():
+            payment = obj.payments.first()
+            return f"{payment.amount} ₽" 
+        return "0.00 ₽"
+    order_amount.short_description = 'Сумма'
 
 @admin.register(Customer)
 class CustomerAdmin(BaseAdmin):
@@ -56,7 +76,7 @@ class CustomerAdmin(BaseAdmin):
         ('wishlist', RelatedDropdownFilter),
         ('favorite', RelatedDropdownFilter),
     )
-    inlines = [NotificationsInline, OrdersInline]
+    inlines = [OrdersInline]
     fieldsets = (
         ('Основная информация', {
             'fields': (

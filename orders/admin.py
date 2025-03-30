@@ -14,8 +14,13 @@ class BaseAdmin(ModelAdmin):
 
 class PaymentInline(TabularInline):
     model = Payment
-    fields = ('amount', 'payment_id', 'payment_date', 'status', 'payment_method')
+    fields = ('payment_id', 'divider', 'status', 'payment_method', 'amount', 'payment_date')
+    readonly_fields = ('divider', )
     extra = 1
+
+    def divider(self, obj):
+        return "┃"
+    divider.short_description = ''
 
 @admin.register(Order)
 class OrderAdmin(BaseAdmin):

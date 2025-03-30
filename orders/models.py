@@ -27,8 +27,8 @@ class Order(models.Model):
 
     customer = models.ForeignKey('accounts.Customer', verbose_name = 'Покупатель', related_name = 'orders', on_delete = models.CASCADE)
     cart = models.ForeignKey('cart.Cart', verbose_name = 'Корзина', on_delete = models.CASCADE)
-    created_at = models.DateTimeField(auto_now = True, verbose_name = 'Дата создания заказа')
-    order_date = models.DateTimeField(verbose_name = 'Дата получения заказа', default = timezone.now)
+    created_at = models.DateTimeField(default = timezone.now, verbose_name = 'Дата создания заказа')
+    order_date = models.DateTimeField( default = timezone.now, verbose_name = 'Дата получения заказа')
 
     status = models.CharField(max_length = 20, verbose_name = 'Статус заказа', choices = STATUS_CHOICES, default = STATUS_NEW)
     buying_type = models.CharField(max_length = 20, verbose_name = 'Тип получения', choices = BUYING_TYPE_CHOICES)
@@ -65,8 +65,8 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits = 10, decimal_places = 2, verbose_name = 'Сумма оплаты')
     payment_id = models.CharField(max_length = 100, verbose_name = 'ID платежа', blank = True, null = True)
     payment_date = models.DateTimeField(verbose_name = 'Дата оплаты', default = timezone.now)
-    status = models.CharField(max_length=20, verbose_name = 'Статус платежа', choices = STATUS_CHOICES, default = STATUS_PENDING)
-    payment_method = models.CharField(max_length=50, verbose_name = 'Способ оплаты', blank = True, null = True)
+    status = models.CharField(max_length = 20, verbose_name = 'Статус платежа', choices = STATUS_CHOICES, default = STATUS_PENDING)
+    payment_method = models.CharField(max_length = 50, verbose_name = 'Способ оплаты', blank = True, null = True, default='Платёжная система Stripe')
 
     def __str__(self):
         return f"Оплата {self.payment_id} для заказа №{self.order.id} | Статус: {self.get_status_display()}"

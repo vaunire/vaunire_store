@@ -24,6 +24,10 @@ DEBUG = os.getenv('DEBUG')
 # Список разрешённых хостов
 ALLOWED_HOSTS = []
 
+# Получаем ключи Stripe из .env файла
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+
 # Определение приложений проекта
 INSTALLED_APPS = [
     # Приложения из пакета Unfold для улучшенного интерфейса админки

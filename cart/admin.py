@@ -17,9 +17,17 @@ class BaseAdmin(ModelAdmin):
 
 class CartProductInline(TabularInline):
     model = CartProduct
-    fields = ('display_name', 'quantity', 'final_price')
-    readonly_fields = ('display_name', 'final_price')  
+    fields = ('cart_product_id', 'display_name', 'quantity', 'final_price')
+    readonly_fields = ('display_name', 'cart_product_id')  
     extra = 1
+
+    def cart_product_id(self, obj):
+        return obj.id if obj.id else '-' 
+    cart_product_id.short_description = 'ID'
+
+    def display_name(self, obj):
+        return obj.display_name
+    display_name.short_description = 'Товар'
 
 @admin.register(Cart)
 class CartAdmin(BaseAdmin):
@@ -47,25 +55,20 @@ class CartAdmin(BaseAdmin):
             'classes': ('collapse',),
         }),
     )
-    readonly_fields = ('total_products', 'final_price')  
+    readonly_fields = ('total_products', 'final_price')
 
     def total_products(self, obj):
         return obj.total_products
     total_products.short_description = 'Количество товаров'
 
     def final_price(self, obj):
-        return obj.final_price
+        return f"{obj.final_price} ₽"
     final_price.short_description = 'Итоговая цена'
 
 @admin.register(CartProduct)
 class CartProductAdmin(BaseAdmin):
     list_display = ('display_name', 'cart', 'quantity', 'final_price')
     search_fields = ('cart__id', 'content_object__name')  
-    list_filter = (
-        ('cart', RelatedDropdownFilter),  
-        ('user', RelatedDropdownFilter),  
-        ('content_type', RelatedDropdownFilter),  
-    )
     fieldsets = (
         ('Основная информация', {
             'fields': (

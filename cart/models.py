@@ -10,7 +10,7 @@ import operator
 # ❒ Модель для хранения корзины пользователя
 class Cart(models.Model):
     owner = models.ForeignKey('accounts.Customer', verbose_name = 'Покупатель', on_delete = models.CASCADE)
-    products = models.ManyToManyField('CartProduct', blank = True, verbose_name = 'Продукты для корзины', related_name = 'related_cart')
+    # products = models.ManyToManyField('CartProduct', blank = True, verbose_name = 'Продукты для корзины', related_name = 'related_cart')
     total_products = models.IntegerField(default = 0, verbose_name = 'Общее кол-во товара')
     final_price = models.DecimalField(max_digits = 10, decimal_places = 2, verbose_name = 'Общая цена', null = True, blank = True)
     in_order = models.BooleanField(default = False, verbose_name = 'В заказе')
@@ -24,16 +24,15 @@ class Cart(models.Model):
             verbose_name_plural = 'Корзины'
 
     def update_totals(self):
-        # Обновляет общее количество и итоговую цену корзины
+        # Пересчитываем итоги, но НЕ вызываем save
         cart_products = self.products.all()
-        self.total_products = cart_products.count()
-        self.final_price = sum(cp.final_price for cp in cart_products) or 0
-        self.save(update_fields=['total_products', 'final_price'])
+        self.total_products = sum(cp.quantity for cp in cart_products) or 0
+        self.final_price = sum(float(cp.final_price) for cp in cart_products) or 0.0
 
     def save(self, *args, **kwargs):
         # Пересчитывает итоги после сохранения корзины
-        super().save(*args, **kwargs)
         self.update_totals()
+        super().save(*args, **kwargs)
 
     @property
     # Возвращает список объектов (например, Album), находящихся в корзине.
@@ -44,23 +43,23 @@ class Cart(models.Model):
 class CartProduct(models.Model):
     # Если магазин расширится и начнет продавать не только альбомы, но и, например, услуги, модель CartProduct можно легко адаптировать:
     MODEL_CART_PRODUCT_DISPLAY_NAME_MAP = {
-         "Album" : {"is_constructable": True, "fields": ["name", "artist.name"], "separator": ' - '}
+         "Album" : {"is_constructable": True, "fields": ["name", "artist.name"], "separator": ' - ', "prefix": "Альбом: "}
          # "Service": {"is_constructable": False, "field": "name"},
          # "RecordPlayer": {"is_constructable": True, "fields": ["brand", "model"], "separator": ' '},
     }
 
     user = models.ForeignKey('accounts.Customer', verbose_name = 'Покупатель', on_delete = models.CASCADE)
-    cart = models.ForeignKey('Cart', verbose_name = 'Корзина', on_delete = models.CASCADE)
+    cart = models.ForeignKey('Cart', verbose_name = 'Корзина', on_delete = models.CASCADE, related_name = 'products')
 
     content_type = models.ForeignKey(ContentType, on_delete = models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    quantity = models.PositiveIntegerField(default = 1)
+    quantity = models.PositiveIntegerField(default = 1, verbose_name = 'Количество')
     final_price = models.DecimalField(max_digits = 10, decimal_places = 2, verbose_name = 'Общая цена')
 
     def __str__(self):
-        return f"Продукт: {self.content_object.name} (для корзины)"
+        return f"Продукт: {self.content_object.name}"
 
     def get_product_price(self):
         # Возвращает текущую цену продукта из прайс-листа для Album
@@ -74,17 +73,18 @@ class CartProduct(models.Model):
     # Возвращает отображаемое имя продукта в корзине
     def display_name(self):
         model_fields = self.MODEL_CART_PRODUCT_DISPLAY_NAME_MAP.get(self.content_object.__class__._meta.model_name.capitalize())
+        prefix = model_fields.get("prefix", "")
         # Если is_constructable равно True, имя формируется динамически из указанных полей
         if model_fields and model_fields['is_constructable']:
             display_name = model_fields['separator'].join(
                 # operator.attrgetter — извлекает атрибуты (например, name, artist.name) динамически из content_object
                 [operator.attrgetter(field)(self.content_object) for field in model_fields['fields']]
             )
-            return display_name
+            return f"{prefix}{display_name}"
         # Если is_constructable равно False, имя берется напрямую из указанного поля
         if model_fields and not model_fields['is_constructable']:
             display_name = operator.attrgetter(model_fields['field'])(self.content_object)
-            return display_name
+            return f"{prefix}{display_name}"
         return self.content_object
     
     def save(self, *args, **kwargs):
