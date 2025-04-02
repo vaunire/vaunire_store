@@ -15,7 +15,7 @@ class AccountView(CartMixin, NotificationsMixin, views.View):
     """Отображает страницу личного кабинета пользователя"""
     def get(self, request, *args, **kwargs):
         customer = Customer.objects.get(user = request.user)
-        last_paid_order = customer.customer_orders.filter(paid=True).last()
+        last_paid_order = customer.orders.filter(paid=True).last()
         context = {
             'customer': customer,
             'cart': self.cart,

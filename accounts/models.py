@@ -77,9 +77,9 @@ def send_notification(instance, **kwargs):
         if customers.count():
             for customer in customers:
                 Notifications.objects.create(
-                    recipient=customer,
-                    text=mark_safe(f'Альбом <a href="{instance.get_absolute_url()}">"{instance.name}"</a>,'
-                                   f'который Вы ожидаете, теперь доступен для приобретения!')
+                    recipient = customer,
+                    text = mark_safe(f'Альбом <a href="{instance.get_absolute_url()}">"{instance.name}"</a>, '
+                                     f'который Вы ожидаете, теперь доступен для приобретения!')
                 )
                 customer.wishlist.remove(instance)
 # Теперь функция будет вызываться каждый раз, когда объект Album сохраняется

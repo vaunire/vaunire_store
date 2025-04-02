@@ -1,0 +1,230 @@
+{% load static tailwind_tags %}
+
+<head>
+    {% tailwind_css %}
+</head>
+
+<!-- Верхняя панель -->
+<div class="fixed top-0 left-0 w-full z-50 font-mulish">
+    <div class="max-w-[1300px] mx-auto px-3 py-3.5 flex justify-between items-center text-xs tracking-wider">
+        <!-- Левая часть (город) -->
+        <div class="flex items-center gap-1 relative" x-data="{ isOpen: false, selectedCity: localStorage.getItem('selectedCity') || 'Северодвинск' }">
+            Ваш город:
+            <svg xmlns="http://www.w3.org/2000/svg" width="11.5" height="11.5" viewBox="0 0 24 24" class="mt-0.5">
+                <path fill="#bdc0c7" d="m18.919 2.635l-5.953 16.08c-.376 1.016-1.459 1.538-2.418 1.165a1.851 1.851 0 0 1-1.045-1.054l-1.887-4.77a3.712 3.712 0 0 0-1.955-2.052l-4.542-1.981C.174 9.61-.256 8.465.157 7.465a1.97 1.97 0 0 1 1.067-1.079L16.54.136c.967-.395 2.04.101 2.395 1.109c.157.446.151.94-.015 1.39z" />
+            </svg>
+            <div class="flex items-center gap-1 cursor-pointer" @click="isOpen = !isOpen">
+                <span class="underline text-gray-700 whitespace-nowrap" x-text="selectedCity"></span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 -ml-[2px] text-gray-600 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div class="absolute top-full left-20 mt-1 bg-white shadow-lg rounded-md transition-opacity duration-200" x-show="isOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.away="isOpen = false">
+                <ul class="py-1">
+                    <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer whitespace-nowrap text-xs text-gray-700" @click="selectedCity = 'Северодвинск'; localStorage.setItem('selectedCity', 'Северодвинск'); isOpen = false">Северодвинск</li>
+                    <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer whitespace-nowrap text-xs text-gray-700" @click="selectedCity = 'Архангельск'; localStorage.setItem('selectedCity', 'Архангельск'); isOpen = false">Архангельск</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Правая часть (телефон, email, соцсети) -->
+        <div class="flex items-center gap-4 text-xs font-mulish">
+            <div class="flex items-center gap-2">
+                <a href="#" class="hover:text-blue-600 transition-colors duration-300 font-normal">+7 (999) 999 99 99</a>
+                <span class="text-gray-500">с 9:00 до 18:00</span>
+            </div>
+            <div class="h-4 w-px bg-gray-300"></div>
+            <a href="#" class="hover:text-blue-600 transition-colors duration-300">info@vaunire.ru</a>
+            <div class="h-4 w-px bg-gray-300"></div>
+            <div class="flex items-center gap-3">
+                <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15.2" height="15.2" viewBox="0 0 32 32">
+                        <path fill="currentColor" d="M20.911 0h-9.823C2.124 0-.001 2.125-.001 11.089v9.823c0 8.964 2.125 11.089 11.089 11.089h9.823C29.875 32.001 32 29.876 32 20.912v-9.823C32 2.125 29.854 0 20.911 0m4.922 22.828H23.51c-.88 0-1.151-.698-2.734-2.302c-1.375-1.333-1.984-1.51-2.323-1.51c-.479 0-.615.135-.615.792v2.099c0 .563-.177.901-1.667.901c-2.464 0-5.198-1.49-7.115-4.266c-2.891-4.068-3.682-7.115-3.682-7.745c0-.339.135-.656.786-.656h2.328c.589 0 .813.271 1.042.901c1.151 3.323 3.068 6.234 3.859 6.234c.292 0 .427-.135.427-.88v-3.432c-.089-1.583-.922-1.719-.922-2.281c0-.271.224-.542.583-.542h3.661c.495 0 .677.271.677.854v4.63c0 .5.224.677.359.677c.292 0 .542-.177 1.083-.719c1.672-1.875 2.87-4.766 2.87-4.766c.156-.339.427-.656 1.016-.656h2.328c.698 0 .854.359.698.859c-.292 1.354-3.141 5.375-3.141 5.375c-.245.406-.339.583 0 1.036c.25.339 1.063 1.042 1.604 1.672c.995 1.13 1.76 2.078 1.964 2.734c.229.651-.109.99-.766.99z" />
+                    </svg>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-[#27a7e7] transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16.15" height="16.15" viewBox="0 0 32 32">
+                        <path fill="currentColor" d="M16 .5C7.437.5.5 7.438.5 16S7.438 31.5 16 31.5c8.563 0 15.5-6.938 15.5-15.5S24.562.5 16 .5m7.613 10.619l-2.544 11.988c-.188.85-.694 1.056-1.4.656l-3.875-2.856l-1.869 1.8c-.206.206-.381.381-.781.381l.275-3.944l7.181-6.488c.313-.275-.069-.431-.482-.156l-8.875 5.587l-3.825-1.194c-.831-.262-.85-.831.175-1.231l14.944-5.763c.694-.25 1.3.169 1.075 1.219z" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Навбар -->
+<div class="fixed top-9 left-0 w-full z-40 font-mulish">
+    <nav class="bg-white shadow-md rounded-xl px-8 py-4 flex justify-between items-center max-w-[1300px] mx-auto w-full">
+        <div class="flex items-center gap-4">
+            <a href="/">
+                <img src="{% static 'logo/logo_black.png' %}" alt="vaunire_logo" class="h-10 w-auto">
+            </a>
+        </div>
+
+        <!-- Центральная часть -->
+        <div class="hidden md:flex items-center gap-6 flex-1 justify-center">
+            <!-- Кнопка каталога -->
+            <div class="relative" x-data="{ isOpen: false }">
+                <button 
+                    type="button" 
+                    class="p-2 text-gray-600 hover:text-blue-600 transition-colors duration-300 -ml-[95px]" 
+                    @click="isOpen = !isOpen">
+                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 16 16" class="text-gray-500">
+                    <path fill="currentColor" fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+                </button>
+                <div 
+                    class="absolute left-0 top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md z-50" 
+                    x-show="isOpen" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    @click.away="isOpen = false">
+                    <ul class="py-1">
+                        <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-300">Все товары</a></li>
+                        <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-300">Новинки</a></li>
+                        <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-300">Популярное</a></li>
+                        <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-300">Скидки</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Поиск -->
+            <form action="#" method="get" class="flex w-full max-w-[300px] relative -ml-20" x-data="{ isOpen: false, searchQuery: '' }">
+                <input 
+                    type="text" 
+                    name="q"
+                    placeholder="Поиск по каталогу..." 
+                    class="w-full pl-4 pr-12 py-1.5 text-sm tracking-wide text-gray-700 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300" 
+                    x-model="searchQuery"
+                    @focus="isOpen = true"
+                    @input.debounce.500ms="isOpen = searchQuery.length > 0">
+                <button 
+                    type="submit" 
+                    class="absolute right-3.5 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-700 transition-colors duration-300">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+                <div 
+                    class="absolute top-full mt-2 w-full bg-white border border-gray-200 shadow-lg rounded-md z-50 max-h-64 overflow-y-auto" 
+                    x-show="isOpen && searchQuery.length > 0" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    @click.away="isOpen = false">
+                    <div class="p-2">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-300 rounded-md">
+                            Результат для "<span x-text="searchQuery"></span>"
+                        </a>
+                    </div>
+                </div>
+            </form>
+            <a href="#" class="text-[15px] tracking-wide font-medium text-gray-600 hover:text-blue-600 transition-colors duration-300">О нас</a>
+            <a href="#" class="text-[15px] tracking-wide font-medium text-gray-600 hover:text-blue-600 transition-colors duration-300">Контакты</a>
+            <div class="relative group" x-data="{ isOpen: false }">
+                <a href="#" class="text-[15px] tracking-wide font-medium text-gray-600 group-hover:text-blue-600 transition-colors duration-300 flex items-center" @click="isOpen = !isOpen">
+                    Покупателям
+                    <svg class="w-3 ml-1 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </a>
+                <div class="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white shadow-lg rounded-md mt-2 p-2 w-48 pointer-events-auto z-50" x-show="isOpen" @click.away="isOpen = false">
+                    <a href="#" class="block px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors duration-300 text-sm">123</a>
+                    <a href="#" class="block px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors duration-300 text-sm">321</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая часть -->
+        <div class="flex items-center gap-1">
+            <!-- Уведомления -->
+            <div class="relative" x-data="{ isOpen: false }">
+                <button type="button" class="relative p-2 text-gray-500 hover:text-blue-600 transition-colors duration-300" @click="isOpen = !isOpen">
+                    <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                    </svg>
+                    {% if request.user.is_authenticated and notifications.count %}
+                        <span class="absolute top-1 right-1 text-blue-600 font-bold text-[10px]">{{ notifications.count }}</span>
+                    {% endif %}
+                </button>
+                {% if request.user.is_authenticated %}
+                    <div class="absolute left-0 top-full mt-1 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-50" x-show="isOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.away="isOpen = false">
+                        <button type="button" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-700 transition-colors duration-300" @click="isOpen = false">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <ul class="divide-y divide-gray-200">
+                            {% if notifications.count %}
+                                {% for notification in notifications %}
+                                <li class="p-3 hover:bg-gray-50 transition-colors duration-200 flex items-start">
+                                    <span class="text-xs text-gray-500 mr-2 whitespace-nowrap">
+                                        {{ notification.created_at|date:"H:i" }}
+                                    </span>
+                                    <span class="text-sm text-gray-700">{{ notification.text|safe }}</span>
+                                </li>
+                                {% endfor %}
+                                <li class="p-3 hover:bg-gray-50 transition-colors duration-200">
+                                    <a href="{% url 'clear_notifications' %}">
+                                        <button type="submit" class="block text-sm text-blue-600 font-medium">Пометить всё как прочитанное</button>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="p-3 text-sm text-gray-700">Нет новых уведомлений</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Корзина -->
+            <a href="{% url 'cart' %}" class="relative p-2 text-gray-500 hover:text-blue-600 transition-colors duration-300">
+                <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
+                {% if request.user.is_authenticated and cart.products.count %}
+                    <span class="absolute top-1 right-1 text-blue-600 font-bold text-[10px]">{{ cart.products.count }}</span>
+                {% endif %}
+            </a>
+
+            <!-- Избранное -->
+            <a href="#" class="relative p-2 text-gray-500 hover:text-red-600 transition-colors duration-300">
+                <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                </svg>
+            </a>
+
+            {% if not request.user.is_authenticated %}
+                <a href="{% url 'login' %}" class="relative ml-2">
+                    <span class="font-bold relative tracking-wider font-mulish inline-block rounded-lg bg-blue-600 px-5 py-1.5 text-xs text-white transition duration-100 hover:bg-blue-500">Войти</span>
+                </a>
+            {% else %}
+                <a href="{% url 'account' %}" class="relative inline-flex items-center rounded-lg space-x-1.5 px-3.5 py-2 shadow-lg bg-white hover:shadow-lg transition duration-300 ease-in-out ml-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 16 16" class="text-gray-400">
+                        <path fill="currentColor" d="M7.995 2C6.154 2 4.662 3.465 4.662 5.273c0 1.807 1.492 3.272 3.333 3.272 1.84 0 3.332-1.465 3.332-3.272C11.327 3.465 9.835 2 7.995 2M5.161 9.262c.424-.17.889-.043 1.319.11a4.6 4.6 0 0 0 1.515.264c.518 0 1.031-.095 1.504-.26.437-.153.909-.279 1.337-.105.73.297 1.551.899 2.02 1.616a.876.876 0 0 1-.082 1.067C11.65 13.216 9.811 14 7.994 14s-3.643-.782-4.768-2.045a.88.88 0 0 1-.083-1.068c.471-.722 1.285-1.332 2.018-1.625"/>
+                    </svg>
+                    <span class="text-sm font-bold tracking-wider text-gray-500">{{ request.user.username }}</span>
+                    <div class="absolute bottom-0 rounded-full left-0 right-[2px] h-[2px] bg-blue-500"></div>
+                </a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="ml-1 mt-2 text-gray-500 hover:text-red-600 transition-colors duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12h-9.5m7.5 3l3-3l-3-3m-5-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
+                        </svg>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </nav>
+</div>
+
+<!-- Подключение Alpine.js -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>

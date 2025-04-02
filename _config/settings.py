@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "unfold.contrib.guardian",  
     "unfold.contrib.simple_history",
 
-    # Утилита для автоматической перезагрузки браузера в режиме разработки
+    # Утилита для автоматической перезагрузки браузера в режиме разработки [1]
     'django_browser_reload',
     # Приложение для настройки Tailwind CSS
     'tailwind_config', 'tailwind', 
@@ -69,6 +69,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django_browser_reload.middleware.BrowserReloadMiddleware",  # [2]
 ]
 
 # Корневой файл URL-конфигурации

@@ -1,1 +1,29 @@
-123
+{% load static tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet"> 
+    <title>Vaunire | Музыкальный интернет-магазин</title>
+    {% tailwind_css %}
+</head>
+<body class = "bg-gray-100">
+    <!-- Навбар -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- Контент -->
+    <main class="flex-grow pt-32 font-mulish">
+        {% block content %}
+        <div class="flex-1 container mx-auto max-w-7xl">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+                {% for album in albums %}
+                    {% include 'partials/card.html' %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endblock content %}
+    </main>
+</body>
+</html>

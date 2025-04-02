@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Breadcrumbs -->
+    <nav class="flex mb-4 text-xs px-4" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1">
+            <li class="inline-flex items-center">
+                <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                    Главная
+                </a>
+            </li>
+            <li class="inline-flex items-center gap-1">
+                <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+                <a href="{% url 'artist_detail' artist_slug=album.artist.slug %}" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                    {{ album.artist.name }}
+                </a>
+            </li>
+            <li class="inline-flex items-center gap-1">
+                <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+                <span class="text-gray-500">
+                    {{ album.name }} ({{ album.media_type.name }})
+                </span>
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="flex flex-col md:flex-row items-start px-8 gap-6">
+        <!-- Изображение альбома -->
+        <div class="flex space-x-5 flex-shrink-0 w-full md:w-1/2">
+            <!-- Маленькие изображения слева -->
+            <div class="flex flex-col space-y-3">
+                <div class="relative aspect-square w-20 h-20 cursor-pointer" onclick="changeMainImage('{{ album.image.url }}')">
+                    <img src="{{ album.image.url }}" alt="{{ album.name }} Main Preview" class="w-full h-full object-cover rounded-lg shadow-md hover:opacity-75 transition-opacity duration-300">
+                </div>
+                {% for image in album.image_gallery.all|slice:":4" %}
+                    <div class="relative aspect-square w-20 h-20 cursor-pointer" onclick="changeMainImage('{{ image.image.url }}')">
+                        <img src="{{ image.image.url }}" alt="{{ album.name }} Preview" class="w-full h-full object-cover rounded-lg shadow-md hover:opacity-75 transition-opacity duration-300">
+                    </div>
+                {% endfor %}
+            </div>
+            <!-- Основное изображение -->
+            <div class="relative aspect-square w-full max-w-md max-h-md">
+                <img id="mainImage" src="{{ album.image.url }}" alt="{{ album.name }}" class="w-full h-full object-cover rounded-lg shadow-md">
+                <button id="prevButton" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-300" onclick="prevImage()">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button id="nextButton" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300" onclick="nextImage()">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                {% if album.offer_of_the_weak %}
+                    <span class="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                        Предложение недели
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Вертикальная синяя палочка -->
+        <div class="hidden md:block w-0.5 bg-blue-500 self-center h-96 -ml-10 mx-4"></div>
+
+        <!-- Информация об альбоме -->
+        <div class="space-y-5 font-mulish flex-1">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-300 relative inline-block">
+                    <a href="{{ album.get_absolute_url }}">{{ album.name }}</a>
+                </h1>
+                <h2 class="text-xl text-gray-600 hover:text-blue-600 transition-colors duration-300 relative inline-block mt-2">
+                    <a href="{{ album.artist.get_absolute_url }}"> - {{ album.artist.name }}</a>
+                </h2>
+                <div class="mt-2 text-sm text-gray-700">
+                    <span class="font-medium">Артикул:</span> {{ album.article }}
+                </div>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-700">
+                <li><span class="font-medium">Формат:</span> {{ album.get_format }}</li>
+                <li><span class="font-medium">Носитель:</span> {{ album.media_type.name }}</li>
+                <li><span class="font-medium">Дата релиза:</span> {{ album.release_date|date:"d.m.Y" }}</li>
+                <li><span class="font-medium">Жанр:</span> {{ album.genre.name|default:"Не указан" }}</li>
+                {% if album.styles.all %}
+                    <li><span class="font-medium">Стили:</span> 
+                        {% for style in album.styles.all %}
+                            {{ style.name }}{% if not forloop.last %}, {% else %}.{% endif %}
+                        {% endfor %}
+                    </li>
+                {% endif %}
+                <li><span class="font-medium">Лейбл:</span> {{ album.label|default:"Не указан" }}</li>
+                <li><span class="font-medium">Страна:</span> {{ album.country|default:"Не указана" }}</li>
+                <li><span class="font-medium">Состояние:</span> {{ album.condition|default:"Не указано" }}</li>
+                <li>
+                    {% if album.stock %}
+                        <span class="text-green-600 font-medium">Есть в наличии:</span> {{ album.stock }} шт. 
+                    {% else %}
+                        <span class="text-red-600 font-medium">Нет в наличии</span>
+                    {% endif %}
+                </li>
+            </ul>
+            <div class="flex items-center space-x-4">
+                <span class="text-2xl font-bold text-gray-900">{{ album.current_price }} ₽</span>
+                {% if album.offer_of_the_weak %}
+                    <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded">Скидка</span>
+                {% endif %}
+            </div>
+
+            <!-- Кнопки -->
+            <div class="flex space-x-4">
+                {% if request.user.is_authenticated %}
+                    {% if album.stock %}
+                        {% if album not in cart.products_in_cart %}
+                            <a href="{% url 'add_to_cart' ct_model=album.ct_model slug=album.slug %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-bold tracking-wide flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                                В корзину
+                            </a>
+                        {% else %}
+                            <span class="text-sm text-gray-600 font-semibold py-2 px-6 bg-gray-200 rounded-lg cursor-not-allowed">
+                                Добавлен в корзину
+                            </span>
+                        {% endif %}
+                    {% else %}
+                        {% if album not in request.user.customer.wishlist.all %}
+                            <a href="{% url 'add_to_wishlist' album_id=album.id %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-semibold tracking-wide flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                                В ожидаемое
+                            </a>
+                        {% else %}
+                            <span class="text-sm text-gray-600 font-semibold py-2 px-6 bg-gray-200 rounded-lg cursor-not-allowed">
+                                В ожидаемом
+                            </span>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-semibold tracking-wide flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                        </svg>
+                        Авторизуйтесь
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Описание и треклист -->
+    <div class="mt-12 space-y-6 font-mulish px-4 text-sm">
+        <div class="bg-white p-6 rounded-xl shadow-md w-[1250px]">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2 relative inline-block">
+                Описание
+                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 transform translate-y-1.5"></span>
+            </h2>
+            <p class="text-gray-700 mt-4 overflow-y-auto">{{ album.description|default:"Описание появится позже"|safe }}</p>
+        </div>
+        {% if album.tracklist %}
+            <div class="bg-white p-6 rounded-xl shadow-md w-full">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 relative inline-block">
+                    Треклист
+                    <span class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 transform translate-y-1.5"></span>
+                </h2>
+                <div class="mt-1 leading-relaxed text-sm">
+                    {{ album.tracklist|safe }}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="h-6"></div> 
+</div>
+
+<!-- JavaScript для переключения изображений -->
+<script>
+    const images = [
+        "{{ album.image.url }}", 
+        {% for image in album.image_gallery.all %}
+            "{{ image.image.url }}",
+        {% endfor %}
+    ];
+    let currentIndex = 0;
+
+    function changeMainImage(src) {
+        const mainImage = document.getElementById('mainImage');
+        mainImage.src = src;
+        currentIndex = images.indexOf(src);
+    }
+
+    function prevImage() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            document.getElementById('mainImage').src = images[currentIndex];
+        }
+    }
+
+    function nextImage() {
+        if (currentIndex < images.length - 1) {
+            currentIndex++;
+            document.getElementById('mainImage').src = images[currentIndex];
+        }
+    }
+</script>
+{% endblock content %}

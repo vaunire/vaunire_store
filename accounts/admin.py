@@ -32,7 +32,7 @@ class OrdersInline(TabularInline):
     order_number.short_description = 'ID'
 
     def divider(self, obj):
-        return "┃"
+        return ":"
     divider.short_description = ''
 
     def order(self, obj):

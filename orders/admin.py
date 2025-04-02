@@ -19,7 +19,7 @@ class PaymentInline(TabularInline):
     extra = 1
 
     def divider(self, obj):
-        return "┃"
+        return ":"
     divider.short_description = ''
 
 @admin.register(Order)
