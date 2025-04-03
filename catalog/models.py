@@ -130,7 +130,7 @@ class Artist(models.Model):
         verbose_name = 'Исполнитель'
         verbose_name_plural = 'Исполнители'
 
- # ❒ Модель для хранения информации о музыкальных альбомах
+# ❒ Модель для хранения информации о музыкальных альбомах
 class Album(models.Model):
     name = models.CharField(max_length = 255, verbose_name = 'Название альбома')
     artist = models.ForeignKey(Artist, on_delete = models.CASCADE, verbose_name = 'Исполнитель')

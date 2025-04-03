@@ -45,6 +45,7 @@ module.exports = {
         extend: {
             fontFamily: {
                 mulish: ["Mulish", "serif"],
+                geologica: ["Geologica", "sans-serif"],
             },
         },
     },

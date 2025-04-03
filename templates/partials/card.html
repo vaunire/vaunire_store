@@ -1,7 +1,7 @@
-<div class="card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl">
+<div class="card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl w-60">
     <!-- Изображение и теги -->
-    <div class="relative aspect-square">
-        <img src="{{ album.image.url }}" alt="{{ album.name }}" class="mx-auto my-auto object-cover">
+    <div class="relative w-full h-[215px]">
+        <img src="{{ album.image.url }}" alt="{{ album.name }}" class="w-full h-full object-cover">
         
         <!-- Формат на черном фоне -->
         <span class="absolute bottom-2 left-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded-md">
@@ -17,22 +17,40 @@
     </div>
 
     <!-- Контент -->
-    <div class="p-3.5">
+    <div class="p-3.5 relative">
         <!-- Артист -->
         <h5 class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300">
             <a href="{{ album.artist.get_absolute_url }}">{{ album.artist.name }}</a>
         </h5>
 
         <!-- Название альбома -->
-        <h5 class="text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors duration-300 line-clamp-2">
+        <h5 class="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors duration-300 line-clamp-2">
             <a href="{{ album.get_absolute_url }}">{{ album.name }}</a>
         </h5>
 
+        <!-- Артикул -->
+        <p class="text-xs text-gray-600 mt-1">Артикул: {{ album.article }}</p>
+
+        <!-- Состояние (condition) -->
+        {% if album.condition %}
+            <span class="absolute top-4 right-3 w-8 h-7 flex items-center justify-center bg-gray-200 text-gray-700 rounded-md text-xs font-bold" title="{{ album.condition }}">
+                {{ album.condition|truncatechars:2|upper }}
+            </span>
+        {% endif %}
+
         <!-- Информация -->
-        <ul class="mt-2 space-y-1 text-xs text-gray-600">
+        <ul class="mt-2.5 space-y-1 text-xs text-gray-600">
             <li>Носитель: {{ album.media_type.name }}</li>
-            <li>Дата релиза: {{ album.release_date|date:"d F Y" }}</li>
-            <li>Жанр: {{ album.artist.genre.name }}</li>
+            <li>Дата релиза: {{ album.release_date|date:"d.m.Y" }}</li>
+            <li>
+                Жанр: 
+                {% if not album.genre %}
+                    Без жанра
+                {% endif %}
+                {% if album.styles.exists %}
+                    {{ album.styles.all|join:", " }}
+                {% endif %}
+            </li>
             <li>
                 {% if album.stock %}
                     <span class="text-green-600 font-medium">В наличии ({{ album.stock }} шт.)</span>
@@ -43,25 +61,25 @@
         </ul>
 
         <!-- Цена и кнопки -->
-        <div class="mt-4 flex items-center justify-between">
+        <div class="mt-3 flex items-center justify-between">
             <!-- Цена из прайс-листа -->
             <span class="text-xl font-bold text-gray-900">{{ album.current_price }} ₽</span>
 
             <!-- Кнопки -->
             <div class="flex items-center gap-2">
-                <!-- Кнопка "В корзину" -->
+                <!-- Кнопка "В корзину" или "Ожидание" -->
                 {% if request.user.is_authenticated %}
                     {% if album.stock %}
                         {% if album not in cart.products_in_cart %}
                             <a href="{% url 'add_to_cart' ct_model=album.ct_model slug=album.slug %}" class="p-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300" title="В корзину">
-                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M10 2.25a1.75 1.75 0 00-1.582 1c-.684.006-1.216.037-1.692.223A3.25 3.25 0 005.3 4.563c-.367.493-.54 1.127-.776 1.998l-.047.17-.513 2.964c-.185.128-.346.28-.486.459-.901 1.153-.472 2.87.386 6.301.545 2.183.818 3.274 1.632 3.91C6.31 21 7.435 21 9.685 21h4.63c2.25 0 3.375 0 4.189-.635c.814-.636 1.086-1.727 1.632-3.91.858-3.432 1.287-5.147.386-6.301a2.186 2.186 0 00-.487-.46l-.513-2.962-.046-.17c-.237-.872-.41-1.506-.776-2a3.25 3.25 0 00-1.426-1.089c-.476-.186-1.009-.217-1.692-.222A1.75 1.75 0 0014 2.25zm8.418 6.896l-.362-2.088c-.283-1.04-.386-1.367-.56-1.601a1.75 1.75 0 00-.768-.587c-.22-.086-.486-.111-1.148-.118A1.75 1.75 0 0114 5.75h-4a1.75 1.75 0 01-1.58-.998c-.663.007-.928.032-1.148.118a1.75 1.75 0 00-.768.587c-.174.234-.277.56-.56 1.6l-.362 2.089C6.58 9 7.91 9 9.685 9h4.63c1.775 0 3.105 0 4.103.146M8 12.25a.75.75 0 01.75.75v4a.75.75 0 01-1.5 0v-4a.75.75 0 01.75-.75m8.75.75a.75.75 0 00-1.5 0v4a.75.75 0 001.5 0v-4M12 12.25a.75.75 0 01.75.75v4a.75.75 0 01-1.5 0v-4a.75.75 0 01.75-.75" clip-rule="evenodd"/>
                                 </svg>
                             </a>
                         {% else %}
                             <span class="relative p-1.5 bg-gray-200 text-gray-500 rounded-md cursor-not-allowed" title="Уже в корзине">
-                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M10 2.25a1.75 1.75 0 00-1.582 1c-.684.006-1.216.037-1.692.223A3.25 3.25 0 005.3 4.563c-.367.493-.54 1.127-.776 1.998l-.047.17-.513 2.964c-.185.128-.346.28-.486.459-.901 1.153-.472 2.87.386 6.301.545 2.183.818 3.274 1.632 3.91C6.31 21 7.435 21 9.685 21h4.63c2.25 0 3.375 0 4.189-.635c.814-.636 1.086-1.727 1.632-3.91.858-3.432 1.287-5.147.386-6.301a2.186 2.186 0 00-.487-.46l-.513-2.962-.046-.17c-.237-.872-.41-1.506-.776-2a3.25 3.25 0 00-1.426-1.089c-.476-.186-1.009-.217-1.692-.222A1.75 1.75 0 0014 2.25zm8.418 6.896l-.362-2.088c-.283-1.04-.386-1.367-.56-1.601a1.75 1.75 0 00-.768-.587c-.22-.086-.486-.111-1.148-.118A1.75 1.75 0 0114 5.75h-4a1.75 1.75 0 01-1.58-.998c-.663.007-.928.032-1.148.118a1.75 1.75 0 00-.768.587c-.174.234-.277.56-.56 1.6l-.362 2.089C6.58 9 7.91 9 9.685 9h4.63c1.775 0 3.105 0 4.103.146M8 12.25a.75.75 0 01.75.75v4a.75.75 0 01-1.5 0v-4a.75.75 0 01.75-.75m8.75.75a.75.75 0 00-1.5 0v4a.75.75 0 001.5 0v-4M12 12.25a.75.75 0 01.75.75v4a.75.75 0 01-1.5 0v-4a.75.75 0 01.75-.75" clip-rule="evenodd"/>
                                 </svg>
                                 <span class="absolute top-0 right-0 -mt-1 -mr-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
                                     <svg class="w-2 h-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,45 +89,39 @@
                             </span>
                         {% endif %}
                     {% else %}
-                        <span class="p-1.5 bg-gray-200 text-gray-400 rounded-md cursor-not-allowed" title="Нет в наличии">
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </span>
+                        <a href="{% url 'add_to_wishlist' album_id=album.id %}" class="p-1.5 bg-gray-100 text-gray-500 rounded-md transition-colors duration-300" title="Добавить в ожидаемое">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 1024 1024"><path fill="currentColor" d="m908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5c-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3a32.05 32.05 0 0 0 .6 45.3l183.7 179.1l-43.4 252.9a31.95 31.95 0 0 0 46.4 33.7L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2c17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9l183.7-179.1c5-4.9 8.3-11.3 9.3-18.3c2.7-17.5-9.5-33.7-27-36.3"/></svg>
+                        </a>
                     {% endif %}
 
-                    <!-- Кнопка "В избранное" (временно через #) -->
+                    <!-- Кнопка "В избранное" -->
                     {% if album in request.user.customer.favorite.all %}
-                        <a href="#" class="p-1.5 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition-colors duration-300" title="Убрать из избранного">
+                        <span class="relative p-1.5 bg-gray-200 text-gray-500 rounded-md cursor-not-allowed" title="Уже в избранном">
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                             </svg>
-                        </a>
+                            <span class="absolute top-0 right-0 -mt-1 -mr-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg class="w-2 h-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                        </span>
                     {% else %}
                         <a href="#" class="p-1.5 bg-gray-100 text-gray-500 rounded-md hover:bg-gray-200 transition-colors duration-300" title="В избранное">
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                             </svg>
                         </a>
                     {% endif %}
                 {% else %}
                     <!-- Кнопка для неавторизованных -->
                     <a href="{% url 'login' %}" class="p-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300" title="Авторизуйтесь">
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14" />
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/>
                         </svg>
                     </a>
                 {% endif %}
             </div>
         </div>
-
-        <!-- Если нет в наличии и не в wishlist -->
-        {% if request.user.is_authenticated and not album.stock and album not in request.user.customer.wishlist.all %}
-            <div class="mt-3">
-                <a href="{% url 'add_to_wishlist' album_id=album.id %}" class="block w-full bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md hover:bg-gray-200 transition-colors duration-300 text-sm text-center font-medium">
-                    Добавить в ожидаемое
-                </a>
-            </div>
-        {% endif %}
     </div>
 </div>

@@ -17,17 +17,13 @@ class BaseAdmin(ModelAdmin):
 
 class CartProductInline(TabularInline):
     model = CartProduct
-    fields = ('cart_product_id', 'divider', 'display_name', 'quantity', 'final_price')
-    readonly_fields = ('display_name', 'cart_product_id', 'divider')  
-    extra = 1
+    fields = ('display_name', 'divider', 'quantity', 'final_price')
+    readonly_fields = ('display_name', 'divider')  
+    extra = 0
 
     def divider(self, obj):
         return ":"
     divider.short_description = ''
-
-    def cart_product_id(self, obj):
-        return obj.id if obj.id else '-' 
-    cart_product_id.short_description = 'ID'
 
     def display_name(self, obj):
         return obj.display_name
