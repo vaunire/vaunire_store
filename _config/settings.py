@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'tailwind_config', 'tailwind', 
     # Поддержка улучшенных выпадающих списков
     'django_select2',
+    # Модуль для форматирования данных, например, форматирование чисел с пробелами
+    'django.contrib.humanize',
     
     # Стандартные приложения Django
     'django.contrib.admin',

@@ -1,0 +1,108 @@
+<div class="w-96 flex-shrink-0">
+    <div class="sticky top-24 space-y-3">
+        <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <nav class="mb-3 text-xs text-gray-500 tracking-wide">
+                <ol class="flex space-x-2">
+                    <li><a href="/" class="hover:text-blue-600">Главная</a></li>
+                    <li>/</li>
+                    <li><a href="{% url 'cart' %}" class="hover:text-blue-600">Корзина</a></li>
+                    <li>/</li>
+                    <li class="text-gray-900">Оформление</li>
+                </ol>
+            </nav>
+
+            <h4 class="text-xl font-semibold font-geologica text-gray-900 mb-2">Ваша корзина</h4>
+            <div class="space-y-2">
+                <div class="flex justify-between text-sm text-gray-600 pt-3 border-gray-200 mb-5">
+                    <span>Итого к оплате</span>
+                    <span class="font-medium">{{ cart.final_price|floatformat:0 }} ₽</span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-600 border-gray-200 border-t pt-2">
+                    <span>Ваша корзина</span>
+                </div>
+                {% for item in cart.products.all %}
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span>{{ item.quantity }} x {{ item.display_name }}</span>
+                        <span class="font-bold text-gray-800">{{ item.final_price|floatformat:0 }} ₽</span>
+                    </div>
+                {% endfor %}
+                <div class="mt-4">
+                    <div class="flex justify-between text-xs text-gray-600 border-gray-200 border-t pt-2">
+                        <span>Промокоды, скидки, акции</span>
+                    </div>
+                    <p class="text-sm text-gray-600 pt-2"><span class="font-medium">quok -15%</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
+            <div class="flex items-center space-x-2">
+                <input type="text" id="promo-code" placeholder="Введите промокод" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="promo-button" class="p-2.5 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors duration-200 focus:ring-2 focus:ring-gray-500 focus:outline-none disabled:bg-gray-200 disabled:text-gray-400" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Улучшенная кнопка "Очистить корзину" -->
+        <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
+            <button onclick="showClearCartModal()" class="w-full px-4 py-2 bg-white text-gray-600 text-center rounded-md border border-gray-300 hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md active:shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20,6H16V5a3,3,0,0,0-3-3H11A3,3,0,0,0,8,5V6H4A1,1,0,0,0,4,8H5V19a3,3,0,0,0,3,3h8a3,3,0,0,0,3-3V8h1a1,1,0,0,0,0-2ZM10,5a1,1,0,0,1,1-1h2a1,1,0,0,1,1,1V6H10Zm7,14a1,1,0,0,1-1,1H8a1,1,0,0,1-1-1V8H17Z"></path>
+                </svg>
+                <span class="text-sm font-semibold tracking-wide">Очистить корзину</span>
+            </button>
+        </div>
+
+        <!-- Модальное окно для очистки корзины -->
+        <div id="clearCartModal" class="fixed inset-0 bg-gray-600 bg-opacity-60 hidden items-center justify-center z-50" style="display: none;">
+            <div class="bg-white rounded-xl p-6 w-96 shadow-2xl border border-gray-100 transform transition-all duration-300 scale-95">
+                <h4 class="text-lg font-semibold text-gray-900 mb-4">Вы точно хотите очистить корзину?</h4>
+                <p class="text-sm text-gray-600 mb-6">Все товары в заказе удалятся</p>
+                <div class="flex justify-end space-x-4">
+                    <button onclick="hideClearCartModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">Отмена</button>
+                    <a id="clearCartLink" href="{% url 'clear_cart' %}" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 shadow-sm">Подтвердить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Динамическая кнопка промокода
+    document.addEventListener('DOMContentLoaded', function () {
+        const promoInput = document.getElementById('promo-code');
+        const promoButton = document.getElementById('promo-button');
+
+        promoInput.addEventListener('input', function () {
+            if (promoInput.value.trim() === '') {
+                promoButton.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                promoButton.classList.add('bg-gray-200', 'text-gray-600', 'hover:bg-gray-300');
+                promoButton.disabled = true;
+            } else {
+                promoButton.classList.remove('bg-gray-200', 'text-gray-600', 'hover:bg-gray-300');
+                promoButton.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                promoButton.disabled = false;
+            }
+        });
+    });
+
+    // Модальное окно для очистки корзины
+    function showClearCartModal() {
+        const modal = document.getElementById('clearCartModal');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.querySelector('.scale-95').classList.remove('scale-95');
+        }, 10);
+    }
+
+    function hideClearCartModal() {
+        const modal = document.getElementById('clearCartModal');
+        modal.querySelector('.transform').classList.add('scale-95');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 200);
+    }
+</script>

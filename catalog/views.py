@@ -9,7 +9,7 @@ from .models import Album, Artist
 class BaseView(CartMixin, NotificationsMixin, views.View):
     """Отображает главную страницу сайта"""
     def get(self, request, *args, **kwargs):
-        albums = Album.objects.all().order_by('-id')[:5]
+        albums = Album.objects.all().order_by('-id')
         context = {
             'albums': albums,
             'cart': self.cart,

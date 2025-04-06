@@ -7,24 +7,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet"> 
     <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&display=swap" rel="stylesheet">
-    <title>Vaunire | Музыкальный интернет-магазин</title>
+   
+    {% block title %}
+        <title>Vaunire | Музыкальный интернет-магазин</title>
+    {% endblock %}
+
     {% tailwind_css %}
 </head>
-<body class = "bg-gray-100">
+<body class="bg-gray-100 pt-24"> 
     <!-- Навбар -->
-    {% include 'partials/navbar.html' %}
+    {% include 'partials/site/navbar.html' %}
 
     <!-- Контент -->
-    <main class="flex-grow pt-32 font-mulish">
+    <main class="flex-grow font-mulish"> 
         {% block content %}
-        <div class="flex-1 container mx-auto max-w-7xl">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                {% for album in albums %}
-                    {% include 'partials/card.html' %}
-                {% endfor %}
+        <div class="container mx-auto max-w-[1330px] px-4">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Фильтры (слева) -->
+                <div class="w-60 bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Фильтры</h3>
+                    <form method="GET" action="">
+                        <!-- Фильтр по цене -->
+                        <div class="mb-6">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Цена</h4>
+                            <div class="flex items-center gap-2 mb-2">
+                                <input type="number" name="min_price" value="{{ min_price|default:0 }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="От">
+                                <input type="number" name="max_price" value="{{ max_price|default:10000 }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="До">
+                            </div>
+                            <div class="relative">
+                                <input type="range" name="min_price_range" min="0" max="10000" value="{{ min_price|default:0 }}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-input" oninput="updatePriceInputs(this, 'min')">
+                                <input type="range" name="max_price_range" min="0" max="10000" value="{{ max_price|default:10000 }}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-input absolute top-0 left-0" oninput="updatePriceInputs(this, 'max')">
+                            </div>
+                        </div>
+
+                        <!-- Фильтр по жанрам -->
+                        <div class="mb-6">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Жанры</h4>
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                {% for genre in genres %}
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="genres" value="{{ genre.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" {% if genre.id|stringformat:"s" in selected_genres %}checked{% endif %}>
+                                        <span class="ml-2 text-sm text-gray-600">{{ genre.name }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Фильтр по стилям -->
+                        <div class="mb-6">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Стили</h4>
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                {% for style in styles %}
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="styles" value="{{ style.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" {% if style.id|stringformat:"s" in selected_styles %}checked{% endif %}>
+                                        <span class="ml-2 text-sm text-gray-600">{{ style.name }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Кнопка применить -->
+                        <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            Применить фильтры
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Альбомы (справа) -->
+                <div class="flex-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                        {% for album in albums %}
+                            {% include 'partials/catalog/card.html' %}
+                        {% empty %}
+                            <p class="text-gray-600 col-span-full text-center">Альбомы не найдены.</p>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
         {% endblock content %}
     </main>
+
+    <!-- JavaScript для ползунков -->
+    <script>
+        function updatePriceInputs(slider, type) {
+            const minSlider = document.querySelector('input[name="min_price_range"]');
+            const maxSlider = document.querySelector('input[name="max_price_range"]');
+            const minInput = document.querySelector('input[name="min_price"]');
+            const maxInput = document.querySelector('input[name="max_price"]');
+
+            let minValue = parseInt(minSlider.value);
+            let maxValue = parseInt(maxSlider.value);
+
+            // Убедимся, что минимальная цена не больше максимальной
+            if (minValue > maxValue - 100) {
+                if (type === 'min') {
+                    minSlider.value = maxValue - 100;
+                    minValue = maxValue - 100;
+                } else {
+                    maxSlider.value = minValue + 100;
+                    maxValue = minValue + 100;
+                }
+            }
+
+            // Обновляем значения в текстовых полях
+            minInput.value = minValue;
+            maxInput.value = maxValue;
+        }
+
+        // Инициализация ползунков при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePriceInputs(document.querySelector('input[name="min_price_range"]'), 'min');
+        });
+    </script>
 </body>
 </html>

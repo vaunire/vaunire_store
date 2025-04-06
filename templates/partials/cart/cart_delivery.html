@@ -1,0 +1,86 @@
+<h3 class="text-2xl font-black text-gray-900 mb-6 relative inline-block">
+    Доставка
+    <span class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 transform translate-y-2"></span>
+</h3>
+<p class="text-sm text-gray-500 mb-6">Выберите подходящий способ доставки</p>
+<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+    <form id="delivery-form" method="POST" action="#">
+        {% csrf_token %}
+        <div class="flex space-x-4 mb-6">
+            <label class="flex items-center space-x-2 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-200">
+                <input type="radio" name="delivery_method" value="courier" class="delivery-method h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" checked>
+                <span class="text-sm text-gray-600">Курьер</span>
+            </label>
+            <label class="flex items-center space-x-2 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-200">
+                <input type="radio" name="delivery_method" value="pickup" class="delivery-method h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                <span class="text-sm text-gray-600">Самовывоз</span>
+            </label>
+        </div>
+
+        <div id="delivery-info" class="flex space-x-4 mb-6" style="display: flex;">
+            <div class="flex-1 p-4 border border-gray-200 rounded-lg">
+                <p class="text-sm text-gray-600">Почтой России до двери. По России</p>
+            </div>
+            <div class="flex-1 p-4 border border-gray-200 rounded-lg">
+                <p class="text-sm text-gray-600">Курьер СДЭК до двери</p>
+            </div>
+        </div>
+
+        <div id="pickup-info" class="mt-4 p-4 border border-gray-200 rounded-lg" style="display: none;">
+            <p class="text-sm text-gray-600">
+                Адрес пункта самовывоза: г. Северодвинск, ул. Ломоносова, д. 81, магазин "Исмарт".<br>
+                Режим работы: Пн-Пт 10:00–19:00, Сб-Вс 11:00–17:00.
+            </p>
+        </div>
+
+        <button type="submit" class="mt-6 px-6 py-3 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium text-sm rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 focus:ring-4 focus:ring-blue-300 focus:outline-none shadow-md">
+            Перейти к оплате
+        </button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deliveryMethods = document.querySelectorAll('.delivery-method');
+    const deliveryInfo = document.getElementById('delivery-info');
+    const pickupInfo = document.getElementById('pickup-info');
+    const orderForm = document.querySelector('form[action="#"]:first-of-type');
+    const deliveryForm = document.getElementById('delivery-form');
+
+    deliveryMethods.forEach(method => {
+        method.addEventListener('change', function () {
+            if (this.value === 'courier') {
+                deliveryInfo.style.display = 'flex';
+                pickupInfo.style.display = 'none';
+            } else if (this.value === 'pickup') {
+                deliveryInfo.style.display = 'none';
+                pickupInfo.style.display = 'block';
+            }
+        });
+    });
+
+    deliveryForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const orderFormData = new FormData(orderForm);
+        const deliveryFormData = new FormData(deliveryForm);
+        
+        // Объединяем данные из обеих форм
+        for (let [key, value] of orderFormData) {
+            deliveryFormData.append(key, value);
+        }
+        
+        // Отправляем объединенные данные
+        fetch(deliveryForm.action, {
+            method: 'POST',
+            body: deliveryFormData,
+            headers: {
+                'X-CSRFToken': deliveryFormData.get('csrfmiddlewaretoken')
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = '#'; // Перенаправление на страницу оплаты
+            }
+        });
+    });
+});
+</script>

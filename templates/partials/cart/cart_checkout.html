@@ -1,0 +1,78 @@
+{% load humanize %}
+<div class="mt-12">
+    <h3 class="text-lg font-black text-gray-900 mb-4 relative inline-block">
+        Оформление заказа
+        <span class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 transform translate-y-2"></span>
+    </h3>
+    <p class="text-sm text-gray-500 mb-4 leading-relaxed">
+        Заполните форму ниже, чтобы завершить оформление заказа. Эти данные необходимы для доставки и отслеживания.
+    </p>
+
+    <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100 relative {% if not user.is_authenticated %}blur-sm{% endif %} transition-all duration-300">
+        <form method="POST" action="#" class="space-y-6">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-0">
+                <div>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">Имя</label>
+                    <input type="text together" name="first_name" id="first_name" required
+                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                           placeholder="Введите ваше имя">
+                </div>
+                <div>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Фамилия</label>
+                    <input type="text" name="last_name" id="last_name" required
+                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                           placeholder="Введите вашу фамилию">
+                </div>
+            </div>
+
+            <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
+                <input type="tel" name="phone" id="phone" required
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                       placeholder="+7 (XXX) XXX-XX-XX">
+            </div>
+
+            <div>
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Адрес доставки</label>
+                <textarea name="address" id="address" required
+                          class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                          placeholder="Введите адрес доставки" rows="4"></textarea>
+            </div>
+
+            <div>
+                <label for="order_date" class="block text-sm font-medium text-gray-700 mb-2">Дата доставки</label>
+                <input type="date" name="order_date" id="order_date" required
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+            </div>
+
+            <div>
+                <label for="comment" class="block text-sm font-medium text-gray-700 mb-2">Комментарий к заказу</label>
+                <textarea name="comment" id="comment"
+                          class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                          placeholder="Дополнительные пожелания (необязательно)" rows="4"></textarea>
+            </div>
+
+            <div class="flex items-center">
+                <input type="checkbox" id="agreement" name="agreement" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-lg">
+                <label for="agreement" class="ml-3 text-sm text-gray-600 leading-tight">
+                    Я даю согласие на обработку персональных данных и соглашаюсь с условиями <a href="#" class="text-blue-600 hover:underline">Политики конфиденциальности</a>
+                </label>
+            </div>
+        </form>
+
+        {% if not user.is_authenticated %}
+            <div class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-80 rounded-xl backdrop-blur-sm transition-all duration-300">
+                <div class="text-center p-8 bg-white rounded-xl shadow-2xl border border-gray-100 transform transition-all duration-300 hover:scale-105">
+                    <h4 class="text-xl font-semibold text-gray-900 mb-4">Войдите в систему</h4>
+                    <p class="text-sm text-gray-600 mb-6 leading-relaxed">
+                        Для оформления заказа необходимо авторизоваться или создать аккаунт.
+                    </p>
+                    <a href="{% url 'login' %}?next={% url 'place_order' %}" class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium text-sm rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 focus:ring-4 focus:ring-blue-300 focus:outline-none shadow-md">
+                        Войти или зарегистрироваться
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>

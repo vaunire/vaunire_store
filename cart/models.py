@@ -10,7 +10,6 @@ import operator
 # ❒ Модель для хранения корзины пользователя
 class Cart(models.Model):
     owner = models.ForeignKey('accounts.Customer', verbose_name = 'Покупатель', on_delete = models.CASCADE)
-    # products = models.ManyToManyField('CartProduct', blank = True, verbose_name = 'Продукты для корзины', related_name = 'related_cart')
     total_products = models.IntegerField(default = 0, verbose_name = 'Общее кол-во товара')
     final_price = models.DecimalField(max_digits = 10, decimal_places = 2, verbose_name = 'Общая цена', null = True, blank = True)
     in_order = models.BooleanField(default = False, verbose_name = 'В заказе')
@@ -95,4 +94,5 @@ class CartProduct(models.Model):
     class Meta:
             verbose_name = 'Продукт корзины'
             verbose_name_plural = 'Продукты корзины'
+            unique_together = [['cart', 'content_type', 'object_id']]
 
