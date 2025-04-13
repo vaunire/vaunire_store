@@ -13,14 +13,25 @@ from .forms import LoginForm, RegistrationForm
 
 class AccountView(CartMixin, NotificationsMixin, views.View):
     """Отображает страницу личного кабинета пользователя"""
-    def get(self, request, *args, **kwargs):
-        customer = Customer.objects.get(user = request.user)
-        last_paid_order = customer.orders.filter(paid=True).last()
+    def get(self, request, tab = 'account', *args, **kwargs):
+        customer = None
+        last_paid_order = None
+        try:
+            customer = Customer.objects.get(user = request.user)
+            last_paid_order = customer.orders.filter(paid = True).last()
+        except (Customer.DoesNotExist, AttributeError):
+            pass
+
+        valid_tabs = ['account', 'orders', 'wishlist', 'returns']
+        if tab not in valid_tabs:
+            tab = 'account'
+
         context = {
             'customer': customer,
             'cart': self.cart,
             'notifications': self.notifications(request.user),
-            'last_paid_order': last_paid_order
+            'last_paid_order': last_paid_order,
+            'active_tab': tab
         }
         return render(request, 'pages/account.html', context)
 

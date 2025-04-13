@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "unfold.contrib.inlines", 
     "unfold.contrib.import_export", 
     "unfold.contrib.guardian",  
+    'django.contrib.humanize',
     "unfold.contrib.simple_history",
 
     # Утилита для автоматической перезагрузки браузера в режиме разработки [1]
@@ -45,8 +46,6 @@ INSTALLED_APPS = [
     'tailwind_config', 'tailwind', 
     # Поддержка улучшенных выпадающих списков
     'django_select2',
-    # Модуль для форматирования данных, например, форматирование чисел с пробелами
-    'django.contrib.humanize',
     
     # Стандартные приложения Django
     'django.contrib.admin',

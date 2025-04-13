@@ -1,49 +1,50 @@
 {% load static tailwind_tags %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet"> 
     <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&display=swap" rel="stylesheet">
-   
-    {% block title %}
-        <title>Vaunire | Музыкальный интернет-магазин</title>
-    {% endblock %}
-
+    <title>Vaunire | Музыкальный интернет-магазин</title>
     {% tailwind_css %}
 </head>
-<body class="bg-gray-100 pt-24"> 
+<body class="bg-gray-100 pt-24 font-mulish">
     <!-- Навбар -->
     {% include 'partials/site/navbar.html' %}
 
     <!-- Контент -->
-    <main class="flex-grow font-mulish"> 
-        {% block content %}
-        <div class="container mx-auto max-w-[1330px] px-4">
-            <div class="flex flex-col lg:flex-row gap-4">
+    <main class="flex-grow">
+        <div class="container mx-auto max-w-[1330px] px-4 py-8">
+            <div class="flex flex-col lg:flex-row gap-6">
                 <!-- Фильтры (слева) -->
-                <div class="w-60 bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+                <div class="w-full lg:w-64 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Фильтры</h3>
                     <form method="GET" action="">
                         <!-- Фильтр по цене -->
-                        <div class="mb-6">
-                            <h4 class="text-sm font-medium text-gray-700 mb-2">Цена</h4>
-                            <div class="flex items-center gap-2 mb-2">
-                                <input type="number" name="min_price" value="{{ min_price|default:0 }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="От">
-                                <input type="number" name="max_price" value="{{ max_price|default:10000 }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="До">
+                        <div class="mb-8">
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">Цена</h4>
+                            <div class="flex items-center gap-2 mb-4">
+                                <input type="number" name="min_price" id="min_price" value="{{ min_price }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="От">
+                                <input type="number" name="max_price" id="max_price" value="{{ max_price }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="До">
                             </div>
-                            <div class="relative">
-                                <input type="range" name="min_price_range" min="0" max="10000" value="{{ min_price|default:0 }}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-input" oninput="updatePriceInputs(this, 'min')">
-                                <input type="range" name="max_price_range" min="0" max="10000" value="{{ max_price|default:10000 }}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-input absolute top-0 left-0" oninput="updatePriceInputs(this, 'max')">
+                            <div class="relative h-4 w-full">
+                                <!-- Полный трек -->
+                                <div class="absolute top-1/2 left-0 right-0 h-1.5 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
+                                <!-- Выбранный диапазон -->
+                                <div id="range-track" class="absolute top-1/2 h-1.5 bg-blue-600 rounded-full transform -translate-y-1/2" style="left: 0%; right: 0%;"></div>
+                                <!-- Ручка для минимальной цены -->
+                                <input type="range" id="min_price_range" name="min_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ min_price }}" class="absolute w-full h-4 bg-transparent appearance-none pointer-events-none focus:outline-none">
+                                <!-- Ручка для максимальной цены -->
+                                <input type="range" id="max_price_range" name="max_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ max_price }}" class="absolute w-full h-4 bg-transparent appearance-none pointer-events-none focus:outline-none">
                             </div>
                         </div>
 
                         <!-- Фильтр по жанрам -->
-                        <div class="mb-6">
-                            <h4 class="text-sm font-medium text-gray-700 mb-2">Жанры</h4>
-                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                        <div class="mb-8">
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">Жанры</h4>
+                            <div class="space-y-2 max-h-40 overflow-y-auto pr-2">
                                 {% for genre in genres %}
                                     <label class="flex items-center">
                                         <input type="checkbox" name="genres" value="{{ genre.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" {% if genre.id|stringformat:"s" in selected_genres %}checked{% endif %}>
@@ -54,9 +55,9 @@
                         </div>
 
                         <!-- Фильтр по стилям -->
-                        <div class="mb-6">
-                            <h4 class="text-sm font-medium text-gray-700 mb-2">Стили</h4>
-                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                        <div class="mb-8">
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">Стили</h4>
+                            <div class="space-y-2 max-h-40 overflow-y-auto pr-2">
                                 {% for style in styles %}
                                     <label class="flex items-center">
                                         <input type="checkbox" name="styles" value="{{ style.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" {% if style.id|stringformat:"s" in selected_styles %}checked{% endif %}>
@@ -68,57 +69,157 @@
 
                         <!-- Кнопка применить -->
                         <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            Применить фильтры
+                            Применить
                         </button>
                     </form>
                 </div>
 
                 <!-- Альбомы (справа) -->
                 <div class="flex-1">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Музыкальный каталог</h1>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {% for album in albums %}
                             {% include 'partials/catalog/card.html' %}
                         {% empty %}
-                            <p class="text-gray-600 col-span-full text-center">Альбомы не найдены.</p>
+                            <p class="text-gray-600 col-span-full text-center py-8">Альбомы не найдены.</p>
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
-        {% endblock content %}
     </main>
 
-    <!-- JavaScript для ползунков -->
+    <!-- JavaScript для слайдера -->
     <script>
-        function updatePriceInputs(slider, type) {
-            const minSlider = document.querySelector('input[name="min_price_range"]');
-            const maxSlider = document.querySelector('input[name="max_price_range"]');
-            const minInput = document.querySelector('input[name="min_price"]');
-            const maxInput = document.querySelector('input[name="max_price"]');
+        function updatePriceSlider() {
+            const minSlider = document.getElementById('min_price_range');
+            const maxSlider = document.getElementById('max_price_range');
+            const minInput = document.getElementById('min_price');
+            const maxInput = document.getElementById('max_price');
+            const rangeTrack = document.getElementById('range-track');
 
             let minValue = parseInt(minSlider.value);
             let maxValue = parseInt(maxSlider.value);
+            const minLimit = parseInt(minSlider.min);
+            const maxLimit = parseInt(maxSlider.max);
 
-            // Убедимся, что минимальная цена не больше максимальной
+            // Убедимся, что minValue <= maxValue с минимальным зазором
             if (minValue > maxValue - 100) {
-                if (type === 'min') {
-                    minSlider.value = maxValue - 100;
-                    minValue = maxValue - 100;
-                } else {
-                    maxSlider.value = minValue + 100;
+                if (minValue === parseInt(minInput.value)) {
                     maxValue = minValue + 100;
+                    maxSlider.value = maxValue;
+                } else {
+                    minValue = maxValue - 100;
+                    minSlider.value = minValue;
                 }
             }
 
-            // Обновляем значения в текстовых полях
+            // Обновляем поля ввода
             minInput.value = minValue;
             maxInput.value = maxValue;
+
+            // Вычисляем проценты для синей полосы
+            const minPercent = ((minValue - minLimit) / (maxLimit - minLimit)) * 100;
+            const maxPercent = ((maxValue - minLimit) / (maxLimit - minLimit)) * 100;
+
+            // Обновляем позицию синей полосы
+            rangeTrack.style.left = `${minPercent}%`;
+            rangeTrack.style.right = `${100 - maxPercent}%`;
         }
 
-        // Инициализация ползунков при загрузке страницы
+        // Синхронизация слайдеров с полями ввода
+        function syncSlidersFromInputs() {
+            const minInput = document.getElementById('min_price');
+            const maxInput = document.getElementById('max_price');
+            const minSlider = document.getElementById('min_price_range');
+            const maxSlider = document.getElementById('max_price_range');
+
+            let minValue = parseInt(minInput.value) || parseInt(minSlider.min);
+            let maxValue = parseInt(maxInput.value) || parseInt(maxSlider.max);
+
+            // Ограничиваем значения
+            minValue = Math.max(parseInt(minSlider.min), Math.min(minValue, parseInt(maxSlider.max)));
+            maxValue = Math.max(parseInt(minSlider.min), Math.min(maxValue, parseInt(maxSlider.max)));
+
+            // Убедимся, что min <= max
+            if (minValue > maxValue - 100) {
+                maxValue = minValue + 100;
+            }
+
+            minSlider.value = minValue;
+            maxSlider.value = maxValue;
+
+            updatePriceSlider();
+        }
+
+        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
-            updatePriceInputs(document.querySelector('input[name="min_price_range"]'), 'min');
+            updatePriceSlider();
+            document.getElementById('min_price').addEventListener('input', syncSlidersFromInputs);
+            document.getElementById('max_price').addEventListener('input', syncSlidersFromInputs);
+            document.getElementById('min_price_range').addEventListener('input', updatePriceSlider);
+            document.getElementById('max_price_range').addEventListener('input', updatePriceSlider);
         });
     </script>
+
+    <!-- Кастомные стили для слайдера -->
+    <style>
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track,
+        input[type="range"]::-moz-range-track {
+            height: 0;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #3b82f6; /* Синий */
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            margin-top: -7px;
+            pointer-events: auto;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #3b82f6;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            pointer-events: auto;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            background: #1d4ed8;
+        }
+
+        input[type="range"]::-moz-range-thumb:active {
+            background: #1d4ed8;
+        }
+    </style>
 </body>
 </html>

@@ -102,29 +102,29 @@
                             <span class="absolute top-1.5 right-1.5 w-[5px] h-[5px] bg-blue-500 opacity-80 rounded-full"></span>
                         {% endif %}
                     </button>
-                    <div class="absolute right-0 top-full mt-1 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-50" x-show="isOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.away="isOpen = false">
+                    <div class="absolute right-0 top-full mt-1 w-[310px] bg-white border border-gray-200 rounded-lg shadow-lg z-50" x-show="isOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.away="isOpen = false">
                         <button type="button" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-700 transition-colors duration-300" @click="isOpen = false">
-                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
-                        <ul class="divide-y divide-gray-200">
+                        <ul class="divide-y divide-gray-200 tracking-wide">
                             {% if notifications.count %}
                                 {% for notification in notifications %}
                                 <li class="p-3 hover:bg-gray-50 transition-colors duration-200 flex items-start">
-                                    <span class="text-xs text-gray-500 mr-2 whitespace-nowrap">
+                                    <span class="text-xs text-gray-500 mr-3 whitespace-nowrap">
                                         {{ notification.created_at|date:"H:i" }}
                                     </span>
-                                    <span class="text-sm text-gray-700">{{ notification.text|safe }}</span>
+                                    <span class="text-[13px] text-gray-700 max-w-[220px]">{{ notification.text|safe }}</span>
                                 </li>
                                 {% endfor %}
                                 <li class="p-3 hover:bg-gray-50 transition-colors duration-200">
                                     <a href="{% url 'clear_notifications' %}">
-                                        <button type="submit" class="block text-sm text-blue-600 font-medium">Пометить всё как прочитанное</button>
+                                        <button type="submit" class="block text-xs text-blue-600 font-medium">Пометить всё как прочитанное</button>
                                     </a>
                                 </li>
                             {% else %}
-                                <li class="p-3 text-sm text-gray-700">Нет новых уведомлений</li>
+                                <li class="p-3 text-xs text-gray-700">Нет новых уведомлений</li>
                             {% endif %}
                         </ul>
                     </div>
@@ -154,7 +154,7 @@
             {% if not request.user.is_authenticated %}
                 <a href="{% url 'login' %}" class="relative ml-2.5">
                     <span class="font-extrabold relative tracking-wider inline-flex items-center rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs text-white transition duration-100 hover:bg-blue-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" class="mr-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" class="mr-1.5 -ml-0.5">
                             <path fill="currentColor" d="M7.995 2C6.154 2 4.662 3.465 4.662 5.273c0 1.807 1.492 3.272 3.333 3.272 1.84 0 3.332-1.465 3.332-3.272C11.327 3.465 9.835 2 7.995 2M5.161 9.262c.424-.17.889-.043 1.319.11a4.6 4.6 0 0 0 1.515.264c.518 0 1.031-.095 1.504-.26c.437-.153.909-.279 1.337-.105c.73.297 1.551.899 2.02 1.616a.876.876 0 0 1-.082 1.067C11.65 13.216 9.811 14 7.994 14s-3.643-.782-4.768-2.045a.88.88 0 0 1-.083-1.068c.471-.722 1.285-1.332 2.018-1.625"/>
                         </svg>
                         Войти
@@ -174,40 +174,53 @@
                         <div class="absolute bottom-0 rounded-full -left-1 right-0.5 h-0.5 bg-blue-500 opacity-75"></div>
                     </a>
 
-                    <!-- Выпадающее меню -->
-                    <div 
-                        class="absolute -right-4 top-full mt-2.5 w-44 bg-white border border-gray-200 shadow-md rounded-md z-50"
-                        x-show="isOpen"
-                        @mouseenter="isOpen = true"
-                        @mouseleave="isOpen = false"
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 translate-y-1"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 translate-y-1">
-                        <div class="py-1.5">
-
-                            <a href="{% url 'account' %}"  class="flex items-center px-3 py-1.5 text-xs font-geologica font-light opacity-90 text-gray-500 hover:bg-gray-100 transition-colors duration-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16.5" height="16.5" viewBox="0 0 16 16" class="text-gray-400 opacity-80 mr-1.5">
+                        <!-- Выпадающее меню -->
+                        <div 
+                            class="absolute -right-4 top-full mt-2.5 w-44 bg-white border border-gray-200 shadow-md rounded-md z-50"
+                            x-show="isOpen"
+                            @mouseenter="isOpen = true"
+                            @mouseleave="isOpen = false"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 translate-y-1">
+                            <div class="py-1.5 tracking-wide">
+                                <!-- Пункты меню -->
+                                <a href="{% url 'account_tab' 'account' %}" 
+                                class="tab-link flex items-center px-3 py-2 text-xs font-semibold opacity-90 text-gray-500 hover:bg-gray-100 transition-colors duration-200"
+                                data-tab="account">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16.4" height="16.4" viewBox="0 0 16 16" class="text-gray-400 opacity-75 mr-[9px]">
                                     <path fill="currentColor" d="M7.995 2C6.154 2 4.662 3.465 4.662 5.273c0 1.807 1.492 3.272 3.333 3.272 1.84 0 3.332-1.465 3.332-3.272C11.327 3.465 9.835 2 7.995 2M5.161 9.262c.424-.17.889-.043 1.319.11a4.6 4.6 0 0 0 1.515.264c.518 0 1.031-.095 1.504-.26c.437-.153.909-.279 1.337-.105c.73.297 1.551.899 2.02 1.616a.876.876 0 0 1-.082 1.067C11.65 13.216 9.811 14 7.994 14s-3.643-.782-4.768-2.045a.88.88 0 0 1-.083-1.068c.471-.722 1.285-1.332 2.018-1.625"/>
                                 </svg>
                                 Личный кабинет
                             </a>
 
+                            <a href="{% url 'account_tab' 'wishlist' %}" 
+                                class="tab-link flex items-center px-3 py-2 text-xs font-semibold opacity-90 text-gray-500 hover:bg-gray-100 transition-colors duration-200"
+                                data-tab="wishlist">
+                                <svg class="mr-2.5 text-gray-400 opacity-75" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 1024 1024">
+                                    <path fill="currentColor" d="m908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5c-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3a32.05 32.05 0 0 0 .6 45.3l183.7 179.1l-43.4 252.9a31.95 31.95 0 0 0 46.4 33.7L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2c17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9l183.7-179.1c5-4.9 8.3-11.3 9.3-18.3c2.7-17.5-9.5-33.7-27-36.3"/>
+                                </svg>
+                                Лист ожидания
+                            </a>
+
                             <div class="border-t border-gray-200 my-1"></div>
 
-                            <!-- Пункты меню -->
-                            <a href="#" class="flex items-center px-3 py-1.5 text-xs font-geologica opacity-90 text-gray-500 hover:bg-gray-100 transition-colors duration-200">
+                            <a href="{% url 'account_tab' 'orders' %}" 
+                                class="tab-link flex items-center px-3 py-2 text-xs font-semibold opacity-90 text-gray-500 hover:bg-gray-100 transition-colors duration-200"
+                                data-tab="orders">
                                 <svg class="mr-2.5 text-gray-400 opacity-75" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24">
                                     <path fill="currentColor" d="M13.409 2.513a3.75 3.75 0 0 0-2.818 0l-2.19.888l9.592 3.73l3.374-1.303a1.8 1.8 0 0 0-.46-.275zM22 7.191l-9.25 3.574v10.923q.336-.068.659-.199l7.498-3.04A1.75 1.75 0 0 0 22 16.827zM11.25 21.688V10.765L2 7.191v9.637a1.75 1.75 0 0 0 1.093 1.621l7.498 3.04q.323.13.659.2M2.633 5.828L12 9.447l3.917-1.514l-9.543-3.71l-3.281 1.33q-.256.104-.46.275"/>
                                 </svg>
                                 Мои заказы
                             </a>
-                            <a href="#" class="flex items-center px-3 py-1.5 text-xs font-geologica opacity-90 text-gray-500 hover:bg-gray-100 transition-colors duration-200">
-                                <svg class="mr-2 text-gray-400 opacity-75" xmlns="http://www.w3.org/2000/svg" width="16.2" height="16.2" viewBox="0 0 20 20">
-                                    <path fill="currentColor" d="m17.421 4.992l-3.046 1.219l-7.5-3L8.7 2.48a3.5 3.5 0 0 1 2.6 0l5.757 2.303a1.5 1.5 0 0 1 .364.208m-7.42 2.969l3.028-1.212l-7.5-3l-2.586 1.035a1.5 1.5 0 0 0-.364.208zM2 6.176q0-.166.035-.324L9.5 8.838v3.367a5.5 5.5 0 0 0-.5 2.294c0 .82.18 1.597.5 2.295v.938q-.409-.058-.8-.214l-5.757-2.303A1.5 1.5 0 0 1 2 13.822zm16 0v4.08A5.48 5.48 0 0 0 14.5 9a5.5 5.5 0 0 0-4 1.724V8.838l7.465-2.986q.035.158.035.324"/>
-                                    <path class="text-blue-500" fill="currentColor" d="M19 14.5a4.5 4.5 0 0 0-9 0a4.5 4.5 0 0 0 9 0m-6.856-.352l.003-.002l2-2a.5.5 0 1 1 .707.707L13.707 14H16.5a.5.5 0 0 1 0 1h-2.793l1.147 1.147a.5.5 0 1 1-.707.707l-2-2a.5.5 0 0 1-.147-.35v-.007a.5.5 0 0 1 .144-.348"/>
+                            <a href="{% url 'account_tab' 'returns' %}" 
+                                class="tab-link flex items-center px-3 py-2 text-xs font-semibold opacity-90 text-gray-500 hover:bg-gray-100 transition-colors duration-200"
+                                data-tab="returns">
+                                <svg class="mr-[9px] text-gray-400 opacity-75" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 1200 1200">
+                                    <path fill="currentColor" d="M300 225L0 525h225v375h450L525 750H375V525h225zm225 75l150 150h150v225H600l300 300l300-300H975V300z"/>
                                 </svg>
                                 Мои возвраты
                             </a>
@@ -218,8 +231,8 @@
                             <form method="post" action="{% url 'logout' %}" class="block w-full">
                                 {% csrf_token %}
                                 <button type="submit"
-                                        class="w-full flex items-center px-3 py-1.5 text-xs font-geologica opacity-90 text-red-500 hover:bg-gray-100 transition-colors duration-200">
-                                    <svg class="mr-2 text-red-500" xmlns="http://www.w3.org/2000/svg" width="13.5" height="13.5" viewBox="0 0 24 24">
+                                        class="w-full flex items-center px-3 py-1.5 text-xs font-semibold opacity-90 text-red-500 hover:bg-gray-100 transition-colors duration-200">
+                                    <svg class="mr-2 text-red-500" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" stroke-width="2.5">
                                         <path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"/>
                                     </svg>
                                     Выход

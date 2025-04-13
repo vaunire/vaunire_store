@@ -1,0 +1,77 @@
+<div id="orders" class="tab-pane {% if active_tab != 'orders' %}hidden{% endif %}">
+    <div class="bg-gray-50 p-6 rounded-lg">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 640 512" class="text-green-500 mr-2.5">
+                    <path fill="currentColor" d="M32 0C14.3 0 0 14.3 0 32s14.3 32 32 32h16c8.8 0 16 7.2 16 16v288c0 44.2 35.8 80 80 80h18.7c-1.8 5-2.7 10.4-2.7 16c0 26.5 21.5 48 48 48s48-21.5 48-48c0-5.6-1-11-2.7-16h197.4c-1.8 5-2.7 10.4-2.7 16c0 26.5 21.5 48 48 48s48-21.5 48-48c0-5.6-1-11-2.7-16H608c17.7 0 32-14.3 32-32s-14.3-32-32-32H144c-8.8 0-16-7.2-16-16V80c0-44.2-35.8-80-80-80zm160 80v192c0 26.5 21.5 48 48 48h320c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48h-96v144c0 5.9-3.2 11.3-8.5 14.1s-11.5 2.5-16.4-.8L400 163.2l-39.1 26.1c-4.9 3.3-11.2 3.6-16.4.8s-8.5-8.2-8.5-14.1V32h-96c-26.5 0-48 21.5-48 48"/>
+                </svg>
+                <h2 class="text-xl font-semibold text-gray-800">Ваши заказы</h2>
+            </div>
+            <span class="text-sm text-gray-600">Всего: {{ customer.orders.all.count }}</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full bg-white rounded-lg shadow-sm">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="py-3 px-6 text-gray-600 text-left font-medium">Номер заказа</th>
+                        <th class="py-3 px-6 text-gray-600 text-left font-medium">Дата</th>
+                        <th class="py-3 px-6 text-gray-600 text-left font-medium">Тип доставки</th>
+                        <th class="py-3 px-6 text-gray-600 text-left font-medium">Статус</th>
+                        <th class="py-3 px-6 text-gray-600 text-left font-medium">Сумма</th>
+                        <th class="py-3 px-6 text-gray-600 text-left font-medium">Детали</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if customer.orders.all %}
+                        {% for order in customer.orders.all %}
+                            <tr class="border-b hover:bg-gray-50 transition-colors duration-200">
+                                <td class="py-4 px-6 text-gray-800 font-medium">#{{ order.id }}</td>
+                                <td class="py-4 px-6 text-gray-700">{{ order.created_at|date:"d.m.Y" }}</td>
+                                <td class="py-4 px-6 text-gray-700">{{ order.get_buying_type_display }}</td>
+                                <td class="py-4 px-6 text-gray-700">
+                                    <span class="inline-block px-2 py-1 text-sm rounded-md {% if order.status == 'completed' %}bg-green-100 text-green-800{% elif order.status == 'in_progress' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-6 text-gray-800 font-medium">{{ order.cart.final_price }} ₽</td>
+                                <td class="py-4 px-6">
+                                    <button class="text-blue-600 hover:underline focus:outline-none" onclick="openModal('modal-{{ order.id }}')">
+                                        Детали заказа
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Модальное окно для каждого заказа -->
+                            <div id="modal-{{ order.id }}" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+                                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-800">Детали заказа #{{ order.id }}</h3>
+                                        <button class="text-gray-500 hover:text-gray-700 focus:outline-none" onclick="closeModal('modal-{{ order.id }}')">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600">Место для деталей заказа...</p>
+                                    </div>
+                                    <div class="mt-4">
+                                        <p class="text-gray-700">Сумма: <span class="font-medium">{{ order.cart.final_price }} ₽</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="py-8 px-6 text-gray-600 text-center">
+                                <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                </svg>
+                                У вас пока нет заказов
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

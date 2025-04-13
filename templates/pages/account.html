@@ -1,197 +1,176 @@
 {% extends 'base.html' %}
 {% block content %}
-
 <body class="bg-gray-100">
     <div class="max-w-[1330px] mx-auto px-4">
-        <nav class="flex mb-2 text-xs px-4 font-mulish" aria-label="Breadcrumb">
+        <!-- Хлебные крошки -->
+        <nav class="flex mb-2.5 text-xs px-4 font-mulish" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1">
                 <li class="inline-flex items-center">
-                    <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-                        Главная
-                    </a>
+                    <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">Главная</a>
                 </li>
                 <li class="inline-flex items-center gap-1">
                     <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
-                    <span class="text-gray-500">
-                        Личный кабинет
-                    </span>
+                    <a href="{% url 'account' %}" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">Личный кабинет</a>
+                </li>
+                <li class="inline-flex items-center gap-1">
+                    <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                    <span id="breadcrumb-last" class="text-gray-500">Данные аккаунта</span>
                 </li>
             </ol>
         </nav>
-
         <div class="bg-white shadow-lg rounded-[10px] p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Блок с информацией о пользователе -->
-                <div class="bg-gray-50 p-6 rounded-lg">
-                    <div class="flex items-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" class="text-blue-500 mr-2">
-                            <path fill="currentColor" d="M12 3.75a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5m-4 9.5A3.75 3.75 0 0 0 4.25 17v1.188c0 .754.546 1.396 1.29 1.517c4.278.699 8.642.699 12.92 0a1.537 1.537 0 0 0 1.29-1.517V17A3.75 3.75 0 0 0 16 13.25h-.34c-.185 0-.369.03-.544.086l-.866.283a7.251 7.251 0 0 1-4.5 0l-.866-.283a1.752 1.752 0 0 0-.543-.086z"/>
-                        </svg>
-                        <h2 class="text-xl font-semibold text-gray-800">Ваши данные</h2>
-                    </div>
-                    <div class="space-y-4 bg-white p-4 rounded-lg shadow-sm">
-                        <div class="flex items-center">
-                            <span class="text-gray-600 w-40 font-medium">Имя:</span>
-                            <p class="text-gray-800 flex-1">{{ request.user.username }}</p>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-gray-600 w-40 font-medium">Email:</span>
-                            <p class="text-gray-800 flex-1">{{ customer.email|default:request.user.email }}</p>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-gray-600 w-40 font-medium">Телефон:</span>
-                            <p class="text-gray-800 flex-1">{{ customer.phone }}</p>
-                        </div>
-                        <div class="flex items-start">
-                            <span class="text-gray-600 w-40 font-medium">Адрес:</span>
-                            <p class="text-gray-800 flex-1 break-words">{{ customer.address|default:"Не указан" }}</p>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-gray-600 w-40 font-medium">Номер карты:</span>
-                            {% if last_paid_order %}
-                                <p class="text-gray-800 flex-1">**** **** **** {{ last_paid_order.payment_id|slice:"-4:" }}</p>
-                            {% else %}
-                                <p class="text-gray-600 flex-1">Карта не привязана</p>
-                            {% endif %}
-                        </div>
-                    </div>
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Навигация вкладок -->
+                <div class="w-full md:w-64 shrink-0 text-[13px]">
+                    <nav class="flex flex-col space-y-2" aria-label="Tabs">
+                        <button class="tab-button flex items-center py-3 px-4 font-geologica text-gray-600 bg-gray-50 hover:bg-blue-50 hover:text-blue-700 rounded-lg text-left focus:bg-blue-100 focus:text-blue-700 transition-all duration-300 relative {% if active_tab == 'account' %}active bg-blue-50 text-blue-700{% endif %}" data-tab="account">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" class="text-gray-400 opacity-75 mr-2.5 {% if active_tab == 'account' %}text-blue-700{% endif %}">
+                                <path fill="currentColor" d="M7.995 2C6.154 2 4.662 3.465 4.662 5.273c0 1.807 1.492 3.272 3.333 3.272 1.84 0 3.332-1.465 3.332-3.272C11.327 3.465 9.835 2 7.995 2M5.161 9.262c.424-.17.889-.043 1.319.11a4.6 4.6 0 0 0 1.515.264c.518 0 1.031-.095 1.504-.26c.437-.153.909-.279 1.337-.105c.73.297 1.551.899 2.02 1.616a.876.876 0 0 1-.082 1.067C11.65 13.216 9.811 14 7.994 14s-3.643-.782-4.768-2.045a.88.88 0 0 1-.083-1.068c.471-.722 1.285-1.332 2.018-1.625"/>
+                            </svg>
+                            Данные аккаунта
+                            <span class="active-indicator absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-r {% if active_tab != 'account' %}hidden{% endif %}"></span>
+                        </button>
+                        <button class="tab-button flex items-center py-3 px-4 font-geologica text-gray-600 bg-gray-50 hover:bg-blue-50 hover:text-blue-700 rounded-lg text-left focus:bg-blue-100 focus:text-blue-700 transition-all duration-300 relative {% if active_tab == 'orders' %}active bg-blue-50 text-blue-700{% endif %}" data-tab="orders">
+                            <svg class="mr-3 text-gray-400 opacity-75 {% if active_tab == 'orders' %}text-blue-700{% endif %}" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M13.409 2.513a3.75 3.75 0 0 0-2.818 0l-2.19.888l9.592 3.73l3.374-1.303a1.8 1.8 0 0 0-.46-.275zM22 7.191l-9.25 3.574v10.923q.336-.068.659-.199l7.498-3.04A1.75 1.75 0 0 0 22 16.827zM11.25 21.688V10.765L2 7.191v9.637a1.75 1.75 0 0 0 1.093 1.621l7.498 3.04q.323.13.659.2M2.633 5.828L12 9.447l3.917-1.514l-9.543-3.71l-3.281 1.33q-.256.104-.46.275"/>
+                            </svg>
+                            Мои заказы
+                            <span class="active-indicator absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-r {% if active_tab != 'orders' %}hidden{% endif %}"></span>
+                        </button>
+                        <button class="tab-button flex items-center py-3 px-4 font-geologica text-gray-600 bg-gray-50 hover:bg-blue-50 hover:text-blue-700 rounded-lg text-left focus:bg-blue-100 focus:text-blue-700 transition-all duration-300 relative {% if active_tab == 'wishlist' %}active bg-blue-50 text-blue-700{% endif %}" data-tab="wishlist">
+                            <svg class="mr-2.5 text-gray-400 opacity-75" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 1024 1024">
+                                <path fill="currentColor" d="m908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5c-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3a32.05 32.05 0 0 0 .6 45.3l183.7 179.1l-43.4 252.9a31.95 31.95 0 0 0 46.4 33.7L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2c17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9l183.7-179.1c5-4.9 8.3-11.3 9.3-18.3c2.7-17.5-9.5-33.7-27-36.3"/>
+                            </svg>
+                            Лист ожидания
+                            <span class="active-indicator absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-r {% if active_tab != 'wishlist' %}hidden{% endif %}"></span>
+                        </button>
+                        <button class="tab-button flex items-center py-3 px-4 font-geologica text-gray-600 bg-gray-50 hover:bg-blue-50 hover:text-blue-700 rounded-lg text-left focus:bg-blue-100 focus:text-blue-700 transition-all duration-300 relative {% if active_tab == 'returns' %}active bg-blue-50 text-blue-700{% endif %}" data-tab="returns">
+                            <svg class="mr-2.5 text-gray-400 opacity-75" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 1200 1200">
+                                <path fill="currentColor" d="M300 225L0 525h225v375h450L525 750H375V525h225zm225 75l150 150h150v225H600l300 300l300-300H975V300z"/>
+                            </svg>
+                            Мои возвраты
+                            <span class="active-indicator absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-r {% if active_tab != 'returns' %}hidden{% endif %}"></span>
+                        </button>
+                    </nav>
                 </div>
 
-                <!-- Блок со списком ожидаемого -->
-                <div class="bg-gray-50 p-6 rounded-lg">
-                    <div class="flex items-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-1.5" width="27" height="27" viewBox="0 0 24 24">
-                            <path fill="currentColor" class="text-blue-500" d="M10 3.75a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5m-4 9.5A3.75 3.75 0 0 0 2.25 17v1.188c0 .754.546 1.396 1.29 1.517c2.21.361 4.443.536 6.676.524c.156-.001.25-.174.174-.31A6.968 6.968 0 0 1 9.5 16.5c0-.787.13-1.544.37-2.25a.213.213 0 0 0-.192-.28a7.247 7.247 0 0 1-1.928-.35l-.866-.284a1.752 1.752 0 0 0-.543-.086z"/>
-                            <path fill="#4B5563" d="M17.25 15a.75.75 0 0 0-1.5 0v1.773c0 .24.115.465.309.606l1 .728a.75.75 0 0 0 .882-1.214l-.691-.502z"/>
-                            <path fill="#4B5563" fill-rule="evenodd" d="M16.5 22a5.5 5.5 0 1 0 0-11a5.5 5.5 0 0 0 0 11m0-1.5a4 4 0 1 0 0-8a4 4 0 0 0 0 8" clip-rule="evenodd"/>
-                        </svg>
-                        <h2 class="text-xl font-semibold text-gray-800">Лист ожидания</h2>
+                <!-- Контент вкладок -->
+                <div class="flex-1">
+                    <div class="tab-content">
+                        {% include 'partials/account/tab_account.html' %}
+                        {% include 'partials/account/tab_orders.html' %}
+                        {% include 'partials/account/tab_wishlist.html' %}
+                        {% include 'partials/account/tab_returns.html' %}
                     </div>
-                    <div class="max-h-[300px] overflow-y-auto space-y-4 pr-2">
-                        {% for album in customer.wishlist.all %}
-                            <div class="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-                                <div class="flex items-center space-x-4">
-                                    <img src="{{ album.image.url }}" alt="{{ album.name }}" class="w-16 h-16 object-cover rounded-md">
-                                    <div>
-                                        <a href="{{ album.get_absolute_url }}" class="text-gray-800 font-medium hover:text-blue-600 transition-colors duration-300 block">
-                                            {{ album.name }}
-                                        </a>
-                                        <a href="{{ album.artist.get_absolute_url }}" class="text-gray-600 text-sm hover:text-blue-600 transition-colors duration-300 block">
-                                            {{ album.artist.name }}
-                                        </a>
-                                        <div class="flex items-center space-x-2 mt-1">
-                                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{{ album.get_format }}</span>
-                                            <span class="text-sm text-gray-700 font-medium">{{ album.current_price }} ₽</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <a href="{% url 'remove_from_wishlist' album_id=album.id %}" class="text-gray-400 hover:text-red-500 transition-colors duration-300 transform hover:scale-110">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </a>
-                            </div>
-                        {% empty %}
-                            <div class="text-center py-8">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="text-gray-400 mx-auto" width="49" height="49" viewBox="0 0 32 32"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M2 15v10h28V15l-4-8H6Zm0 0h8s1 5 6 5s6-5 6-5h8"/></svg>
-                                <p class="text-gray-600">Ваш лист ожидаемого пуст</p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Блок с заказами -->
-            <div class="mt-8 bg-gray-50 p-6 rounded-lg">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 640 512" class="text-green-500 mr-2.5">
-                            <path fill="currentColor" d="M32 0C14.3 0 0 14.3 0 32s14.3 32 32 32h16c8.8 0 16 7.2 16 16v288c0 44.2 35.8 80 80 80h18.7c-1.8 5-2.7 10.4-2.7 16c0 26.5 21.5 48 48 48s48-21.5 48-48c0-5.6-1-11-2.7-16h197.4c-1.8 5-2.7 10.4-2.7 16c0 26.5 21.5 48 48 48s48-21.5 48-48c0-5.6-1-11-2.7-16H608c17.7 0 32-14.3 32-32s-14.3-32-32-32H144c-8.8 0-16-7.2-16-16V80c0-44.2-35.8-80-80-80zm160 80v192c0 26.5 21.5 48 48 48h320c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48h-96v144c0 5.9-3.2 11.3-8.5 14.1s-11.5 2.5-16.4-.8L400 163.2l-39.1 26.1c-4.9 3.3-11.2 3.6-16.4.8s-8.5-8.2-8.5-14.1V32h-96c-26.5 0-48 21.5-48 48"/>
-                        </svg>
-                        <h2 class="text-xl font-semibold text-gray-800">Ваши заказы</h2>
-                    </div>
-                    <span class="text-sm text-gray-600">Всего: {{ customer.orders.all.count }}</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full bg-white rounded-lg shadow-sm">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="py-3 px-6 text-gray-600 text-left font-medium">Номер заказа</th>
-                                <th class="py-3 px-6 text-gray-600 text-left font-medium">Дата</th>
-                                <th class="py-3 px-6 text-gray-600 text-left font-medium">Тип доставки</th>
-                                <th class="py-3 px-6 text-gray-600 text-left font-medium">Статус</th>
-                                <th class="py-3 px-6 text-gray-600 text-left font-medium">Сумма</th>
-                                <th class="py-3 px-6 text-gray-600 text-left font-medium">Детали</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if customer.orders.all %}
-                                {% for order in customer.orders.all %}
-                                    <tr class="border-b hover:bg-gray-50 transition-colors duration-200">
-                                        <td class="py-4 px-6 text-gray-800 font-medium">#{{ order.id }}</td>
-                                        <td class="py-4 px-6 text-gray-700">{{ order.created_at|date:"d.m.Y" }}</td>
-                                        <td class="py-4 px-6 text-gray-700">{{ order.get_buying_type_display }}</td>
-                                        <td class="py-4 px-6 text-gray-700">
-                                            <span class="inline-block px-2 py-1 text-sm rounded-md {% if order.status == 'completed' %}bg-green-100 text-green-800{% elif order.status == 'in_progress' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
-                                                {{ order.get_status_display }}
-                                            </span>
-                                        </td>
-                                        <td class="py-4 px-6 text-gray-800 font-medium">{{ order.cart.final_price }} ₽</td>
-                                        <td class="py-4 px-6">
-                                            <button class="text-blue-600 hover:underline focus:outline-none" onclick="openModal('modal-{{ order.id }}')">
-                                                Детали заказа
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <!-- Модальное окно для каждого заказа -->
-                                    <div id="modal-{{ order.id }}" class="fixed inset-0 bg-gray-800 bg-opacity-50 items-center justify-center z-50" style="display: none;">
-                                        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
-                                            <div class="flex justify-between items-center mb-4">
-                                                <h3 class="text-lg font-semibold text-gray-800">Детали заказа #{{ order.id }}</h3>
-                                                <button class="text-gray-500 hover:text-gray-700 focus:outline-none" onclick="closeModal('modal-{{ order.id }}')">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <div>
-                                                <!-- Здесь будет ваш код для деталей заказа -->
-                                                <p class="text-gray-600">Место для деталей заказа...</p>
-                                            </div>
-                                            <div class="mt-4">
-                                                <p class="text-gray-700">Сумма: <span class="font-medium">{{ order.cart.final_price }} ₽</span></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            {% else %}
-                            <tr>
-                                <td colspan="6" class="py-8 px-6 text-gray-600 text-center">
-                                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                                    </svg>
-                                    У вас пока нет заказов
-                                </td>
-                            </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript для открытия/закрытия модальных окон -->
     <script>
+        // Функция для активации вкладки
+        function activateTab(tabId) {
+            // Удаляем активные классы
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-50', 'text-blue-700');
+                btn.classList.add('text-gray-600', 'bg-gray-50');
+                btn.querySelector('.active-indicator').classList.add('hidden');
+                btn.querySelector('svg').classList.remove('text-blue-700');
+                btn.querySelector('svg').classList.add('text-gray-400');
+            });
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.add('hidden');
+            });
+    
+            // Активируем нужную вкладку
+            const targetButton = document.querySelector(`.tab-button[data-tab="${tabId}"]`);
+            if (targetButton) {
+                targetButton.classList.add('active', 'bg-blue-50', 'text-blue-700');
+                targetButton.classList.remove('text-gray-600', 'bg-gray-50');
+                targetButton.querySelector('.active-indicator').classList.remove('hidden');
+                targetButton.querySelector('svg').classList.add('text-blue-700');
+                targetButton.querySelector('svg').classList.remove('text-gray-400');
+                document.getElementById(tabId).classList.remove('hidden');
+            }
+    
+            // Обновляем последний элемент хлебных крошек
+            const breadcrumbLast = document.getElementById('breadcrumb-last');
+            const tabTitles = {
+                'account': 'Данные аккаунта',
+                'orders': 'Мои заказы',
+                'wishlist': 'Лист ожидания',
+                'returns': 'Мои возвраты'
+            };
+            if (breadcrumbLast) {
+                breadcrumbLast.textContent = tabTitles[tabId] || 'Данные аккаунта';
+            }
+        }
+    
+        // Управление вкладками при клике на кнопки вкладок
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+                activateTab(tabId);
+                // Обновляем URL без хэша
+                history.pushState({}, '', `/profile/${tabId}`);
+            });
+        });
+    
+        // Управление вкладками при клике на пункты выпадающего меню
+        document.querySelectorAll('.tab-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault(); // Предотвращаем перезагрузку страницы
+                const tabId = link.dataset.tab;
+                activateTab(tabId);
+                // Обновляем URL без хэша
+                history.pushState({}, '', `/profile/${tabId}`);
+            });
+        });
+    
+        // Проверка URL при загрузке страницы
+        window.addEventListener('load', () => {
+            // Извлекаем tab из URL
+            let path = window.location.pathname.split('/').filter(segment => segment).pop();
+            const validTabs = ['account', 'orders', 'wishlist', 'returns'];
+            
+            // Если path не является валидной вкладкой, устанавливаем 'account'
+            const tabToActivate = validTabs.includes(path) ? path : 'account';
+            
+            console.log(`Initial tab: ${tabToActivate}`); // Отладка
+            activateTab(tabToActivate);
+            
+            // Если URL некорректный, обновляем его
+            if (!validTabs.includes(path)) {
+                history.replaceState({}, '', '/profile/account');
+            }
+        });
+    
+        // Обработка изменения истории браузера (навигация вперед/назад)
+        window.addEventListener('popstate', () => {
+            let path = window.location.pathname.split('/').filter(segment => segment).pop();
+            const validTabs = ['account', 'orders', 'wishlist', 'returns'];
+            const tabToActivate = validTabs.includes(path) ? path : 'account';
+            
+            activateTab(tabToActivate);
+        });
+    
+        // Управление модальными окнами
         function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+            }
         }
         function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
         }
     </script>
 </body>
-
 {% endblock content %}

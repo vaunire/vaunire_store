@@ -1,35 +1,39 @@
-<div class="card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl w-60">
+{% load humanize %}
+<div class="card bg-white rounded-lg shadow-md tracking-wide overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl w-60">
     <!-- Изображение и теги -->
     <div class="relative w-full h-[210px]">
         <img src="{{ album.image.url }}" alt="{{ album.name }}" class="w-full h-full object-cover">
         
         <!-- Формат на черном фоне -->
-        <span class="absolute bottom-2 left-2 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded-md">
+        <span class="absolute bottom-2 left-2 bg-black/80 text-white text-xs font-medium px-2.5 py-1 rounded-md">
             {{ album.get_format }}
         </span>
 
         <!-- Предложение недели -->
         {% if album.offer_of_the_week %}
-            <span class="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-                Предложение недели
+            <span class="absolute top-2 right-2 bg-red-500 text-white text-xs font-geologica font-semibold px-2.5 py-1 rounded-md">
+                SALE
             </span>
         {% endif %}
     </div>
 
     <!-- Контент -->
     <div class="p-3.5 relative">
-        <!-- Артист -->
-        <h5 class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300">
-            <a href="{{ album.artist.get_absolute_url }}">{{ album.artist.name }}</a>
-        </h5>
-
-        <!-- Название альбома -->
-        <h5 class="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors duration-300 line-clamp-2">
-            <a href="{{ album.get_absolute_url }}">{{ album.name }}</a>
-        </h5>
+        <!-- Артист и альбом с синей полоской -->
+        <div class="flex items-start gap-3">
+            <div class="w-0.5 h-10 mt-0.5 bg-blue-500 rounded-full"></div>
+            <div>
+                <h5 class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                    <a href="{{ album.artist.get_absolute_url }}">{{ album.artist.name }}</a>
+                </h5>
+                <h5 class="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors duration-300 line-clamp-2">
+                    <a href="{{ album.get_absolute_url }}">{{ album.name }}</a>
+                </h5>
+            </div>
+        </div>
 
         <!-- Артикул -->
-        <p class="text-xs text-gray-600 mt-1">Артикул: {{ album.article }}</p>
+        <p class="text-xs text-gray-600 mt-1.5">Артикул: {{ album.article }}</p>
 
         <!-- Состояние (condition) -->
         {% if album.condition %}
@@ -40,8 +44,7 @@
 
         <!-- Информация -->
         <ul class="mt-2.5 space-y-1 text-xs text-gray-600">
-            <li>Носитель: {{ album.media_type.name }}</li>
-            <li>Дата релиза: {{ album.release_date|date:"d.m.Y" }}</li>
+            <li>{{ album.media_type.name }}</li>
             <li>
                 Стиль: 
                 {% if album.styles.exists %}
@@ -63,7 +66,7 @@
         <!-- Цена и кнопки -->
         <div class="mt-3 flex items-center justify-between">
             <!-- Цена из прайс-листа -->
-            <span class="text-xl font-bold text-gray-900">{{ album.current_price }} ₽</span>
+            <span class="text-[21px] font-bold text-gray-900">{{ album.current_price|floatformat:0|default:'0'|intcomma }} ₽</span>
 
             <!-- Кнопки -->
             <div class="flex items-center gap-2 opacity-75">

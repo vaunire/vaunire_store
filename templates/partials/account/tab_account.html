@@ -1,0 +1,68 @@
+{% load static %}
+<div id="account" class="tab-pane {% if active_tab != 'account' %}hidden{% endif %} transition-opacity duration-300">
+    <div class="bg-white p-2.5">
+        <!-- Заголовок и кнопка редактирования -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+                <h2 class="text-lg font-geologica text-gray-900">Данные аккаунта</h2>
+            </div>
+            <a href="#" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-xs font-geologica tracking-wide rounded-lg hover:bg-blue-600 transition-colors duration-300">
+                <svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 512 512">
+                    <path fill="#ffffff" d="m497.9 142.1l-46.1 46.1c-4.7 4.7-12.3 4.7-17 0l-111-111c-4.7-4.7-4.7-12.3 0-17l46.1-46.1c18.7-18.7 49.1-18.7 67.9 0l60.1 60.1c18.8 18.7 18.8 49.1 0 67.9M284.2 99.8L21.6 362.4L.4 483.9c-2.9 16.4 11.4 30.6 27.8 27.8l121.5-21.3l262.6-262.6c4.7-4.7 4.7-12.3 0-17l-111-111c-4.8-4.7-12.4-4.7-17.1 0M124.1 339.9c-5.5-5.5-5.5-14.3 0-19.8l154-154c5.5-5.5 14.3-5.5 19.8 0s5.5 14.3 0 19.8l-154 154c-5.5 5.5-14.3 5.5-19.8 0M88 424h48v36.3l-64.5 11.3l-31.1-31.1L51.7 376H88z"/>
+                </svg>
+                Редактировать
+            </a>
+        </div>
+
+        <!-- Фото и данные пользователя -->
+        <div class="flex flex-col sm:flex-row gap-6">
+            <!-- Фото пользователя -->
+            <div class="flex-shrink-0 mr-8">
+                <img src="{% static 'images/avatar-placeholder.jpg' %}" alt="Аватар пользователя" class="w-32 h-32 rounded-full object-cover border-2 border-gray-200">
+            </div>
+
+            <!-- Данные -->
+            <dl class="flex-1 space-y-4">
+                <!-- Имя -->
+                <div class="flex items-center group">
+                    <dt class="w-32 text-gray-600 font-medium text-sm">Имя</dt>
+                    <dd class="flex-1 text-gray-900 font-medium group-hover:text-blue-600 transition-colors duration-200">
+                        {{ request.user.username|default:"Не указано" }}
+                    </dd>
+                </div>
+                <!-- Email -->
+                <div class="flex items-center group">
+                    <dt class="w-32 text-gray-600 font-medium text-sm">Email</dt>
+                    <dd class="flex-1 text-gray-900 font-medium group-hover:text-blue-600 transition-colors duration-200">
+                        {{ customer.email|default:request.user.email|default:"Не указан" }}
+                    </dd>
+                </div>
+                <!-- Телефон -->
+                <div class="flex items-center group">
+                    <dt class="w-32 text-gray-600 font-medium text-sm">Телефон</dt>
+                    <dd class="flex-1 text-gray-900 font-medium group-hover:text-blue-600 transition-colors duration-200">
+                        {{ customer.phone|default:"Не указан" }}
+                    </dd>
+                </div>
+                <!-- Адрес -->
+                <div class="flex items-start group">
+                    <dt class="w-32 text-gray-600 font-medium text-sm">Адрес</dt>
+                    <dd class="flex-1 text-gray-900 font-medium break-words group-hover:text-blue-600 transition-colors duration-200">
+                        {{ customer.address|default:"Не указан" }}
+                    </dd>
+                </div>
+                <!-- Номер карты -->
+                <div class="flex items-center group">
+                    <dt class="w-32 text-gray-600 font-medium text-sm">Номер карты</dt>
+                    <dd class="flex-1 font-medium {% if last_paid_order %}text-gray-900 group-hover:text-blue-600{% else %}text-gray-500{% endif %} transition-colors duration-200">
+                        {% if last_paid_order %}
+                            **** **** **** {{ last_paid_order.payment_id|slice:"-4:" }}
+                        {% else %}
+                            Карта не привязана
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+</div>

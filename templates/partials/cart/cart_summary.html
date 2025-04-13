@@ -1,4 +1,5 @@
-<div class="w-96 flex-shrink-0">
+{% load humanize %}
+<div class="w-96 flex-shrink-0 tracking-wide">
     <div class="sticky top-24 space-y-3">
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             <nav class="mb-3 text-xs text-gray-500 tracking-wide">
@@ -13,24 +14,42 @@
 
             <h4 class="text-xl font-semibold font-geologica text-gray-900 mb-2">Ваша корзина</h4>
             <div class="space-y-2">
-                <div class="flex justify-between text-sm text-gray-600 pt-3 border-gray-200 mb-5">
-                    <span>Итого к оплате</span>
-                    <span class="font-medium">{{ cart.final_price|floatformat:0 }} ₽</span>
+                <div class="flex items-center justify-between pt-3 border-gray-200 mb-5">
+                    <span class="text-xs text-gray-600">Итого к оплате</span>
+                    <div class="text-right">
+                        {% if cart.original_price and cart.original_price > cart.final_price %}
+                            <span class="block text-sm text-gray-400 line-through">{{ cart.original_price|floatformat:0|intcomma }} ₽</span>
+                        {% endif %}
+                        <span class="text-lg font-bold text-blue-600">{{ cart.final_price|floatformat:0|intcomma }} ₽</span>
+                    </div>
                 </div>
                 <div class="flex justify-between text-xs text-gray-600 border-gray-200 border-t pt-2">
-                    <span>Ваша корзина</span>
+                    <span class="text-xs">Ваша корзина</span>
                 </div>
                 {% for item in cart.products.all %}
-                    <div class="flex justify-between text-sm text-gray-600">
-                        <span>{{ item.quantity }} x {{ item.display_name }}</span>
-                        <span class="font-bold text-gray-800">{{ item.final_price|floatformat:0 }} ₽</span>
+                    <div class="text-sm text-gray-600">
+                        <div class="flex justify-between">
+                            <div class="flex items-baseline max-w-[260px]">
+                                <span class="text-gray-500 mr-1 text-xs">{{ item.quantity }} x</span>
+                                <span class="text-gray-900">{{ item.display_name }}</span>
+                            </div>
+                            <span class="font-bold text-gray-800">{{ item.final_price|floatformat:0|intcomma }} ₽</span>
+                        </div>
+                        {% if item.content_object.get_format %}
+                            <span class="inline-block px-2 ml-3.5 py-0.5 text-xs text-gray-500 mt-0.5">
+                                {{ item.content_object.get_format }}
+                            </span>
+                        {% endif %}
                     </div>
                 {% endfor %}
                 <div class="mt-4">
-                    <div class="flex justify-between text-xs text-gray-600 border-gray-200 border-t pt-2">
-                        <span>Промокоды, скидки, акции</span>
+                    <div class="flex justify-between text-gray-600 border-gray-200 border-t pt-2">
+                        <span class="text-xs">Промокоды, скидки, акции</span>
                     </div>
-                    <p class="text-sm text-gray-600 pt-2"><span class="font-medium">quok -15%</span></p>
+                    <div class="flex justify-between text-sm text-gray-600 pt-2">
+                        <span class="font-medium">Акция firstorder</span>
+                        <span class="font-bold text-blue-600">- 1500 ₽</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -46,7 +65,7 @@
             </div>
         </div>
 
-        <!-- Улучшенная кнопка "Очистить корзину" -->
+        <!-- Кнопка "Очистить корзину" -->
         <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
             <button onclick="showClearCartModal()" class="w-full px-4 py-2 bg-white text-gray-600 text-center rounded-md border border-gray-300 hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md active:shadow-inner">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -57,13 +76,19 @@
         </div>
 
         <!-- Модальное окно для очистки корзины -->
-        <div id="clearCartModal" class="fixed inset-0 bg-gray-600 bg-opacity-60 hidden items-center justify-center z-50" style="display: none;">
-            <div class="bg-white rounded-xl p-6 w-96 shadow-2xl border border-gray-100 transform transition-all duration-300 scale-95">
-                <h4 class="text-lg font-semibold text-gray-900 mb-4">Вы точно хотите очистить корзину?</h4>
-                <p class="text-sm text-gray-600 mb-6">Все товары в заказе удалятся</p>
-                <div class="flex justify-end space-x-4">
-                    <button onclick="hideClearCartModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">Отмена</button>
-                    <a id="clearCartLink" href="{% url 'clear_cart' %}" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 shadow-sm">Подтвердить</a>
+        <div id="clearCartModal" class="fixed inset-0 bg-gray-600 bg-opacity-60 flex items-center tracking-wide justify-center z-[60]" style="display: none;">
+            <div class="bg-white rounded-xl p-6 w-[500px] shadow-2xl border border-gray-100 transform transition-all duration-300 scale-95">
+                <div class="flex justify-center mb-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
+                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
+                    </svg>
+                </div>
+                <h4 class="text-lg text-gray-800 font-bold mb-2 text-center">Вы точно хотите очистить корзину?</h4>
+                <p class="text-sm text-gray-600 mb-6 text-center">Все товары в заказе удалятся</p>
+                <div class="border-t border-gray-200 mb-3.5"></div>
+                <div class="flex justify-between text-[13px]">
+                    <button onclick="hideClearCartModal()" class="px-3 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 font-geologica">Отмена</button>
+                    <a id="clearCartLink" href="{% url 'clear_cart' %}" class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 shadow-sm font-geologica">Подтвердить</a>
                 </div>
             </div>
         </div>
