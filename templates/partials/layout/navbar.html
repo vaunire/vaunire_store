@@ -78,7 +78,7 @@
             <div class="relative group" x-data="{ isOpen: false }">
                 <a href="#" class="text-sm tracking-wide font-geologica font-normal text-gray-500 opacity-80 group-hover:text-blue-600 transition-colors duration-300 flex items-center" @click="isOpen = !isOpen">
                     Покупателям
-                    <svg class="w-2.5 ml-1 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                    <svg class="w-2.5 ml-1 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                     </svg>
                 </a>
@@ -90,45 +90,53 @@
         </div>
 
         <!-- Правая часть -->
-        <div class="flex items-center gap-0.5 ml-auto">
+        <div class="flex items-center gap-0.5 ml-auto tracking-wide">
             {% if request.user.is_authenticated %}
                 <!-- Уведомления -->
                 <div class="relative" x-data="{ isOpen: false }">
-                    <button type="button" class="relative p-2 text-gray-400 opacity-70 hover:text-blue-600 transition-colors duration-300" @click="isOpen = !isOpen">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16.8" height="16.8" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7v3.528a1 1 0 0 1-.105.447l-1.717 3.433A1.1 1.1 0 0 0 4.162 18h15.676a1.1 1.1 0 0 0 .984-1.592l-1.716-3.433a1 1 0 0 1-.106-.447V9a7 7 0 0 0-7-7m0 19a3.001 3.001 0 0 1-2.83-2h5.66A3.001 3.001 0 0 1 12 21"/>
+                <button type="button" class="relative p-2 text-gray-400 opacity-70 hover:text-blue-600 transition-colors duration-300" @click="isOpen = !isOpen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16.8" height="16.8" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7v3.528a1 1 0 0 1-.105.447l-1.717 3.433A1.1 1.1 0 0 0 4.162 18h15.676a1.1 1.1 0 0 0 .984-1.592l-1.716-3.433a1 1 0 0 1-.106-.447V9a7 7 0 0 0-7-7m0 19a3.001 3.001 0 0 1-2.83-2h5.66A3.001 3.001 0 0 1 12 21"/>
+                    </svg>
+                    {% if notifications.count %}
+                        <span class="absolute top-1.5 right-1.5 w-[5px] h-[5px] bg-blue-500 opacity-80 rounded-full"></span>
+                    {% endif %}
+                </button>
+                <div class="absolute right-0 top-full mt-2 w-[350px] bg-white border border-gray-200 rounded-lg shadow-lg z-50" x-show="isOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.away="isOpen = false">
+                    <!-- Кнопка закрытия -->
+                    <button type="button" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-700 transition-colors duration-300" @click="isOpen = false">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        {% if notifications.count %}
-                            <span class="absolute top-1.5 right-1.5 w-[5px] h-[5px] bg-blue-500 opacity-80 rounded-full"></span>
-                        {% endif %}
                     </button>
-                    <div class="absolute right-0 top-full mt-1 w-[310px] bg-white border border-gray-200 rounded-lg shadow-lg z-50" x-show="isOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.away="isOpen = false">
-                        <button type="button" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-700 transition-colors duration-300" @click="isOpen = false">
-                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <ul class="divide-y divide-gray-200 tracking-wide">
-                            {% if notifications.count %}
-                                {% for notification in notifications %}
-                                <li class="p-3 hover:bg-gray-50 transition-colors duration-200 flex items-start">
-                                    <span class="text-xs text-gray-500 mr-3 whitespace-nowrap">
-                                        {{ notification.created_at|date:"H:i" }}
-                                    </span>
-                                    <span class="text-[13px] text-gray-700 max-w-[220px]">{{ notification.text|safe }}</span>
-                                </li>
-                                {% endfor %}
-                                <li class="p-3 hover:bg-gray-50 transition-colors duration-200">
-                                    <a href="{% url 'clear_notifications' %}">
-                                        <button type="submit" class="block text-xs text-blue-600 font-medium">Пометить всё как прочитанное</button>
-                                    </a>
-                                </li>
-                            {% else %}
-                                <li class="p-3 text-xs text-gray-700">Нет новых уведомлений</li>
-                            {% endif %}
-                        </ul>
+                    <!-- Заголовок -->
+                    <div class="px-4 py-3 border-b border-gray-200">
+                        <h3 class="text-[13px] font-semibold text-gray-600">Уведомления {% if notifications.count %}({{ notifications.count }}){% endif %}</h3>
                     </div>
+                    <!-- Список уведомлений -->
+                    <ul class="divide-y divide-gray-200">
+                        {% if notifications.count %}
+                            {% for notification in notifications %}
+                                <li class="p-3 hover:bg-gray-50 transition-colors duration-200 mb-0.5">
+                                    <div class="text-xs text-gray-400 font-ligth">
+                                        <span>{{ notification.created_at|date:"H:i" }} | {{ notification.created_at|date:"d E" }}</span>
+                                    </div>
+                                    <div class="text-[13px] text-gray-700 mt-1">{{ notification.text|safe }}</div>
+                                </li>
+                            {% endfor %}
+                            <li class="p-3 hover:bg-gray-50 transition-colors duration-200 text-center">
+                                <a href="{% url 'clear_notifications' %}" class="group flex items-center justify-center text-[13px] text-blue-600 font-medium hover:text-blue-700 transition-colors duration-200">
+                                    <svg class="mr-1.5 text-blue-600 group-hover:hidden" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 512 512"><path d="M405.333 106.667v298.666H106.667V106.667h298.666m0-42.667H106.667C83.198 64 64 83.198 64 106.667v298.666C64 428.802 83.198 448 106.667 448h298.666C428.802 448 448 428.802 448 405.333V106.667C448 83.198 428.802 64 405.333 64z" fill="currentColor"/></svg>
+                                    <svg class="mr-1.5 text-blue-600 hidden group-hover:block" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 512 512"><path d="M168.531 215.469l-29.864 29.864 96 96L448 128l-29.864-29.864-183.469 182.395-66.136-65.062zm236.802 189.864H106.667V106.667H320V64H106.667C83.198 64 64 83.198 64 106.667v298.666C64 428.802 83.198 448 106.667 448h298.666C428.802 448 448 428.802 448 405.333V234.667h-42.667v170.666z" fill="currentColor"/></svg>
+                                    Пометить всё как прочитанное
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="p-3.5 text-[13px] text-gray-600 text-center">Нет новых уведомлений</li>
+                        {% endif %}
+                    </ul>
                 </div>
+            </div>
                 {% endif %}
                 <!-- Корзина -->
                 <div class="relative inline-flex items-center">

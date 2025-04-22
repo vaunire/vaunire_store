@@ -93,7 +93,7 @@ class RegistrationView(views.View):
         return render(request, 'auth/registration.html', context)
 
 class AddToWishlist(views.View):
-    """Добавляет альбом в список желаний пользователя"""
+    """Добавляет альбом в список ожидания пользователя"""
     @staticmethod
     def get(request, *args, **kwargs):
         album = Album.objects.get(id = kwargs['album_id'])
@@ -102,13 +102,35 @@ class AddToWishlist(views.View):
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 class RemoveFromWishlist(views.View):
-    """Удаляет альбом из списка желаний пользователя"""
+    """Удаляет альбом из списка ожидания пользователя"""
     @staticmethod
     def get(request, *args, **kwargs):
         album = Album.objects.get(id = kwargs['album_id'])
         customer = Customer.objects.get(user = request.user)
         customer.wishlist.remove(album)
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+class AddToFavorite(views.View):
+    """Добавляет альбом в избранное пользователя"""
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect('/login/')
+        album = Album.objects.get(id=kwargs['album_id'])
+        customer = Customer.objects.get(user=request.user)
+        customer.favorite.add(album)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+class RemoveFromFavorite(views.View):
+    """Удаляет альбом из избранного пользователя"""
+    @staticmethod
+    def get(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect('/login/')
+        album = Album.objects.get(id=kwargs['album_id'])
+        customer = Customer.objects.get(user=request.user)
+        customer.favorite.remove(album)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 class ClearNotificationsView(views.View):
     """Помечает все непрочитанные уведомления как прочитанные"""

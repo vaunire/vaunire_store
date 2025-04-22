@@ -1,7 +1,7 @@
 {% load static tailwind_tags %}
 
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,74 +9,227 @@
     <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&display=swap" rel="stylesheet">
     <title>Vaunire | Музыкальный интернет-магазин</title>
     {% tailwind_css %}
+    <style>
+        /* Стили для ползунков ценового диапазона */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: transparent;
+            cursor: pointer;
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            pointer-events: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border: 2px solid #2563eb;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border: 2px solid #2563eb;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+        input[type="range"]:hover::-webkit-slider-thumb,
+        input[type="range"]:hover::-moz-range-thumb {
+            background: #2563eb;
+            border-color: #ffffff;
+        }
+        /* Контейнер для слайдера */
+        .slider-container {
+            position: relative;
+            height: 16px;
+            width: 100%;
+        }
+        /* Убираем обводку у чекбоксов */
+        input[type="checkbox"]:focus,
+        input[type="checkbox"]:active,
+        input[type="checkbox"]:checked:focus {
+            outline: none;
+            box-shadow: none;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-shadow: none;
+        }
+        /* Кастомный свич для "только в наличии" */
+        .custom-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .custom-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .custom-switch .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e5e7eb;
+            transition: background-color 0.3s ease;
+            border-radius: 20px;
+        }
+        .custom-switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: transform 0.3s ease;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .custom-switch input:checked + .slider {
+            background-color: #2563eb;
+        }
+        .custom-switch input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        /* Стили для скроллбара в списках */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2563eb;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #2159d3;
+        }
+        /* Ограничение высоты для 3 элементов */
+        .list-limited {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .list-limited > label {
+            flex: 0 0 auto;
+        }
+        .list-limited > label:nth-child(n+4) {
+            display: none;
+        }
+        .list-expanded {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Сохраняем тот же межстрочный интервал */
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 pt-24 font-mulish">
+<body class="bg-gray-100 pt-[70px] font-mulish">
     <!-- Навбар -->
-    {% include 'partials/site/navbar.html' %}
+    {% include 'partials/layout/navbar.html' %}
 
+    {% block content %}
     <!-- Контент -->
     <main class="flex-grow">
-        <div class="container mx-auto max-w-[1330px] px-4 py-8">
+        <div class="container mx-auto max-w-[1330px] px-4 py-6">
             <div class="flex flex-col lg:flex-row gap-6">
                 <!-- Фильтры (слева) -->
                 <div class="w-full lg:w-64 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Фильтры</h3>
-                    <form method="GET" action="">
+                    <form method="GET" action="" id="filter-form">
                         <!-- Фильтр по цене -->
-                        <div class="mb-8">
-                            <h4 class="text-sm font-medium text-gray-700 mb-3">Цена</h4>
-                            <div class="flex items-center gap-2 mb-4">
-                                <input type="number" name="min_price" id="min_price" value="{{ min_price }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="От">
-                                <input type="number" name="max_price" id="max_price" value="{{ max_price }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="До">
-                            </div>
-                            <div class="relative h-4 w-full">
-                                <!-- Полный трек -->
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold mb-3">Цена</h4>
+                            <div class="slider-container mb-4">
                                 <div class="absolute top-1/2 left-0 right-0 h-1.5 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
-                                <!-- Выбранный диапазон -->
                                 <div id="range-track" class="absolute top-1/2 h-1.5 bg-blue-600 rounded-full transform -translate-y-1/2" style="left: 0%; right: 0%;"></div>
-                                <!-- Ручка для минимальной цены -->
-                                <input type="range" id="min_price_range" name="min_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ min_price }}" class="absolute w-full h-4 bg-transparent appearance-none pointer-events-none focus:outline-none">
-                                <!-- Ручка для максимальной цены -->
-                                <input type="range" id="max_price_range" name="max_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ max_price }}" class="absolute w-full h-4 bg-transparent appearance-none pointer-events-none focus:outline-none">
+                                <input type="range" id="min_price_range" name="min_price_range" min="{{ min_price_default|default:0 }}" max="{{ max_price_default|default:10000 }}" value="{{ min_price|default:min_price_default|default:0 }}" class="w-full" oninput="updatePriceSlider(); submitForm();">
+                                <input type="range" id="max_price_range" name="max_price_range" min="{{ min_price_default|default:0 }}" max="{{ max_price_default|default:10000 }}" value="{{ max_price|default:max_price_default|default:10000 }}" class="w-full" oninput="updatePriceSlider(); submitForm();">
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <input type="number" name="min_price" id="min_price" value="{{ min_price|default:min_price_default|default:0 }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="от {{ min_price_default|default:0 }}" oninput="syncSlidersFromInputs(); submitForm();">
+                                <input type="number" name="max_price" id="max_price" value="{{ max_price|default:max_price_default|default:10000 }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="до {{ max_price_default|default:10000 }}" oninput="syncSlidersFromInputs(); submitForm();">
                             </div>
                         </div>
 
+                        <!-- Фильтр "только в наличии" -->
+                        <div class="mb-4">
+                            <h4 class="text-sm mb-3">Наличие</h4>
+                            <label class="flex items-center cursor-pointer">
+                                <span class="custom-switch">
+                                    <input type="checkbox" name="in_stock" value="1" {% if 'in_stock' in request.GET %}checked{% endif %} onchange="submitForm();">
+                                    <span class="slider"></span>
+                                </span>
+                                <span class="ml-2 text-sm text-gray-600">Только в наличии</span>
+                            </label>
+                        </div>
+
                         <!-- Фильтр по жанрам -->
-                        <div class="mb-8">
-                            <h4 class="text-sm font-medium text-gray-700 mb-3">Жанры</h4>
-                            <div class="space-y-2 max-h-40 overflow-y-auto pr-2">
+                        <div class="mb-4">
+                            <h4 class="text-sm mb-3">Жанры</h4>
+                            <div id="genres-list" class="list-limited">
                                 {% for genre in genres %}
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="genres" value="{{ genre.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" {% if genre.id|stringformat:"s" in selected_genres %}checked{% endif %}>
+                                        <input type="checkbox" name="genres" value="{{ genre.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-0" {% if genre.id|stringformat:"s" in selected_genres %}checked{% endif %} onchange="submitForm();">
                                         <span class="ml-2 text-sm text-gray-600">{{ genre.name }}</span>
                                     </label>
                                 {% endfor %}
                             </div>
+                            {% if genres|length > 3 %}
+                                <button type="button" id="toggle-genres" class="mt-2 text-sm text-blue-600 hover:text-blue-800 focus:outline-none">Посмотреть все</button>
+                            {% endif %}
                         </div>
 
                         <!-- Фильтр по стилям -->
-                        <div class="mb-8">
-                            <h4 class="text-sm font-medium text-gray-700 mb-3">Стили</h4>
-                            <div class="space-y-2 max-h-40 overflow-y-auto pr-2">
+                        <div class="mb-4">
+                            <h4 class="text-sm mb-3">Стили</h4>
+                            <div id="styles-list" class="list-limited">
                                 {% for style in styles %}
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="styles" value="{{ style.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" {% if style.id|stringformat:"s" in selected_styles %}checked{% endif %}>
+                                        <input type="checkbox" name="styles" value="{{ style.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-0" {% if style.id|stringformat:"s" in selected_styles %}checked{% endif %} onchange="submitForm();">
                                         <span class="ml-2 text-sm text-gray-600">{{ style.name }}</span>
                                     </label>
                                 {% endfor %}
                             </div>
+                            {% if styles|length > 3 %}
+                                <button type="button" id="toggle-styles" class="mt-2 text-sm text-blue-600 hover:text-blue-800 focus:outline-none">Посмотреть все</button>
+                            {% endif %}
                         </div>
-
-                        <!-- Кнопка применить -->
-                        <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            Применить
-                        </button>
+                         <!-- Кнопка "Очистить все фильтры" -->
+                         <div>
+                            <button type="button" onclick="resetForm();" class="w-full px-3 py-1.5 bg-white text-gray-700 text-center rounded-md border border-gray-300 hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center space-x-1.5 shadow-sm hover:shadow-md active:shadow-inner">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M20,6H16V5a3,3,0,0,0-3-3H11A3,3,0,0,0,8,5V6H4A1,1,0,0,0,4,8H5V19a3,3,0,0,0,3,3h8a3,3,0,0,0,3-3V8h1a1,1,0,0,0,0-2ZM10,5a1,1,0,0,1,1-1h2a1,1,0,0,1,1,1V6H10Zm7,14a1,1,0,0,1-1,1H8a1,1,0,0,1-1-1V8H17Z"></path>
+                                </svg>
+                                <span class="text-[13px] font-semibold tracking-wide">Сбросить фильтры</span>
+                            </button>
+                        </div>
                     </form>
                 </div>
 
                 <!-- Альбомы (справа) -->
                 <div class="flex-1">
-                    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Музыкальный каталог</h1>
+                    <h1 class="text-2xl font-geologica font-medium text-gray-800 mb-4">Музыкальный каталог</h1>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {% for album in albums %}
                             {% include 'partials/catalog/card.html' %}
@@ -89,7 +242,10 @@
         </div>
     </main>
 
-    <!-- JavaScript для слайдера -->
+     <!-- Навбар -->
+     {% include 'partials/layout/footer.html' %}
+
+    <!-- JavaScript для слайдера, кнопок и отправки формы -->
     <script>
         function updatePriceSlider() {
             const minSlider = document.getElementById('min_price_range');
@@ -127,7 +283,6 @@
             rangeTrack.style.right = `${100 - maxPercent}%`;
         }
 
-        // Синхронизация слайдеров с полями ввода
         function syncSlidersFromInputs() {
             const minInput = document.getElementById('min_price');
             const maxInput = document.getElementById('max_price');
@@ -152,74 +307,51 @@
             updatePriceSlider();
         }
 
-        // Инициализация
+        function toggleList(listId, buttonId, count) {
+            const list = document.getElementById(listId);
+            const button = document.getElementById(buttonId);
+            if (list.classList.contains('list-limited')) {
+                list.classList.remove('list-limited');
+                list.classList.add('list-expanded', 'custom-scrollbar');
+                button.textContent = 'Скрыть';
+            } else {
+                list.classList.add('list-limited');
+                list.classList.remove('list-expanded', 'custom-scrollbar');
+                button.textContent = `Показать больше (${count})`;
+            }
+        }
+
+        function submitForm() {
+            document.getElementById('filter-form').submit();
+        }
+
+        function resetForm() {
+            const form = document.getElementById('filter-form');
+            form.reset();
+            updatePriceSlider();
+            // Очищаем GET-параметры, перенаправляя на базовый URL
+            window.location.href = '/';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             updatePriceSlider();
             document.getElementById('min_price').addEventListener('input', syncSlidersFromInputs);
             document.getElementById('max_price').addEventListener('input', syncSlidersFromInputs);
             document.getElementById('min_price_range').addEventListener('input', updatePriceSlider);
             document.getElementById('max_price_range').addEventListener('input', updatePriceSlider);
+
+            const genresButton = document.getElementById('toggle-genres');
+            const stylesButton = document.getElementById('toggle-styles');
+            if (genresButton) {
+                const genresCount = {{ genres|length|add:"-3" }};
+                genresButton.addEventListener('click', () => toggleList('genres-list', 'toggle-genres', genresCount));
+            }
+            if (stylesButton) {
+                const stylesCount = {{ styles|length|add:"-3" }};
+                stylesButton.addEventListener('click', () => toggleList('styles-list', 'toggle-styles', stylesCount));
+            }
         });
     </script>
-
-    <!-- Кастомные стили для слайдера -->
-    <style>
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-            cursor: pointer;
-            pointer-events: auto;
-        }
-
-        input[type="range"]::-webkit-slider-runnable-track,
-        input[type="range"]::-moz-range-track {
-            height: 0;
-            background: transparent;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #3b82f6; /* Синий */
-            border-radius: 50%;
-            border: 2px solid #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-            margin-top: -7px;
-            pointer-events: auto;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            background: #3b82f6;
-            border-radius: 50%;
-            border: 2px solid #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-            pointer-events: auto;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            background: #2563eb;
-            transform: scale(1.1);
-        }
-
-        input[type="range"]::-moz-range-thumb:hover {
-            background: #2563eb;
-            transform: scale(1.1);
-        }
-
-        input[type="range"]::-webkit-slider-thumb:active {
-            background: #1d4ed8;
-        }
-
-        input[type="range"]::-moz-range-thumb:active {
-            background: #1d4ed8;
-        }
-    </style>
+    {% endblock content %}
 </body>
 </html>

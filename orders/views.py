@@ -22,7 +22,7 @@ class CheckoutView(CartMixin, NotificationsMixin, views.View):
             'form': form,
             'notifications': self.notifications(request.user)
         }
-        return render(request, 'pages/checkout.html', context)
+        return render(request, 'pages/cart.html', context)
 
 class MakeOrderView(CartMixin, views.View):
     """Создаёт новый заказ на основе данных из формы, проверяет наличие товаров и их количество на складе, сохраняет заказ и обновляет остатки"""
@@ -59,8 +59,8 @@ class MakeOrderView(CartMixin, views.View):
                                          "Пожалуйста, удалите их из корзины или дождитесь пополнения запасов.\n" 
             if more_than_on_stock:
                 for item in more_than_on_stock:
-                    more_than_on_stock_messages += f"Для товара '{item['product']}': в наличии {item['stock']} шт., " \
-                                                   f"заказано {item['quantity']} шт. Пожалуйста, скорректируйте количество.\n"
+                    more_than_on_stock_messages += f"Товар '{item['product']}': в наличии {item['stock']} шт., заказано {item['quantity']} шт." \
+                                                    "Пожалуйста, скорректируйте количество.\n"
             # Формирование сообщений об ошибках
             error_message_for_customer = ""
             if out_of_stock:
@@ -98,4 +98,4 @@ class MakeOrderView(CartMixin, views.View):
             messages.success(request, 'Спасибо за заказ! Менеджер свяжется с вами в ближайшее время.')
             return redirect('/')
         # Если форма невалидна, возвращаем пользователя на страницу оформления
-        return redirect('checkout')
+        return redirect('cart')

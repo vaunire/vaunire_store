@@ -23,15 +23,15 @@ class AddToCartView(CartMixin, views.View):
     """Добавляет товар в корзину и обновляет её итоги"""
     def get(self, request, *args, **kwargs):
         ct_model, product_slug = kwargs.get('ct_model'), kwargs.get('slug')
-        content_type = ContentType.objects.get(model=ct_model)
-        product = content_type.model_class().objects.get(slug=product_slug)
+        content_type = ContentType.objects.get(model = ct_model)
+        product = content_type.model_class().objects.get(slug = product_slug)
 
         # Проверяем, есть ли уже такой продукт в корзине
         cart_product, created = CartProduct.objects.get_or_create(
-            user=self.cart.owner,
-            cart=self.cart,
-            content_type=content_type,
-            object_id=product.id,
+            user = self.cart.owner,
+            cart = self.cart,
+            content_type = content_type,
+            object_id = product.id,
             defaults={'quantity': 1}
         )
 
@@ -48,14 +48,14 @@ class RemoveFromCartView(CartMixin, views.View):
     """Удаляет товар из корзины и обновляет её итоги"""
     def get(self, request, *args, **kwargs):
         ct_model, product_slug = kwargs.get('ct_model'), kwargs.get('slug')
-        content_type = ContentType.objects.get(model=ct_model)
-        product = content_type.model_class().objects.get(slug=product_slug)
+        content_type = ContentType.objects.get(model = ct_model)
+        product = content_type.model_class().objects.get(slug = product_slug)
 
         cart_product = CartProduct.objects.filter(
-            user=self.cart.owner,
-            cart=self.cart,
-            content_type=content_type,
-            object_id=product.id
+            user = self.cart.owner,
+            cart = self.cart,
+            content_type = content_type,
+            object_id = product.id
         ).first()
 
         cart_product.delete()
@@ -66,14 +66,14 @@ class ChangeQuantityView(CartMixin, views.View):
     """Обновляет количество товара в корзине и пересчитывает итоги"""
     def post(self, request, *args, **kwargs):
         ct_model, product_slug = kwargs.get('ct_model'), kwargs.get('slug')
-        content_type = ContentType.objects.get(model=ct_model)
-        product = content_type.model_class().objects.get(slug=product_slug)
+        content_type = ContentType.objects.get(model = ct_model)
+        product = content_type.model_class().objects.get(slug = product_slug)
 
         cart_product = CartProduct.objects.filter(
-            user=self.cart.owner,
-            cart=self.cart,
-            content_type=content_type,
-            object_id=product.id
+            user = self.cart.owner,
+            cart = self.cart,
+            content_type = content_type,
+            object_id = product.id
         ).first()
 
         if not cart_product:

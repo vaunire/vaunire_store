@@ -1,20 +1,15 @@
 from django import views
 from django.shortcuts import render
+from django.db.models import Max, Min
 
 from cart.mixins import CartMixin
 from accounts.mixins import NotificationsMixin
+from catalog.models import Album, Genre, Style
 
 from .models import Album, Artist
 
-from django.views import View
-from django.shortcuts import render
-from catalog.models import Album, Genre, Style
-from cart.mixins import CartMixin
-from accounts.mixins import NotificationsMixin
-from django.db.models import Max, Min
 
-class BaseView(CartMixin, NotificationsMixin, View):
-    """Отображает главную страницу сайта с фильтрами"""
+class BaseView(CartMixin, NotificationsMixin, views.View):
     def get(self, request, *args, **kwargs):
         albums = Album.objects.all()
         genres = Genre.objects.all()
@@ -22,8 +17,8 @@ class BaseView(CartMixin, NotificationsMixin, View):
 
         # Получаем минимальную и максимальную цену из активного прайс-листа
         price_range = albums.aggregate(
-            min_price=Min('items__price'),
-            max_price=Max('items__price')
+            min_price = Min('items__price'),
+            max_price = Max('items__price')
         )
         min_price_default = int(price_range['min_price'] or 0)
         max_price_default = int(price_range['max_price'] or 10000)
@@ -33,16 +28,19 @@ class BaseView(CartMixin, NotificationsMixin, View):
         max_price = request.GET.get('max_price')
         selected_genres = request.GET.getlist('genres')
         selected_styles = request.GET.getlist('styles')
+        in_stock = request.GET.get('in_stock')
 
         # Применяем фильтры
         if min_price:
-            albums = albums.filter(items__price__gte=float(min_price))
+            albums = albums.filter(items__price__gte = float(min_price))
         if max_price:
-            albums = albums.filter(items__price__lte=float(max_price))
+            albums = albums.filter(items__price__lte = float(max_price))
         if selected_genres:
-            albums = albums.filter(genre__id__in=selected_genres)
+            albums = albums.filter(genre__id__in = selected_genres)
         if selected_styles:
-            albums = albums.filter(styles__id__in=selected_styles)
+            albums = albums.filter(styles__id__in = selected_styles).distinct() # distinct() убирает дубликаты
+        if in_stock:
+            albums = albums.filter(stock__gt=0)
 
         # Сортировка по новизне
         albums = albums.order_by('-id')
@@ -57,11 +55,12 @@ class BaseView(CartMixin, NotificationsMixin, View):
             'max_price_default': max_price_default,
             'selected_genres': selected_genres,
             'selected_styles': selected_styles,
+            'in_stock': in_stock,
             'cart': self.cart,
             'notifications': self.notifications(request.user),
         }
         return render(request, 'base.html', context)
-
+        
 class ArtistDetailView(CartMixin,views.generic.DetailView):
     """Отображает детальную страницу исполнителя по его slug"""
     model = Artist

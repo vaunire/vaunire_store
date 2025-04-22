@@ -17,7 +17,7 @@ class CartMixin(views.generic.detail.SingleObjectMixin, views.View):
             # Получаем или создаём профиль покупателя для авторизованного пользователя
             customer = Customer.objects.filter(user = request.user).first()
             if not customer:
-                customer = Customer.objects.create(user = request.user)
+                customer = Customer.objects.get(user = request.user)
             # Ищем активную корзину (не в заказе) или создаём новую
             cart = Cart.objects.filter(owner = customer, in_order = False).first()
             if not cart:
