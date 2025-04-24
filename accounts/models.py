@@ -82,6 +82,5 @@ def send_notification(instance, **kwargs):
                                      f'который Вы ожидаете, теперь доступен для приобретения!')
                 )
                 customer.wishlist.remove(instance)
-# Теперь функция будет вызываться каждый раз, когда объект Album сохраняется
 post_save.connect(send_notification, sender = Album)
 pre_save.connect(check_stock_change, sender = Album)

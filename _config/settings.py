@@ -28,6 +28,9 @@ ALLOWED_HOSTS = []
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 
+# Получение API-ключа Яндекс.Карт
+YANDEX_MAPS_API_URL = os.getenv('YANDEX_MAPS_API_URL')
+
 # Определение приложений проекта
 INSTALLED_APPS = [
     # Приложения из пакета Unfold для улучшенного интерфейса админки

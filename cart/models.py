@@ -29,6 +29,7 @@ class Cart(models.Model):
         self.final_price = sum(float(cp.final_price) for cp in cart_products) or 0.0
 
     def save(self, *args, **kwargs):
+        self.update_totals()
         if self.pk:  # Если объект уже существует в базе
             self.update_totals()
         else:  # Для новых объектов устанавливаем начальные значения
@@ -45,7 +46,7 @@ class Cart(models.Model):
 class CartProduct(models.Model):
     # Если магазин расширится и начнет продавать не только альбомы, но и, например, услуги, модель CartProduct можно легко адаптировать:
     MODEL_CART_PRODUCT_DISPLAY_NAME_MAP = {
-         "Album" : {"is_constructable": True, "fields": ["name", "artist.name"], "separator": ' - ', "prefix": "Альбом: "}
+         "Album" : {"is_constructable": True, "fields": ["name", "artist.name"], "separator": ' - '}
          # "Service": {"is_constructable": False, "field": "name"},
          # "RecordPlayer": {"is_constructable": True, "fields": ["brand", "model"], "separator": ' '},
     }
@@ -93,6 +94,7 @@ class CartProduct(models.Model):
         # Пересчитывает итоговую цену на основе текущей цены продукта из прайс-листа
         self.final_price = self.quantity * self.get_product_price()
         super().save(*args, **kwargs)
+        self.cart.save()
 
     class Meta:
             verbose_name = 'Продукт корзины'

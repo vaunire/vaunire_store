@@ -21,7 +21,7 @@
                             <a href="{{ album.artist.get_absolute_url }}" class="text-gray-600 text-sm hover:text-blue-600 transition-colors duration-300 block">
                                 {{ album.artist.name }}
                             </a>
-                            <div class="flex items-center space-x-2 mt-1">
+                            <div class="flex items-center space-x-2 mt-1.5">
                                 <span class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">{{ album.get_format }}</span>
                                 <span class="text-base text-gray-600 font-bold">{{ album.current_price|floatformat:0|default:'0'|intcomma }} ₽</span>
                             </div>

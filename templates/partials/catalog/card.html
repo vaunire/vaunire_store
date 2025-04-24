@@ -3,56 +3,61 @@
   <!-- Изображение и теги -->
   <div class="relative w-full h-[215px] overflow-hidden group">
     <!-- Контейнер для карусели -->
-    <div class="relative w-full h-full cursor-pointer" data-carousel data-images='[
-        "{{ album.image.url }}"
-        {% for image in album.image_gallery.all|slice:":7" %}
-            ,"{{ image.image.url }}"
-        {% endfor %}
-    ]' data-total-images="{{ album.image_gallery.all|length|add:1 }}">
-        <!-- Основное изображение (первое в карусели) -->
-        <img src="{{ album.image.url }}" alt="{{ album.name }}" class="absolute w-full h-full object-cover transition-opacity duration-300 opacity-100" data-carousel-image>
-        <!-- Остальные изображения (скрыты изначально) -->
-        {% for image in album.image_gallery.all|slice:":7" %}
-            <img src="{{ image.image.url }}" alt="{{ album.name }} Preview" class="absolute w-full h-full object-cover transition-opacity duration-300 opacity-0" data-carousel-image loading="lazy" decoding="async">
-        {% endfor %}
-        <!-- Счётчик изображений -->
-        <span class="absolute top-2 right-2 bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md" data-carousel-counter>1 / {{ album.image_gallery.all|length|add:1 }}</span>
-    </div>
-        
-    <!-- Формат на черном фоне -->
-    <span class="absolute bottom-2 left-2 bg-black/70 text-white text-xs font-medium px-2.5 py-1 rounded-md">
+    <div class="relative w-full h-full cursor-pointer" data-carousel 
+         data-images='[
+           "{{ album.image.url }}"
+           {% for image in album.image_gallery.all|slice:":7" %}
+             {% if forloop.first %},{% endif %}
+             "{{ image.image.url }}"
+           {% endfor %}
+         ]'
+         data-total-images="{% with gallery_length=album.image_gallery.all|length %}{{ gallery_length|add:1 }}{% endwith %}">
+      <!-- Основное изображение (первое в карусели) -->
+      <img src="{{ album.image.url }}" alt="{{ album.name }}" class="absolute w-full h-full object-cover transition-all duration-300 z-10" data-carousel-image>
+      <!-- Остальные изображения -->
+      {% for image in album.image_gallery.all|slice:":7" %}
+          <img src="{{ image.image.url }}" alt="{{ album.name }} Preview" class="absolute w-full h-full object-cover transition-all duration-300 z-0" data-carousel-image loading="lazy" decoding="async">
+      {% endfor %}
+      <!-- Формат на черном фоне -->
+      <span class="absolute bottom-2 left-2 bg-black/55 text-white text-xs font-medium px-2.5 py-1 rounded-md z-20">
         {{ album.get_format }}
-    </span>
+      </span>
+    </div>
   </div>
 
   <!-- Контент -->
   <div class="p-3.5 relative">
+    <!-- Точки переключения -->
+    <div class="relative flex justify-center mb-2.5 -mt-0.5 space-x-2 z-10" data-carousel-dots>
+      {% with gallery_length=album.image_gallery.all|length|add:1 %}
+          {% for i in "x"|ljust:gallery_length %}
+              <button type="button" class="w-1.5 h-1.5 rounded-full bg-black/20 transition-all duration-300 hover:bg-black/80 hover:scale-125 cursor-pointer focus:outline-none" data-dot-index="{{ forloop.counter0 }}" aria-label="Показать фото {{ forloop.counter }}"></button>
+          {% endfor %}
+      {% endwith %}
+    </div>
+
     <!-- Артист и альбом -->
-    <div class="flex items-start gap-3">
-      <div class="w-0.5 h-9 mt-1 bg-blue-500 rounded-full"></div>
+    <div class="flex items-start gap-[11px]">
+      <div class="w-[3px] h-8 mt-1 bg-blue-500 rounded-full"></div>
       <div>
         <h5 class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300">
           <a href="{{ album.artist.get_absolute_url }}">{{ album.artist.name }}</a>
         </h5>
-        <h5 class="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors duration-300 line-clamp-2">
+        <h5 class="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors duration-300 -mt-0.5">
           <a href="{{ album.get_absolute_url }}">{{ album.name }}</a>
         </h5>
       </div>
     </div>
 
-    <!-- Артикул -->
-    <p class="text-xs text-gray-600 mt-1.5">Артикул: {{ album.article }}</p>
-
     <!-- Состояние (condition) -->
     {% if album.condition %}
-      <span class="absolute top-4 right-3 w-8 h-7 flex items-center justify-center font-geologica rounded-md text-[11px] bg-gray-100 text-gray-700" title="Состояние: {{ album.condition }}">
+      <span class="absolute top-[30px] right-3 w-8 h-6 flex items-center justify-center font-geologica font-medium rounded-md text-[10px] bg-gray-100 text-gray-700" title="Состояние: {{ album.condition }}">
         {{ album.condition|truncatechars:2|upper }}
       </span>
     {% endif %}
 
     <!-- Информация -->
-    <ul class="mt-2 space-y-1 text-xs text-gray-600">
-      <li>{{ album.media_type.name }}</li>
+    <ul class="mt-1.5 space-y-1 text-xs text-gray-600">
       <li>
         {% if album.styles.exists %}
           {% for style in album.styles.all %}
@@ -70,9 +75,9 @@
     </ul>
 
     <!-- Цена и кнопки -->
-    <div class="mt-2 flex items-center justify-between">
+    <div class="mt-1.5 flex items-center justify-between">
       <!-- Цена из прайс-листа -->
-      <span class="text-xl font-bold text-gray-900">{{ album.current_price|floatformat:0|default:'0'|intcomma }} ₽</span>
+      <span class="text-xl font-bold">{{ album.current_price|floatformat:0|default:'0'|intcomma }} ₽</span>
 
       <!-- Кнопки -->
       <div class="flex items-center gap-2 opacity-75">
@@ -135,13 +140,24 @@
   </div>
 </div>
 
-<!-- Предварительная загрузка основного изображения -->
+<!-- Предварительная загрузка изображений -->
 <link rel="preload" href="{{ album.image.url }}" as="image">
+{% for image in album.image_gallery.all|slice:":7" %}
+  <link rel="preload" href="{{ image.image.url }}" as="image">
+{% endfor %}
 
 <!-- JavaScript для карусели -->
 <script>
 document.querySelectorAll('[data-carousel]').forEach(carousel => {
-  let images;
+  // Найти родительскую карточку
+  const card = carousel.closest('.card');
+  if (!card) {
+    console.error('Card container not found for carousel:', carousel);
+    return;
+  }
+
+  // Получаем изображения из data-images
+  let images = [];
   try {
     images = JSON.parse(carousel.dataset.images);
   } catch (e) {
@@ -149,13 +165,28 @@ document.querySelectorAll('[data-carousel]').forEach(carousel => {
     images = [carousel.querySelector('[data-carousel-image]').src];
   }
 
+  // Получаем элементы карусели
   const totalImages = parseInt(carousel.dataset.totalImages, 10) || 1;
   const imageElements = carousel.querySelectorAll('[data-carousel-image]');
-  const counterElement = carousel.querySelector('[data-carousel-counter]');
-  
-  if (totalImages <= 1) {
+  const dotsContainer = card.querySelector('[data-carousel-dots]');
+  const dotElements = dotsContainer ? dotsContainer.querySelectorAll('[data-dot-index]') : [];
+
+  // Отладка
+  console.log('Total images:', totalImages, 'Images:', images.length, 'Image elements:', imageElements.length, 'Dots:', dotElements.length);
+
+  // Проверка загрузки изображений
+  imageElements.forEach((img, index) => {
+    img.addEventListener('error', () => console.error(`Failed to load image ${index + 1}: ${img.src}`));
+    img.addEventListener('load', () => console.log(`Image ${index + 1} loaded: ${img.src}`));
+  });
+
+  // Если только одно изображение, отключаем карусель
+  if (totalImages <= 1 || imageElements.length <= 1) {
     carousel.style.cursor = 'default';
-    counterElement.textContent = '1 / 1';
+    if (dotElements[0]) {
+      dotElements[0].classList.add('bg-black/80');
+      dotElements[0].classList.remove('bg-black/20');
+    }
     return;
   }
 
@@ -163,26 +194,59 @@ document.querySelectorAll('[data-carousel]').forEach(carousel => {
 
   // Функция обновления карусели
   function updateCarousel(newIndex) {
-    if (newIndex === currentIndex) return;
-    imageElements[currentIndex].classList.remove('opacity-100');
-    imageElements[currentIndex].classList.add('opacity-0');
+    if (newIndex === currentIndex || newIndex < 0 || newIndex >= totalImages || !imageElements[newIndex]) {
+      console.warn('Invalid index or no image element:', newIndex);
+      return;
+    }
+
+    // Сбрасываем z-index текущего изображения
+    imageElements[currentIndex].classList.remove('z-10');
+    imageElements[currentIndex].classList.add('z-0');
+
+    // Обновляем стиль текущей точки
+    if (dotElements[currentIndex]) {
+      dotElements[currentIndex].classList.remove('bg-black/80');
+      dotElements[currentIndex].classList.add('bg-black/20');
+    }
+
+    // Показываем новое изображение
     currentIndex = newIndex;
-    imageElements[currentIndex].classList.remove('opacity-0');
-    imageElements[currentIndex].classList.add('opacity-100');
-    counterElement.textContent = `${currentIndex + 1} / ${totalImages}`;
+    imageElements[currentIndex].classList.remove('z-0');
+    imageElements[currentIndex].classList.add('z-10');
+
+    // Обновляем стиль новой точки
+    if (dotElements[currentIndex]) {
+      dotElements[currentIndex].classList.remove('bg-black/20');
+      dotElements[currentIndex].classList.add('bg-black/80');
+    }
+
+    // Отладка
+    console.log(`Switched to image ${newIndex + 1}, Dot classes:`, dotElements[newIndex]?.classList.toString());
   }
+
+  // Обработчик клика по точкам
+  dotElements.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      console.log(`Clicked dot ${index + 1}`);
+      updateCarousel(index);
+    });
+    // Поддержка клавиш для доступности
+    dot.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        console.log(`Keydown on dot ${index + 1}`);
+        updateCarousel(index);
+      }
+    });
+  });
 
   // Обработчик наведения курсора
   carousel.addEventListener('mousemove', (e) => {
     const rect = carousel.getBoundingClientRect();
     const relativeX = e.clientX - rect.left;
     const width = rect.width;
-
-    // Разделяем ширину на 8 зон
-    const zoneWidth = width / 8;
+    const zoneWidth = width / totalImages;
     const zoneIndex = Math.min(Math.floor(relativeX / zoneWidth), totalImages - 1);
-
-    // Показываем изображение, соответствующее зоне
     updateCarousel(zoneIndex);
   });
 
@@ -190,5 +254,17 @@ document.querySelectorAll('[data-carousel]').forEach(carousel => {
   carousel.addEventListener('mouseleave', () => {
     updateCarousel(0);
   });
+
+  // Инициализация: подсвечиваем первую точку
+  if (dotElements[0]) {
+    dotElements[0].classList.remove('bg-black/20');
+    dotElements[0].classList.add('bg-black/80');
+    console.log('Initialized first dot as active');
+  }
+
+  // Инициализация: первое изображение на переднем плане
+  if (imageElements[0]) {
+    imageElements[0].classList.add('z-10');
+  }
 });
 </script>

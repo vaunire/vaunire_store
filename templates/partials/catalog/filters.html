@@ -1,0 +1,121 @@
+<!-- Контейнер фильтров -->
+<div class="filter-container bg-white p-5 rounded-lg shadow-sm border border-gray-200 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-gray-100">
+    <form method="GET" action="" id="filter-form">
+        <!-- Сохранение текущих GET-параметров для пагинации -->
+        {% for key, value in request.GET.items %}
+            {% if key != 'page' %}
+                {% if value %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        <!-- Фильтр по цене -->
+        <div class="mb-4">
+            <h4 class="text-sm mb-3">Цена</h4>
+            <div class="slider-container mb-4">
+                <div class="absolute top-1/2 left-0 right-0 h-1.5 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
+                <div id="price-range-track" class="absolute top-1/2 h-1.5 bg-blue-500 rounded-full transform -translate-y-1/2" style="left: 0%; right: 0%;"></div>
+                <input type="range" id="min_price_range" name="min_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ min_price }}" class="w-full">
+                <input type="range" id="max_price_range" name="max_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ max_price }}" class="w-full">
+            </div>
+            <div class="flex items-center justify-between gap-2">
+                <input type="number" name="min_price" id="min_price" value="{{ min_price }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="от {{ min_price_default }}">
+                <input type="number" name="max_price" id="max_price" value="{{ max_price }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="до {{ max_price_default }}">
+            </div>
+        </div>
+
+        <!-- Фильтр "только в наличии" -->
+        <div class="mb-4">
+            <h4 class="text-sm mb-3">Наличие</h4>
+            <label class="flex items-center cursor-pointer">
+                <span class="switch-container">
+                    <input type="checkbox" name="in_stock" value="1" {% if in_stock %}checked{% endif %} class="switch-checkbox in-stock-checkbox">
+                    <span class="switch-slider"></span>
+                </span>
+                <span class="ml-2 text-sm text-gray-600">Только в наличии</span>
+            </label>
+        </div>
+
+        <!-- Фильтр по жанрам -->
+        <div class="mb-2.5">
+            <h4 class="text-sm mb-3">Жанры</h4>
+            <div id="genres-list" class="flex flex-col gap-2 list-limited">
+                {% for genre in genres|slice:":3" %}
+                    <label class="flex items-center">
+                        <input type="checkbox" name="genres" value="{{ genre.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-0" {% if genre.id|stringformat:"s" in selected_genres %}checked{% endif %}>
+                        <span class="ml-2 text-sm text-gray-600">{{ genre.name }}</span>
+                    </label>
+                {% endfor %}
+                {% for genre in genres|slice:"3:" %}
+                    <label class="hidden toggleable-genre">
+                        <input type="checkbox" name="genres" value="{{ genre.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-0" {% if genre.id|stringformat:"s" in selected_genres %}checked{% endif %}>
+                        <span class="ml-2 text-sm text-gray-600">{{ genre.name }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {% if genres|length > 3 %}
+                <button type="button" id="toggle-genres" class="mt-2 text-sm text-blue-600 hover:text-blue-800 focus:outline-none">Посмотреть все</button>
+            {% endif %}
+        </div>
+
+        <!-- Фильтр по стилям -->
+        <div class="mb-2.5">
+            <h4 class="text-sm mb-3">Стили</h4>
+            <div id="styles-list" class="flex flex-col gap-2 list-limited">
+                {% for style in styles|slice:":3" %}
+                    <label class="flex items-center">
+                        <input type="checkbox" name="styles" value="{{ style.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-0" {% if style.id|stringformat:"s" in selected_styles %}checked{% endif %}>
+                        <span class="ml-2 text-sm text-gray-600">{{ style.name }}</span>
+                    </label>
+                {% endfor %}
+                {% for style in styles|slice:"3:" %}
+                    <label class="hidden toggleable-style">
+                        <input type="checkbox" name="styles" value="{{ style.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-0" {% if style.id|stringformat:"s" in selected_styles %}checked{% endif %}>
+                        <span class="ml-2 text-sm text-gray-600">{{ style.name }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {% if styles|length > 3 %}
+                <button type="button" id="toggle-styles" class="mt-2 text-sm text-blue-600 hover:text-blue-800 focus:outline-none">Посмотреть все</button>
+            {% endif %}
+        </div>
+
+        <!-- Фильтр по году выпуска -->
+        <div class="mb-4">
+            <h4 class="text-sm mb-3">Год выпуска</h4>
+            <div class="slider-container mb-4">
+                <div class="absolute top-1/2 left-0 right-0 h-1.5 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
+                <div id="year-range-track" class="absolute top-1/2 h-1.5 bg-blue-500 rounded-full transform -translate-y-1/2" style="left: 0%; right: 0%;"></div>
+                <input type="range" id="min_year_range" name="min_year_range" min="{{ min_year_default }}" max="{{ max_year_default }}" value="{{ min_year }}" class="w-full">
+                <input type="range" id="max_year_range" name="max_year_range" min="{{ min_year_default }}" max="{{ max_year_default }}" value="{{ max_year }}" class="w-full">
+            </div>
+            <div class="flex items-center justify-between gap-2">
+                <input type="number" name="min_year" id="min_year" value="{{ min_year }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="от {{ min_year_default }}">
+                <input type="number" name="max_year" id="max_year" value="{{ max_year }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="до {{ max_year_default }}">
+            </div>
+        </div>
+
+        <!-- Фильтр по предложению недели -->
+        <div class="mb-1">
+            <h4 class="text-sm mb-3">Акции</h4>
+            <label class="flex items-center cursor-pointer">
+                <span class="switch-container">
+                    <input type="checkbox" name="offer_of_the_week" value="1" {% if offer_of_the_week %}checked{% endif %} class="switch-checkbox offer-checkbox">
+                    <span class="switch-slider"></span>
+                </span>
+                <span class="ml-2 text-sm text-gray-600">Предложение недели</span>
+            </label>
+        </div>
+    </form>
+</div>
+
+<!-- Кнопка сброса фильтров -->
+<div class="bg-white p-3 rounded-lg shadow-sm border border-gray-50 mt-3">
+    <button type="button" onclick="resetForm();" class="w-full px-4 py-2 bg-white text-gray-500 text-center rounded-md border border-gray-300 hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center space-x-1.5 shadow-sm hover:shadow-md active:shadow-inner">
+        <svg class="text-blue-500" xmlns="http://www.w3.org/2000/svg" width="16.5" height="16.5" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M2.39 1.73L1.11 3L9 10.89v4.98c-.04.29.06.6.29.83l4.01 4.01c.39.39 1.02.39 1.41 0c.23-.21.33-.53.29-.83v-2.99l5.84 5.84l1.27-1.27L15 14.35v-.01l-2-1.99l-2-2.01L4.15 3.5zM6.21 3L8.2 5h8.76l-3.85 4.91L15 11.8v-1.05l4.79-6.13a1 1 0 0 0-.17-1.4c-.19-.14-.40-.22-.62-.22zM11 12.89l2 2v2.69l-2-2z"/>
+        </svg>
+        <span class="text-[13px] font-semibold tracking-wide">Сбросить фильтры</span>
+    </button>
+</div>

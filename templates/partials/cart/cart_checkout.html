@@ -1,7 +1,37 @@
 {% load humanize %}
+
+<!-- Подключение Яндекс.Карт -->
+<script src="https://api-maps.yandex.ru/2.1/?apikey=6ebfcb53-30a2-474a-8518-0f6fc0b955e1&lang=ru_RU" type="text/javascript"></script>
+
+<style>
+    #map { width: 100%; height: 400px; border-radius: 8px; margin-top: 10px; }
+    .error { color: red; display: none; font-size: 13px; margin-top: 5px; }
+    .address-display {
+        background: #F8FAFC;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 8px;
+        border: 1px solid #E5E7EB;
+    }
+    input[type="date"] {
+        width: 100%;
+        padding: 12px;
+        background: #F8FAFC;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    input[type="date"]:focus {
+        outline: none;
+        border-color: transparent;
+        box-shadow: 0 0 0 2px #3B82F6;
+    }
+</style>
+
 <div>
     <!-- Заголовок -->
-    <div class="flex items-center justify-between mt-4 mb-4">
+    <div class="flex items-center justify-between mt-5 mb-3.5">
         <h3 class="text-lg font-black text-gray-900 relative inline-block">Оформление заказа
             <span class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 transform translate-y-1.5"></span>
         </h3>
@@ -12,81 +42,103 @@
     </p>
 
     <!-- Форма -->
-    <div class="rounded-2xl border border-gray-100 relative {% if not user.is_authenticated %}blur-sm{% endif %} transition-all duration-300">
-        <form method="POST" action="{% url 'order' %}" class="space-y-3 -mt-3">
+    <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 relative {% if not user.is_authenticated %}blur-sm{% endif %} transition-all duration-300">
+        <form method="POST" action="{% url 'order' %}" class="space-y-3 -mt-5 tracking-wide" id="order-form">
             {% csrf_token %}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <!-- Имя -->
                 <div>
-                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">Имя</label>
-                    <input type="text" name="first_name" id="first_name" required
+                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Имя</label>
+                    <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}" value="{{ form.first_name.value|default:'' }}"
                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                           placeholder="Введите ваше имя">
+                           placeholder="Введите ваше имя" required>
+                    {% if form.first_name.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ form.first_name.errors }}</p>
+                    {% endif %}
                 </div>
                 <!-- Фамилия -->
                 <div>
-                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Фамилия</label>
-                    <input type="text" name="last_name" id="last_name" required
+                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Фамилия</label>
+                    <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}" value="{{ form.last_name.value|default:'' }}"
                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                           placeholder="Введите вашу фамилию">
+                           placeholder="Введите вашу фамилию" required>
+                    {% if form.last_name.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ form.last_name.errors }}</p>
+                    {% endif %}
                 </div>
             </div>
 
             <!-- Телефон -->
             <div>
-                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
-                <input type="tel" name="phone" id="phone" required
+                <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
+                <input type="tel" name="phone" id="{{ form.phone.id_for_label }}" value="{{ form.phone.value|default:'' }}"
                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                       placeholder="+7 (XXX) XXX-XX-XX">
+                       placeholder="+7 (XXX) XXX-XX-XX" required>
+                {% if form.phone.errors %}
+                    <p class="text-sm text-red-600 mt-1">{{ form.phone.errors }}</p>
+                {% endif %}
             </div>
 
-            <!-- Адрес -->
-            <div>
-                <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Адрес доставки</label>
-                <textarea name="address" id="address" required
-                          class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          placeholder="Введите адрес доставки" rows="4"></textarea>
-            </div>
-
-            <!-- Способ доставки -->
-            <div>
-                <label for="buying_type" class="block text-sm font-medium text-gray-700 mb-2">Способ доставки</label>
-                <select name="buying_type" id="buying_type" required
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                    <option value="" disabled selected>Выберите способ доставки</option>
-                    <option value="self">Самовывоз</option>
-                    <option value="delivery">Курьерская доставка</option>
-                    <option value="post">Почта России</option>
+             <!-- Способ доставки -->
+             <div>
+                <label for="{{ form.buying_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Способ доставки</label>
+                <select name="buying_type" id="id_buying_type"
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        required>
+                    <option value="delivery" {% if form.buying_type.value == 'delivery' or not form.buying_type.value %}selected{% endif %}>Курьерская доставка</option>
+                    <option value="self" {% if form.buying_type.value == 'self' %}selected{% endif %}>Самовывоз</option>
                 </select>
+                {% if form.buying_type.errors %}
+                    <p class="text-sm text-red-600 mt-1">{{ form.buying_type.errors }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Адрес (Яндекс.Карта) -->
+            <div class="form-group">
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Адрес доставки</label>
+                <div id="map"></div>
+                <input type="hidden" id="address" name="address">
+                <p class="address-display text-sm"><span id="address-text">Не выбран</span></p>
+                <p id="error-message" class="error">Ошибка: не удалось загрузить адрес.</p>
             </div>
 
             <!-- Дата доставки -->
             <div>
-                <label for="order_date" class="block text-sm font-medium text-gray-700 mb-2">Дата доставки</label>
-                <input type="date" name="order_date" id="order_date" required
-                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                <label for="{{ form.order_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Дата получения заказа</label>
+                <input type="date" name="order_date" id="{{ form.order_date.id_for_label }}" value="{{ form.order_date.value|default:'' }}"
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                       required>
+                {% if form.order_date.errors %}
+                    <p class="text-sm text-red-600 mt-1">{{ form.order_date.errors }}</p>
+                {% endif %}
             </div>
 
             <!-- Комментарий -->
             <div>
-                <label for="comment" class="block text-sm font-medium text-gray-700 mb-2">Комментарий к заказу</label>
-                <textarea name="comment" id="comment"
+                <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Комментарий к заказу</label>
+                <textarea name="comment" id="{{ form.comment.id_for_label }}"
                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          placeholder="Дополнительные пожелания (необязательно)" rows="4"></textarea>
+                          placeholder="Дополнительные пожелания (необязательно)" rows="4">{{ form.comment.value|default:'' }}</textarea>
+                {% if form.comment.errors %}
+                    <p class="text-sm text-red-600 mt-1">{{ form.comment.errors }}</p>
+                {% endif %}
             </div>
 
             <!-- Согласие -->
             <div class="flex items-center">
-                <input type="checkbox" id="agreement" name="agreement" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-lg">
+                <input type="checkbox" id="agreement" name="agreement" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-lg" required>
                 <label for="agreement" class="ml-3 text-sm text-gray-600 leading-tight">
-                    Я даю согласие на обработку персональных данных и соглашаюсь с условиями <a href="#" class="text-blue-600 hover:underline">Политики конфиденциальности</a>
+                    <a href="#" class="text-blue-600 underline">Я согласен с использованием моих персональных данных для обработки данного обращения</a>
                 </label>
             </div>
 
             <!-- Кнопка оформления заказа -->
-            <div class="mt-8">
-                <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium text-sm rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all duration-300 shadow-md transform hover:scale-105">
-                    Оформить заказ
+            <div>
+                <button type="submit" class="w-full mt-1.5 px-6 py-3 bg-blue-500 text-white flex items-center justify-center space-x-1.5 rounded-lg hover:bg-blue-600 transition-all duration-300 shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M10.591 2.513a3.75 3.75 0 0 1 2.818 0l7.498 3.04A1.75 1.75 0 0 1 22 7.175v5.635a6.5 6.5 0 0 0-1.5-1.077v-3.96l-7.75 2.992v2.298a6.5 6.5 0 0 0-1.5 2.645v-4.944L3.5 7.75v9.078a.25.25 0 0 0 .156.231l7.499 3.04q.047.02.095.036l.189.076q.088.036.179.06c.248.526.565 1.014.94 1.451a3.75 3.75 0 0 1-1.967-.233l-7.498-3.04A1.75 1.75 0 0 1 2 16.827V7.176a1.75 1.75 0 0 1 1.093-1.622zm2.254 1.39a2.25 2.25 0 0 0-1.69 0L9.24 4.68l7.527 2.927l2.67-1.03zM4.59 6.564l7.411 2.883l2.69-1.04L7.216 5.5zM17.5 23.001a5.5 5.5 0 1 0 0-11a5.5 5.5 0 0 0 0 11m-1-4.207l3.646-3.647a.5.5 0 0 1 .708.707l-4 4a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.707z"/>
+                    </svg>
+                    <span class="font-geologica font-medium text-[13px]">Оформить заказ</span>
                 </button>
             </div>
         </form>
@@ -99,7 +151,7 @@
                     <p class="text-sm text-gray-600 mb-6 leading-relaxed">
                         Для оформления заказа необходимо авторизоваться или создать аккаунт.
                     </p>
-                    <a href="{% url 'login' %}?next={% url 'place_order' %}" class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium text-sm rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 focus:ring-4 focus:ring-blue-300 focus:outline-none shadow-md">
+                    <a href="{% url 'login' %}?next={% url 'checkout' %}" class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium text-sm rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 focus:ring-4 focus:ring-blue-300 focus:outline-none shadow-md">
                         Войти или зарегистрироваться
                     </a>
                 </div>
@@ -107,3 +159,165 @@
         {% endif %}
     </div>
 </div>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM полностью загружен');
+        ymaps.ready(init).catch(function(error) {
+            showError('Не удалось загрузить карту. Проверьте подключение.');
+            console.error('Ошибка загрузки Яндекс.Карт:', error);
+        });
+    
+        let myMap = null;
+        let placemark = null;
+    
+        function init() {
+            console.log('Инициализация карты начата');
+            myMap = new ymaps.Map("map", {
+                center: [64.5635, 39.8302], // Северодвинск
+                zoom: 14,
+                controls: ['zoomControl']
+            });
+    
+            var bounds = [[64.45, 39.70], [64.65, 39.95]];
+            myMap.setBounds(bounds, { checkZoomRange: true });
+    
+            function setAddress(address, coords, zoom = 17) {
+                console.log('Установка адреса:', address, coords, zoom);
+                document.getElementById('address').value = address;
+                document.getElementById('address-text').textContent = address;
+                document.getElementById('error-message').style.display = 'none';
+    
+                if (placemark) {
+                    myMap.geoObjects.remove(placemark);
+                    placemark = null;
+                }
+    
+                placemark = new ymaps.Placemark(coords, {
+                    balloonContent: address
+                }, {
+                    preset: 'islands#blueDotIcon'
+                });
+    
+                myMap.geoObjects.add(placemark);
+                myMap.panTo(coords, {
+                    duration: 500
+                }).then(function() {
+                    myMap.setZoom(zoom, { duration: 300 });
+                });
+            }
+    
+            function handleMapClick(e) {
+                var coords = e.get('coords');
+                console.log('Клик по карте:', coords);
+                ymaps.geocode(coords, { results: 1 }).then(function(res) {
+                    var geoObject = res.geoObjects.get(0);
+                    if (geoObject) {
+                        var address = geoObject.getAddressLine();
+                        setAddress(address, coords);
+                    } else {
+                        showError('Не удалось определить адрес.');
+                    }
+                }).catch(function(error) {
+                    showError('Ошибка геокодирования.');
+                    console.error('Ошибка геокодирования:', error);
+                });
+            }
+    
+            myMap.events.add('click', handleMapClick);
+    
+            var searchControl = new ymaps.control.SearchControl({
+                options: {
+                    provider: 'yandex#search',
+                    noPlacemark: true,
+                    boundedBy: bounds
+                }
+            });
+            myMap.controls.add(searchControl);
+    
+            searchControl.events.add('resultselect', function(e) {
+                var index = e.get('index');
+                searchControl.getResult(index).then(function(res) {
+                    var address = res.properties.get('name');
+                    var coords = res.geometry.getCoordinates();
+                    setAddress(address, coords);
+                });
+            });
+    
+            function handleBuyingTypeChange() {
+                var buyingTypeSelect = document.getElementById('{{ form.buying_type.id_for_label }}');
+                if (!buyingTypeSelect) {
+                    console.error('Элемент buying_type не найден.');
+                    showError('Ошибка: поле доставки не найдено.');
+                    return;
+                }
+    
+                var buyingType = buyingTypeSelect.value;
+                console.log('Тип доставки:', buyingType);
+                if (buyingType === 'self') {
+                    var safuAddress = 'Северодвинск, улица Воронина, 6';
+                    var safuCoords = [64.5586, 39.7916];
+                    setAddress(safuAddress, safuCoords, 16);
+                    myMap.events.remove('click', handleMapClick);
+                    console.log('Самовывоз: маркер САФУ установлен');
+                } else {
+                    myMap.events.add('click', handleMapClick);
+                    document.getElementById('address').value = '';
+                    document.getElementById('address-text').textContent = 'Не выбран';
+                    if (placemark) {
+                        myMap.geoObjects.remove(placemark);
+                        placemark = null;
+                    }
+                    myMap.setCenter([64.5635, 39.8302], 14);
+                    console.log('Курьерская доставка: адрес сброшен');
+                }
+            }
+    
+            var buyingTypeSelect = document.getElementById('{{ form.buying_type.id_for_label }}');
+            if (buyingTypeSelect) {
+                console.log('Начальный тип доставки:', buyingTypeSelect.value);
+                handleBuyingTypeChange();
+                buyingTypeSelect.addEventListener('change', function() {
+                    console.log('Событие change сработало');
+                    handleBuyingTypeChange();
+                });
+            } else {
+                console.error('Элемент buying_type не найден при инициализации.');
+                showError('Ошибка: поле доставки не найдено.');
+            }
+    
+            document.getElementById('order-form').addEventListener('submit', function(e) {
+                var address = document.getElementById('address').value;
+                var agreement = document.getElementById('agreement').checked;
+                var buyingType = document.getElementById('{{ form.buying_type.id_for_label }}').value;
+    
+                if (!address) {
+                    e.preventDefault();
+                    showError('Выберите адрес на карте.');
+                    console.error('Ошибка: адрес не выбран');
+                    return;
+                }
+    
+                if (buyingType === 'self' && address !== 'Северодвинск, улица Воронина, 6') {
+                    e.preventDefault();
+                    showError('Для самовывоза адрес должен быть: Северодвинск, улица Воронина, 6.');
+                    console.error('Ошибка: неверный адрес для самовывоза');
+                    return;
+                }
+    
+                if (!agreement) {
+                    e.preventDefault();
+                    showError('Необходимо согласиться с Политикой конфиденциальности.');
+                    console.error('Ошибка: соглашение не подтверждено');
+                    return;
+                }
+            });
+    
+            function showError(message) {
+                var errorEl = document.getElementById('error-message');
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            }
+        }
+    });
+</script>
