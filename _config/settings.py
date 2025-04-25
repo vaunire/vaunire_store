@@ -24,12 +24,12 @@ DEBUG = os.getenv('DEBUG')
 # Список разрешённых хостов
 ALLOWED_HOSTS = []
 
-# Получаем ключи Stripe из .env файла
+# Получаем ключи Stripe
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 
 # Получение API-ключа Яндекс.Карт
-YANDEX_MAPS_API_URL = os.getenv('YANDEX_MAPS_API_URL')
+YANDEX_MAPS_API_KEY = os.getenv('YANDEX_MAPS_API_KEY')
 
 # Определение приложений проекта
 INSTALLED_APPS = [

@@ -29,7 +29,6 @@ class Cart(models.Model):
         self.final_price = sum(float(cp.final_price) for cp in cart_products) or 0.0
 
     def save(self, *args, **kwargs):
-        self.update_totals()
         if self.pk:  # Если объект уже существует в базе
             self.update_totals()
         else:  # Для новых объектов устанавливаем начальные значения

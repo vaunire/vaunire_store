@@ -98,7 +98,7 @@ class BaseView(CartMixin, NotificationsMixin, views.View):
             'offer_of_the_week': offer_of_the_week,
             'cart': self.cart,
             'notifications': self.notifications(request.user),
-            'page_obj': page_obj, 
+            'page_obj': page_obj
         }
         return render(request, 'base.html', context)
 

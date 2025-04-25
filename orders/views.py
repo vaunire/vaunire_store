@@ -10,21 +10,20 @@ from accounts.models import Customer
 from cart.mixins import CartMixin
 from cart.models import Cart
 from catalog.models import Artist
+
 from .forms import OrderForm
 from .models import Order
 
-logger = logging.getLogger(__name__)
 
 class CheckoutView(CartMixin, NotificationsMixin, views.View):
     """Отображает страницу оформления заказа"""
     def get(self, request, *args, **kwargs):
         form = OrderForm(request.POST or None)
-        logger.info(f"Yandex Maps API URL in view: {settings.YANDEX_MAPS_API_URL}")
         context = {
             'cart': self.cart,
             'form': form,
             'notifications': self.notifications(request.user),
-            'yandex_maps_api_url': settings.YANDEX_MAPS_API_URL or ''
+            'yandex_maps_api_key': settings.yandex_maps_api_key,
         }
         return render(request, 'pages/cart.html', context)
 
