@@ -7,9 +7,9 @@ urlpatterns = [
     path('', AccountView.as_view(), name = 'account'),
     path('<str:tab>/', AccountView.as_view(), name = 'account_tab'),
 
-    path('login/', LoginView.as_view(), name = 'login'),
-    path('registration/', RegistrationView.as_view(), name = 'registration'),
-    path('logout/', LogoutView.as_view(next_page = '/'), name = 'logout'),
+    path('sign/in/', LoginView.as_view(), name = 'login'),
+    path('sign/up/', RegistrationView.as_view(), name = 'registration'),
+    path('sign/out/', LogoutView.as_view(next_page = '/'), name = 'logout'),
 
     path('actions/clear-notifications/', ClearNotificationsView.as_view(), name = 'clear_notifications'),
 

@@ -10,7 +10,7 @@ from django.db.models.signals import post_save, pre_save
 from django.utils.safestring import mark_safe
 
 
- # ❒ Модель для хранения информации о покупателе
+# ❒ Модель для хранения информации о покупателе
 class Customer(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, verbose_name = 'Пользователь', on_delete = models.CASCADE)
     is_active = models.BooleanField(default = True, verbose_name = 'Пользователь активен')

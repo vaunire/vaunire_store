@@ -1,10 +1,11 @@
 {% load static %}
 <div id="account" class="tab-pane {% if active_tab != 'account' %}hidden{% endif %} transition-opacity duration-300">
-    <div class="bg-white p-2.5">
+    <div class="bg-white p-2">
         <!-- Заголовок и кнопка редактирования -->
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center space-x-3">
-                <h2 class="text-lg font-geologica text-gray-900">Данные аккаунта</h2>
+        <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center space-x-3 relative">
+                <h2 class="text-lg font-geologica">Данные аккаунта</h2>
+                <span class="absolute bottom-0 -left-3 w-full h-0.5 bg-blue-500 transform translate-y-1"></span>
             </div>
             <a href="#" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-xs font-geologica tracking-wide rounded-lg hover:bg-blue-600 transition-colors duration-300">
                 <svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 512 512">
@@ -14,13 +15,7 @@
             </a>
         </div>
 
-        <!-- Фото и данные пользователя -->
         <div class="flex flex-col sm:flex-row gap-6">
-            <!-- Фото пользователя -->
-            <div class="flex-shrink-0 mr-8">
-                <img src="{% static 'images/avatar-placeholder.jpg' %}" alt="Аватар пользователя" class="w-32 h-32 rounded-full object-cover border-2 border-gray-200">
-            </div>
-
             <!-- Данные -->
             <dl class="flex-1 space-y-4">
                 <!-- Имя -->

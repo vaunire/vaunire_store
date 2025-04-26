@@ -6,9 +6,27 @@ from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.contrib.filters.admin import RelatedDropdownFilter, RangeDateFilter, ChoicesDropdownFilter
 from unfold.contrib.forms.widgets import WysiwygWidget
+from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
+
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
+from django.contrib.auth.models import User, Group
 
 from orders.models import Order
 from .models import Customer, Notifications
+
+admin.site.unregister(User)
+admin.site.unregister(Group)
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin, ModelAdmin):
+    form = UserChangeForm
+    add_form = UserCreationForm
+    change_password_form = AdminPasswordChangeForm
+
+@admin.register(Group)
+class GroupAdmin(BaseGroupAdmin, ModelAdmin):
+    pass
 
 class BaseAdmin(ModelAdmin):
     list_filter_submit = True

@@ -5,6 +5,29 @@
 <script src="https://api-maps.yandex.ru/2.1/?apikey=6ebfcb53-30a2-474a-8518-0f6fc0b955e1&lang=ru_RU" type="text/javascript"></script>
 <link rel="stylesheet" href="{% static 'css/map.css' %}">
 
+<style>
+    /* Стили для крестика */
+    .clear-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        display: none;
+        color: #6b7280;
+        font-size: 16px;
+    }
+    .clear-icon:hover {
+        color: #ef4444;
+    }
+    .input-wrapper {
+        position: relative;
+    }
+    .input-wrapper input:not(:placeholder-shown) + .clear-icon,
+    .input-wrapper textarea:not(:placeholder-shown) + .clear-icon {
+        display: block;}
+</style>
+
 <div>
     <!-- Заголовок -->
     <div class="flex items-center justify-between mt-5 mb-3.5">
@@ -23,21 +46,25 @@
             {% csrf_token %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <!-- Имя -->
-                <div>
+                <div class="input-wrapper">
                     <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Имя</label>
-                    <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}" value="{{ form.first_name.value|default:'' }}"
+                    <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}" 
+                           value="{% if form.first_name.value %}{{ form.first_name.value }}{% elif user.first_name %}{{ user.first_name }}{% endif %}"
                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                            placeholder="Введите ваше имя" required>
+                    <span class="clear-icon" onclick="clearInput('{{ form.first_name.id_for_label }}')">&times;</span>
                     {% if form.first_name.errors %}
                         <p class="text-sm text-red-600 mt-1">{{ form.first_name.errors }}</p>
                     {% endif %}
                 </div>
                 <!-- Фамилия -->
-                <div>
+                <div class="input-wrapper">
                     <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Фамилия</label>
-                    <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}" value="{{ form.last_name.value|default:'' }}"
+                    <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}" 
+                           value="{% if form.last_name.value %}{{ form.last_name.value }}{% elif user.last_name %}{{ user.last_name }}{% endif %}"
                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                            placeholder="Введите вашу фамилию" required>
+                    <span class="clear-icon" onclick="clearInput('{{ form.last_name.id_for_label }}')">&times;</span>
                     {% if form.last_name.errors %}
                         <p class="text-sm text-red-600 mt-1">{{ form.last_name.errors }}</p>
                     {% endif %}
@@ -45,11 +72,13 @@
             </div>
 
             <!-- Телефон -->
-            <div>
+            <div class="input-wrapper">
                 <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
-                <input type="tel" name="phone" id="{{ form.phone.id_for_label }}" value="{{ form.phone.value|default:'' }}"
+                <input type="tel" name="phone" id="{{ form.phone.id_for_label }}" 
+                       value="{% if form.phone.value %}{{ form.phone.value }}{% elif user.customer.phone %}{{ user.customer.phone }}{% endif %}"
                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                        placeholder="+7 (XXX) XXX-XX-XX" required>
+                <span class="clear-icon" onclick="clearInput('{{ form.phone.id_for_label }}')">&times;</span>
                 {% if form.phone.errors %}
                     <p class="text-sm text-red-600 mt-1">{{ form.phone.errors }}</p>
                 {% endif %}
@@ -70,17 +99,19 @@
             </div>
 
             <!-- Адрес (Яндекс.Карта) -->
-            <div class="form-group">
+            <div class="form-group input-wrapper">
                 <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Адрес доставки</label>
                 <div id="map"></div>
-                <input type="hidden" id="address" name="address">
-                <p class="address-display text-sm"><span id="address-text">Не выбран</span></p>
+                <input type="hidden" id="address" name="address" 
+                       value="{% if form.address.value %}{{ form.address.value }}{% elif user.customer.address %}{{ user.customer.address }}{% endif %}">
+                <p class="address-display text-sm"><span id="address-text">{% if form.address.value %}{{ form.address.value }}{% elif user.customer.address %}{{ user.customer.address }}{% else %}Не выбран{% endif %}</span></p>
+                <span class="clear-icon" onclick="clearInput('address')" style="top: 20px; right: 20px;">&times;</span>
                 <p id="error-message" class="error">Ошибка: не удалось загрузить адрес.</p>
             </div>
 
             <!-- Дата доставки -->
             <div>
-                <label for="{{ form.order_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Дата получения заказа (рабочий день с 11:00 до 20:00)</label>
+                <label for="{{ form.order_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Дата получения заказа</label>
                 <input type="date" name="order_date" id="id_order_date"
                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                        required>
@@ -90,11 +121,12 @@
             </div>
 
             <!-- Комментарий -->
-            <div>
+            <div class="input-wrapper">
                 <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Комментарий к заказу</label>
                 <textarea name="comment" id="{{ form.comment.id_for_label }}"
                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                           placeholder="Дополнительные пожелания (необязательно)" rows="4">{{ form.comment.value|default:'' }}</textarea>
+                <span class="clear-icon" onclick="clearInput('{{ form.comment.id_for_label }}')" style="top: 30px;">&times;</span>
                 {% if form.comment.errors %}
                     <p class="text-sm text-red-600 mt-1">{{ form.comment.errors }}</p>
                 {% endif %}
@@ -103,19 +135,9 @@
             <!-- Согласие -->
             <div class="flex items-center">
                 <input type="checkbox" id="agreement" name="agreement" class="h-4 w-4 text-blue-600 focus:outline-none border-gray-300 rounded-lg" required>
-                <label for="agreement" class="ml-3 text-sm text-gray-600 leading-tight">
+                <label for="agreement" class="ml-2.5 text-sm text-gray-600 leading-tight">
                     <a href="#" class="text-blue-600 underline">Я согласен с использованием моих персональных данных для обработки данного обращения</a>
                 </label>
-            </div>
-
-            <!-- Кнопка оформления заказа -->
-            <div>
-                <button type="submit" class="w-full mt-1.5 px-6 py-3 bg-blue-500 text-white flex items-center justify-center space-x-1.5 rounded-lg hover:bg-blue-600 transition-all duration-300 shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M10.591 2.513a3.75 3.75 0 0 1 2.818 0l7.498 3.04A1.75 1.75 0 0 1 22 7.175v5.635a6.5 6.5 0 0 0-1.5-1.077v-3.96l-7.75 2.992v2.298a6.5 6.5 0 0 0-1.5 2.645v-4.944L3.5 7.75v9.078a.25.25 0 0 0 .156.231l7.499 3.04q.047.02.095.036l.189.076q.088.036.179.06c.248.526.565 1.014.94 1.451a3.75 3.75 0 0 1-1.967-.233l-7.498-3.04A1.75 1.75 0 0 1 2 16.827V7.176a1.75 1.75 0 0 1 1.093-1.622zm2.254 1.39a2.25 2.25 0 0 0-1.69 0L9.24 4.68l7.527 2.927l2.67-1.03zM4.59 6.564l7.411 2.883l2.69-1.04L7.216 5.5zM17.5 23.001a5.5 5.5 0 1 0 0-11a5.5 5.5 0 0 0 0 11m-1-4.207l3.646-3.647a.5.5 0 0 1 .708.707l-4 4a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.707z"/>
-                    </svg>
-                    <span class="font-geologica font-medium text-[13px]">Оформить заказ</span>
-                </button>
             </div>
         </form>
 
@@ -134,6 +156,36 @@
             </div>
         {% endif %}
     </div>
+    <div class="mt-3">
+         <!-- Кнопка оформления заказа -->
+         <button type="submit" class="w-full mt-1.5 px-6 py-3 bg-blue-500 text-white flex items-center justify-center space-x-1.5 rounded-lg hover:bg-blue-600 transition-all duration-300 shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M10.591 2.513a3.75 3.75 0 0 1 2.818 0l7.498 3.04A1.75 1.75 0 0 1 22 7.175v5.635a6.5 6.5 0 0 0-1.5-1.077v-3.96l-7.75 2.992v2.298a6.5 6.5 0 0 0-1.5 2.645v-4.944L3.5 7.75v9.078a.25.25 0 0 0 .156.231l7.499 3.04q.047.02.095.036l.189.076q.088.036.179.06c.248.526.565 1.014.94 1.451a3.75 3.75 0 0 1-1.967-.233l-7.498-3.04A1.75 1.75 0 0 1 2 16.827V7.176a1.75 1.75 0 0 1 1.093-1.622zm2.254 1.39a2.25 2.25 0 0 0-1.69 0L9.24 4.68l7.527 2.927l2.67-1.03zM4.59 6.564l7.411 2.883l2.69-1.04L7.216 5.5zM17.5 23.001a5.5 5.5 0 1 0 0-11a5.5 5.5 0 0 0 0 11m-1-4.207l3.646-3.647a.5.5 0 0 1 .708.707l-4 4a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.707z"/>
+            </svg>
+            <span class="font-geologica font-medium text-[13px]">Оформить заказ</span>
+        </button>
+    </div>
 </div>
 
 <script src="{% static 'js/map.js' %}"></script>
+<script>
+    function clearInput(inputId) {
+        const input = document.getElementById(inputId);
+        input.value = '';
+        input.dispatchEvent(new Event('input')); // Триггерим событие для обновления состояния
+        toggleClearIcon(input);
+    }
+
+    function toggleClearIcon(input) {
+        const clearIcon = input.nextElementSibling;
+        if (clearIcon && clearIcon.classList.contains('clear-icon')) {
+            clearIcon.style.display = input.value ? 'block' : 'none';
+        }
+    }
+
+    // Инициализация крестиков для всех полей
+    document.querySelectorAll('.input-wrapper input, .input-wrapper textarea').forEach(input => {
+        toggleClearIcon(input);
+        input.addEventListener('input', () => toggleClearIcon(input));
+    });
+</script>

@@ -18,12 +18,29 @@ from .models import Order
 class CheckoutView(CartMixin, NotificationsMixin, views.View):
     """Отображает страницу оформления заказа"""
     def get(self, request, *args, **kwargs):
-        form = OrderForm(request.POST or None)
+        initial_data = {}
+        if request.user.is_authenticated:
+            # Пробуем получить данные из Customer
+            try:
+                customer = Customer.objects.get(user = request.user)
+                initial_data = {
+                    'first_name': customer.user.first_name or customer.first_name,
+                    'last_name': customer.user.last_name or customer.last_name,
+                    'phone': customer.phone,
+                    'address': customer.address,
+                }
+            except Customer.DoesNotExist:
+                # Если Customer не существует, используем данные из User
+                initial_data = {
+                    'first_name': request.user.first_name,
+                    'last_name': request.user.last_name,
+                }
+
+        form = OrderForm(initial = initial_data)
         context = {
             'cart': self.cart,
             'form': form,
             'notifications': self.notifications(request.user),
-            'yandex_maps_api_key': settings.yandex_maps_api_key,
         }
         return render(request, 'pages/cart.html', context)
 
@@ -86,6 +103,13 @@ class MakeOrderView(CartMixin, views.View):
             new_order.order_date = form.cleaned_data['order_date']
             new_order.comment = form.cleaned_data['comment']
             new_order.save()
+
+            # Обновление данных в Customer (если они изменились)
+            customer.first_name = form.cleaned_data['first_name']
+            customer.last_name = form.cleaned_data['last_name']
+            customer.phone = form.cleaned_data['phone']
+            customer.address = form.cleaned_data['address']
+            customer.save()
 
             # Обновляем корзину и связываем с заказом
             self.cart.in_order = True

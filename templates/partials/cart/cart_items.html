@@ -28,14 +28,14 @@
             <div class="flex-1 ml-6 -mt-0.5">
                 <div class="flex justify-between items-start">
                     <div>
-                        <a href="{% url 'album_detail' artist_slug=item.content_object.artist.slug album_slug=item.content_object.slug %}" class="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors duration-200">
+                        <a href="{% url 'album_detail' artist_slug=item.content_object.artist.slug album_slug=item.content_object.slug %}" class="text-lg font-semibold hover:text-blue-600 transition-colors duration-200">
                             {{ item.display_name }}
                         </a>
                         <div class="mt-1 text-sm text-gray-600">
                             <div class="space-x-1.5 -ml-0.5">
                                 {% if item.content_object.get_format %}
                                     <span class="inline-block px-2 py-1 text-xs font-medium tracking-wide text-gray-700 bg-gray-100 rounded">
-                                        {{ item.content_object.get_format }}
+                                        {{ item.content_object.get_format }} 
                                     </span>
                                 {% endif %}
                                 {% if item.content_object.genre %}

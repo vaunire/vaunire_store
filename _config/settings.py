@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     "unfold.contrib.inlines", 
     "unfold.contrib.import_export", 
     "unfold.contrib.guardian",  
-    'django.contrib.humanize',
     "unfold.contrib.simple_history",
 
     # Утилита для автоматической перезагрузки браузера в режиме разработки [1]
@@ -55,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.humanize',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 

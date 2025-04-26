@@ -1,13 +1,11 @@
 {% load humanize %}
 <div id="wishlist" class="tab-pane {% if active_tab != 'wishlist' %}hidden{% endif %}">
-    <div class="bg-gray-50 p-6 rounded-lg">
-        <div class="flex items-center mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="mr-1.5" width="27" height="27" viewBox="0 0 24 24">
-                <path fill="currentColor" class="text-blue-500" d="M10 3.75a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5m-4 9.5A3.75 3.75 0 0 0 2.25 17v1.188c0 .754.546 1.396 1.29 1.517c2.21.361 4.443.536 6.676.524c.156-.001.25-.174.174-.31A6.968 6.968 0 0 1 9.5 16.5c0-.787.13-1.544.37-2.25a.213.213 0 0 0-.192-.28a7.247 7.247 0 0 1-1.928-.35l-.866-.284a1.752 1.752 0 0 0-.543-.086z"/>
-                <path fill="#4B5563" d="M17.25 15a.75.75 0 0 0-1.5 0v1.773c0 .24.115.465.309.606l1 .728a.75.75 0 0 0 .882-1.214l-.691-.502z"/>
-                <path fill="#4B5563" fill-rule="evenodd" d="M16.5 22a5.5 5.5 0 1 0 0-11a5.5 5.5 0 0 0 0 11m0-1.5a4 4 0 1 0 0-8a4 4 0 0 0 0 8" clip-rule="evenodd"/>
-            </svg>
-            <h2 class="text-xl font-semibold text-gray-800">Лист ожидания</h2>
+    <div class="bg-white p-2.5">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3 relative">
+                <h2 class="text-lg font-geologica">Лист ожидания</h2>
+                <span class="absolute bottom-0 -left-3 w-full h-0.5 bg-blue-500 transform translate-y-1"></span>
+            </div>
         </div>
         <div class="max-h-[300px] overflow-y-auto space-y-4 pr-2 tracking-wide">
             {% for album in customer.wishlist.all %}

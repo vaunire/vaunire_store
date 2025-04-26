@@ -14,58 +14,82 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Основная функция инициализации карты
     function initMap() {
-        myMap = new ymaps.Map("map", {
-            center: [64.5635, 39.8302],
-            zoom: 20,
-            controls: ['zoomControl']
-        });
+        try {
+            console.log('Инициализация карты...');
+            myMap = new ymaps.Map("map", {
+                center: [64.5635, 39.8302],
+                zoom: 14,
+                controls: ['zoomControl']
+            });
 
-        myMap.setBounds([[64.45, 39.70], [64.65, 39.95]], { checkZoomRange: true });
+            myMap.setBounds([[64.45, 39.70], [64.65, 39.95]], { checkZoomRange: true });
 
-        // Настройка поискового контрола
-        searchControl = new ymaps.control.SearchControl({
-            options: {
-                provider: 'yandex#search',
-                noPlacemark: true,
-                boundedBy: [[64.45, 39.70], [64.65, 39.95]]
-            }
-        });
-        myMap.controls.add(searchControl);
+            // Настройка поискового контрола
+            searchControl = new ymaps.control.SearchControl({
+                options: {
+                    provider: 'yandex#search',
+                    noPlacemark: true,
+                    boundedBy: [[64.45, 39.70], [64.65, 39.95]],
+                    placeholderContent: 'Введите адрес, включая подъезд и квартиру',
+                    fitMaxWidth: true
+                }
+            });
+            myMap.controls.add(searchControl);
 
-        setDefaultOrderDate();
-        checkBuyingTypeElement();
+            // Обработчик выбора результата поиска
+            searchControl.events.add('resultselect', handleSearchResult);
+
+            setDefaultOrderDate();
+            checkBuyingTypeElement();
+        } catch (error) {
+            showError('Ошибка инициализации карты.');
+            console.error('Ошибка initMap:', error);
+        }
     }
 
     // Установка даты заказа по умолчанию (текущая дата + 2 дня)
     function setDefaultOrderDate() {
-        const orderDateInput = document.getElementById('id_order_date');
-        if (orderDateInput) {
-            const today = new Date();
-            const defaultDate = new Date(today);
-            defaultDate.setDate(today.getDate() + 2);
-            orderDateInput.value = defaultDate.toISOString().split('T')[0];
+        try {
+            const orderDateInput = document.getElementById('id_order_date');
+            if (orderDateInput) {
+                const today = new Date();
+                const defaultDate = new Date(today);
+                defaultDate.setDate(today.getDate() + 2);
+                orderDateInput.value = defaultDate.toISOString().split('T')[0];
+            }
+        } catch (error) {
+            console.error('Ошибка setDefaultOrderDate:', error);
         }
     }
 
     // Проверка и инициализация элемента выбора типа доставки
     function checkBuyingTypeElement() {
-        const buyingTypeSelect = document.getElementById('id_buying_type');
-        if (buyingTypeSelect) {
-            initializeBuyingType(buyingTypeSelect);
-        } else {
-            setTimeout(checkBuyingTypeElement, 500);
+        try {
+            const buyingTypeSelect = document.getElementById('id_buying_type');
+            if (buyingTypeSelect) {
+                initializeBuyingType(buyingTypeSelect);
+            } else {
+                setTimeout(checkBuyingTypeElement, 500);
+            }
+        } catch (error) {
+            console.error('Ошибка checkBuyingTypeElement:', error);
         }
     }
 
     // Инициализация обработчика изменения типа доставки
     function initializeBuyingType(buyingTypeSelect) {
-        handleBuyingTypeChange();
-        buyingTypeSelect.addEventListener('change', handleBuyingTypeChange);
+        try {
+            handleBuyingTypeChange();
+            buyingTypeSelect.addEventListener('change', handleBuyingTypeChange);
+        } catch (error) {
+            console.error('Ошибка initializeBuyingType:', error);
+        }
     }
 
     // Установка адреса на карте с созданием метки
     function setAddress(address, coords, zoom = 17, isSafu = false) {
         try {
+            console.log('Установка адреса:', address, 'Координаты:', coords);
             document.getElementById('address').value = address;
             document.getElementById('address-text').textContent = address;
             document.getElementById('error-message').style.display = 'none';
@@ -78,8 +102,6 @@ document.addEventListener('DOMContentLoaded', function () {
             placemark = new ymaps.Placemark(coords, {
                 balloonContent: address,
                 iconCaption: isSafu ? 'ИСМАРТ' : ''
-            }, {
-                preset: isSafu ? 'islands#redIcon' : 'islands#blueDotIcon'
             });
 
             myMap.geoObjects.add(placemark);
@@ -96,10 +118,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleMapClick(e) {
         try {
             const coords = e.get('coords');
+            console.log('Клик по карте, координаты:', coords);
             ymaps.geocode(coords, { results: 1, provider: 'yandex#map' }).then(function (res) {
                 const geoObject = res.geoObjects.get(0);
                 if (geoObject) {
-                    setAddress(geoObject.getAddressLine(), coords);
+                    const fullAddress = geoObject.properties.get('text') || geoObject.properties.get('name') || 'Адрес не найден';
+                    console.log('Адрес по клику:', fullAddress);
+                    setAddress(fullAddress, coords);
                 } else {
                     showError('Не удалось определить адрес.');
                 }
@@ -117,8 +142,15 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleSearchResult(e) {
         try {
             const index = e.get('index');
+            console.log('Выбран результат поиска, индекс:', index);
             searchControl.getResult(index).then(function (res) {
-                setAddress(res.properties.get('name'), res.geometry.getCoordinates());
+                const properties = res.properties.getAll();
+                console.log('Свойства результата поиска:', properties);
+                // Пробуем получить полный адрес из text, description или name
+                let fullAddress = properties.text || properties.description || properties.name || 'Адрес не найден';
+                const coords = res.geometry.getCoordinates();
+                console.log('Полный адрес:', fullAddress, 'Координаты:', coords);
+                setAddress(fullAddress, coords);
             }).catch(function (error) {
                 showError('Ошибка поиска адреса.');
                 console.error('Ошибка поиска:', error);
@@ -131,20 +163,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Обработчик изменения типа доставки (самовывоз/доставка)
     function handleBuyingTypeChange() {
-        const buyingTypeSelect = document.getElementById('id_buying_type');
-        if (!buyingTypeSelect) {
-            showError('Ошибка: поле доставки не найдено.');
-            return;
-        }
-
-        const buyingType = buyingTypeSelect.value;
-        const mapContainer = document.getElementById('map');
-
         try {
-            if (buyingType === 'self') {
-                const currentAddress = document.getElementById('address').value;
-                setAddress(SAFU_ADDRESS, SAFU_COORDS, 16, true);
+            const buyingTypeSelect = document.getElementById('id_buying_type');
+            if (!buyingTypeSelect) {
+                showError('Ошибка: поле доставки не найдено.');
+                return;
+            }
 
+            const buyingType = buyingTypeSelect.value;
+            const mapContainer = document.getElementById('map');
+
+            if (buyingType === 'self') {
+                setAddress(SAFU_ADDRESS, SAFU_COORDS, 16, true);
                 myMap.events.remove('click', handleMapClick);
                 if (searchControl) {
                     myMap.controls.remove(searchControl);
@@ -160,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 mapContainer.classList.remove('map-disabled');
 
                 const currentAddress = document.getElementById('address').value;
-                if (currentAddress !== SAFU_ADDRESS) {
+                if (currentAddress === SAFU_ADDRESS) {
                     document.getElementById('address').value = '';
                     document.getElementById('address-text').textContent = 'Не выбран';
                     if (placemark) {
@@ -209,10 +239,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Функция отображения ошибок
     function showError(message) {
-        const errorEl = document.getElementById('error-message');
-        if (errorEl) {
-            errorEl.textContent = message;
-            errorEl.style.display = 'block';
+        const deepen = document.getElementById('error-message');
+        if (deepen) {
+            deepen.textContent = message;
+            deepen.style.display = 'block';
         }
         console.error('Ошибка:', message);
     }
