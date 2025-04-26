@@ -102,14 +102,14 @@ class BaseView(CartMixin, NotificationsMixin, views.View):
         }
         return render(request, 'base.html', context)
 
-class ArtistDetailView(CartMixin,views.generic.DetailView):
+class ArtistDetailView(CartMixin,views.generic.DetailView, NotificationsMixin):
     """Отображает детальную страницу исполнителя по его slug"""
     model = Artist
     template_name = 'artist/artist_detail.html'
     slug_url_kwarg = 'artist_slug'
     context_object_name = 'artist'
 
-class AlbumDetailView(CartMixin,views.generic.DetailView):
+class AlbumDetailView(CartMixin,views.generic.DetailView, NotificationsMixin):
     """Отображает детальную страницу альбома по его slug"""
     model = Album
     template_name = 'album/album_detail.html'

@@ -1,10 +1,10 @@
 {% load static %}
 <div id="account" class="tab-pane {% if active_tab != 'account' %}hidden{% endif %} transition-opacity duration-300">
-    <div class="bg-white p-2">
+    <div class="bg-white p-4">
         <!-- Заголовок и кнопка редактирования -->
-        <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3 relative">
-                <h2 class="text-lg font-geologica">Данные аккаунта</h2>
+                <h2 class="text-xl font-geologica font-semibold text-gray-800">Данные аккаунта</h2>
                 <span class="absolute bottom-0 -left-3 w-full h-0.5 bg-blue-500 transform translate-y-1"></span>
             </div>
             <a href="#" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-xs font-geologica tracking-wide rounded-lg hover:bg-blue-600 transition-colors duration-300">
@@ -14,10 +14,11 @@
                 Редактировать
             </a>
         </div>
+        
 
-        <div class="flex flex-col sm:flex-row gap-6">
+        <div class="flex flex-col sm:flex-row text-base">
             <!-- Данные -->
-            <dl class="flex-1 space-y-4">
+            <dl class="flex-1 space-y-5">
                 <!-- Имя -->
                 <div class="flex items-center group">
                     <dt class="w-32 text-gray-600 font-medium text-sm">Имя</dt>
