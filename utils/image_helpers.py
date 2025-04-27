@@ -20,6 +20,10 @@ class ImageUploadHelper:
         'Album': {
             'field': 'slug',            
             'upload_postfix': 'albums_images'   
+        },
+        'ReturnRequest': {
+            'field': 'order.customer.user.username',
+            'upload_postfix': 'customer_returns'
         }
     }
 
@@ -68,12 +72,15 @@ class ImageUploadHelper:
             str: Путь в формате "images/<модель>/<постфикс>/<значение_поля>.<расширение>".
             Пример: "images/member/members_images/Thom_Yorke/Thom_Yorke.jpg".
         """
-        # Извлекаем значение поля (например, slug) из экземпляра модели
-        field_to_combine = getattr(self.instance, self.field_name_to_combine)
+        # Поддержка вложенных полей (например, customer.user.username)
+        field_parts = self.field_name_to_combine.split('.')
+        field_value = self.instance
+        for part in field_parts:
+            field_value = getattr(field_value, part)
         # Формируем имя файла: <значение_поля>.<расширение> 
-        filename = '.'.join([field_to_combine, self.extention])
+        filename = '.'.join([field_value, self.extention])
         # Формируем полный путь: images/<имя_модели><постфикс>/<значение_поля>/<имя_файла>
-        return f"images/{self.instance.__class__.__name__.lower()}{self.upload_postfix}/{field_to_combine}/{filename}"
+        return f"images/{self.instance.__class__.__name__.lower()}/{self.upload_postfix}/{field_value}/{filename}"
 
 
 def upload_function(instance, filename):

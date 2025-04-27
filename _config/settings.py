@@ -76,6 +76,152 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",  # [2]
 ]
 
+UNFOLD = {
+    "SITE_TITLE": "Vaunire | Музыкальный интернет-магазин",
+    "SITE_HEADER": " ",
+    "SITE_ICON": lambda request: static("images/logo/logo_admin.png"),
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "48x48",
+            "type": "image/svg+xml",
+            "href": lambda request: static("images/logo/favicon.svg"),
+        },
+    ],
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "separator": False,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": _("Информационная панель"),
+                        "icon": "monitoring",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": _("Музыка"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Альбомы"),
+                        "icon": "album",
+                        "link": reverse_lazy("admin:catalog_album_changelist"),
+                    },
+                    {
+                        "title": _("Исполнители"),
+                        "icon": "artist",
+                        "link": reverse_lazy("admin:catalog_artist_changelist"),
+                    },
+                    {
+                        "title": _("Музыканты"),
+                        "icon": "group",
+                        "link": reverse_lazy("admin:catalog_member_changelist"),
+                    },
+                    {
+                        "title": _("Жанры"),
+                        "icon": "music_note",
+                        "link": reverse_lazy("admin:catalog_genre_changelist"),
+                    },
+                    {
+                        "title": _("Стили"),
+                        "icon": "queue_music",
+                        "link": reverse_lazy("admin:catalog_style_changelist"),
+                    },
+                    {
+                        "title": _("Медианосители"),
+                        "icon": "audio_video_receiver",
+                        "link": reverse_lazy("admin:catalog_mediatype_changelist"),
+                    },
+                    {
+                        "title": _("Прайс-листы"),
+                        "icon": "currency_ruble",
+                        "link": reverse_lazy("admin:catalog_pricelist_changelist"),
+                    },
+                    {
+                        "title": _("Позиции прайс-листа"),
+                        "icon": "menu",
+                        "link": reverse_lazy("admin:catalog_pricelistitem_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Галерея"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Галерея изображений"),
+                        "icon": "image",
+                        "link": reverse_lazy("admin:catalog_imagegallery_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Пользователи"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Покупатели"),
+                        "icon": "patient_list",
+                        "link": reverse_lazy("admin:accounts_customer_changelist"),
+                    },
+                    {
+                        "title": _("Уведомления"),
+                        "icon": "notifications_active",
+                        "link": reverse_lazy("admin:accounts_notifications_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Корзина"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Корзины"),
+                        "icon": "shopping_cart",
+                        "link": reverse_lazy("admin:cart_cart_changelist"),
+                    },
+                    {
+                        "title": _("Продукты корзины"),
+                        "icon": "remove_shopping_cart",
+                        "link": reverse_lazy("admin:cart_cartproduct_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Заказы и платежи"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Заказы"),
+                        "icon": "shopping_bag",
+                        "link": reverse_lazy("admin:orders_order_changelist"),
+                    },
+                    {
+                        "title": _("Платежи"),
+                        "icon": "payment",
+                        "link": reverse_lazy("admin:orders_payment_changelist"),
+                    },
+                    {
+                        "title": _("Заявки на возврат"),
+                        "icon": "assignment_return",
+                        "link": reverse_lazy("admin:orders_returnrequest_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+}
+
 # Корневой файл URL-конфигурации
 ROOT_URLCONF = '_config.urls'
 

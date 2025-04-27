@@ -4,12 +4,19 @@ function activateTab(tabId) {
     document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.remove('active', 'bg-blue-50', 'text-blue-700');
         btn.classList.add('text-gray-600', 'bg-gray-50');
-        btn.querySelector('.active-indicator').classList.add('hidden');
-        btn.querySelector('svg').classList.remove('text-blue-700');
-        btn.querySelector('svg').classList.add('text-gray-400');
+        const indicator = btn.querySelector('.active-indicator');
+        if (indicator) indicator.classList.add('hidden');
+        const svg = btn.querySelector('svg');
+        if (svg) {
+            svg.classList.remove('text-blue-700');
+            svg.classList.add('text-gray-400');
+        }
     });
     document.querySelectorAll('.tab-pane').forEach(pane => {
         pane.classList.add('hidden');
+    });
+    document.querySelectorAll('.tab-link').forEach(link => {
+        link.classList.remove('active');
     });
 
     // Активируем нужную вкладку
@@ -17,10 +24,22 @@ function activateTab(tabId) {
     if (targetButton) {
         targetButton.classList.add('active', 'bg-blue-50', 'text-blue-700');
         targetButton.classList.remove('text-gray-600', 'bg-gray-50');
-        targetButton.querySelector('.active-indicator').classList.remove('hidden');
-        targetButton.querySelector('svg').classList.add('text-blue-700');
-        targetButton.querySelector('svg').classList.remove('text-gray-400');
-        document.getElementById(tabId).classList.remove('hidden');
+        const indicator = targetButton.querySelector('.active-indicator');
+        if (indicator) indicator.classList.remove('hidden');
+        const svg = targetButton.querySelector('svg');
+        if (svg) {
+            svg.classList.add('text-blue-700');
+            svg.classList.remove('text-gray-400');
+        }
+    }
+
+    const targetPane = document.getElementById(tabId);
+    if (targetPane) {
+        targetPane.classList.remove('hidden');
+    }
+    const targetLink = document.querySelector(`.tab-link[data-tab="${tabId}"]`);
+    if (targetLink) {
+        targetLink.classList.add('active');
     }
 
     // Обновляем последний элемент хлебных крошек
@@ -41,7 +60,6 @@ document.querySelectorAll('.tab-button').forEach(button => {
     button.addEventListener('click', () => {
         const tabId = button.dataset.tab;
         activateTab(tabId);
-        // Обновляем URL без хэша
         history.pushState({}, '', `/profile/${tabId}`);
     });
 });
@@ -49,39 +67,64 @@ document.querySelectorAll('.tab-button').forEach(button => {
 // Управление вкладками при клике на пункты выпадающего меню
 document.querySelectorAll('.tab-link').forEach(link => {
     link.addEventListener('click', (e) => {
-        e.preventDefault(); // Предотвращаем перезагрузку страницы
+        e.preventDefault();
         const tabId = link.dataset.tab;
         activateTab(tabId);
-        // Обновляем URL без хэша
         history.pushState({}, '', `/profile/${tabId}`);
     });
 });
 
 // Проверка URL при загрузке страницы
 window.addEventListener('load', () => {
-    // Извлекаем tab из URL
     let path = window.location.pathname.split('/').filter(segment => segment).pop();
     const validTabs = ['account', 'orders', 'wishlist', 'returns'];
-
-    // Если path не является валидной вкладкой, устанавливаем 'account'
     const tabToActivate = validTabs.includes(path) ? path : 'account';
 
-    console.log(`Initial tab: ${tabToActivate}`); // Отладка
+    console.log(`Initial tab: ${tabToActivate}`);
     activateTab(tabToActivate);
 
-    // Если URL некорректный, обновляем его
     if (!validTabs.includes(path)) {
         history.replaceState({}, '', '/profile/account');
     }
+
+    // Проверяем параметр order_id для вкладки returns
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order_id');
+    if (orderId && tabToActivate === 'returns') {
+        const targetTab = document.getElementById('returns');
+        if (targetTab) {
+            const returnRequest = targetTab.querySelector(`[data-order-id="${orderId}"]`);
+            if (returnRequest) {
+                setTimeout(() => {
+                    returnRequest.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+    }
 });
 
-// Обработка изменения истории браузера (навигация вперед/назад)
+// Обработка изменения истории браузера
 window.addEventListener('popstate', () => {
     let path = window.location.pathname.split('/').filter(segment => segment).pop();
     const validTabs = ['account', 'orders', 'wishlist', 'returns'];
     const tabToActivate = validTabs.includes(path) ? path : 'account';
 
     activateTab(tabToActivate);
+
+    // Проверяем параметр order_id при навигации
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order_id');
+    if (orderId && tabToActivate === 'returns') {
+        const targetTab = document.getElementById('returns');
+        if (targetTab) {
+            const returnRequest = targetTab.querySelector(`[data-order-id="${orderId}"]`);
+            if (returnRequest) {
+                setTimeout(() => {
+                    returnRequest.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+    }
 });
 
 // Управление модальными окнами

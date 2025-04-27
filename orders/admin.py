@@ -4,7 +4,7 @@ from unfold.admin import ModelAdmin, TabularInline
 from unfold.contrib.filters.admin import ChoicesDropdownFilter, RangeDateFilter, RelatedDropdownFilter
 from unfold.contrib.forms.widgets import WysiwygWidget
 
-from .models import Order, Payment
+from .models import Order, Payment, ReturnRequest
 
 class BaseAdmin(ModelAdmin):
     list_filter_submit = True
@@ -92,3 +92,18 @@ class PaymentAdmin(BaseAdmin):
             )
         }),
     )
+
+@admin.register(ReturnRequest)
+class ReturnRequestAdmin(BaseAdmin):
+    list_display = ('order', 'get_customer_username', 'status', 'reason', 'created_at')
+    list_filter = (
+        ('status', ChoicesDropdownFilter),
+        ('reason', ChoicesDropdownFilter),
+        ('created_at', RangeDateFilter),
+    )
+    search_fields = ('order__id', 'customer__user__username', 'details')
+    readonly_fields = ('created_at', 'updated_at')
+
+    def get_customer_username(self, obj):
+        return obj.customer.user.username
+    get_customer_username.short_description = 'Покупатель'

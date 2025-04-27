@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from utils import upload_function
+
 # ❒ Модель для хранения информации о заказе пользователя
 class Order(models.Model):
     # Статусы заказа
@@ -74,3 +76,48 @@ class Payment(models.Model):
     class Meta:
         verbose_name = 'Платёж'
         verbose_name_plural = 'Платежи'
+
+# ❒ Модель для хранения заявок на возврат товаров
+class ReturnRequest(models.Model):
+    # Статусы заявки на возврат
+    STATUS_PENDING = 'pending'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'canceled'
+    STATUS_PAID = 'paid'
+
+    STATUS_CHOICES = (
+        (STATUS_PENDING, 'Ожидает рассмотрения'),
+        (STATUS_APPROVED, 'Одобрена'),
+        (STATUS_REJECTED, 'Отменена'),
+        (STATUS_PAID, 'Выплачена'),
+    )
+
+    # Причины возврата
+    REASON_DEFECTIVE = 'defective'
+    REASON_WRONG = 'wrong'
+    REASON_NOT_NEEDED = 'not_needed'
+    REASON_OTHER = 'other'
+
+    REASON_CHOICES = (
+        (REASON_DEFECTIVE, 'Товар поврежден (царапины, дефекты)'),
+        (REASON_WRONG, 'Неправильный альбом / исполнитель'),
+        (REASON_NOT_NEEDED, 'Товар больше не нужен'),
+        (REASON_OTHER, 'Другое'),
+    )
+
+    customer = models.ForeignKey('accounts.Customer', verbose_name = 'Покупатель', related_name = 'return_requests', on_delete = models.CASCADE, blank = True, null = True)
+    order = models.ForeignKey('Order', verbose_name = 'Заказ', related_name = 'return_requests', on_delete = models.CASCADE)
+    products = models.ManyToManyField('cart.CartProduct', verbose_name = 'Товары для возврата', related_name = 'return_requests')
+    reason = models.CharField(max_length = 50, verbose_name = 'Причина возврата', choices = REASON_CHOICES)
+    details = models.TextField(verbose_name = 'Подробности', blank = True, null = True)
+    file = models.FileField(upload_to = upload_function, verbose_name = 'Прикрепленный файл', blank = True, null = True)
+    status = models.CharField(max_length = 20, verbose_name = 'Статус запроса', choices = STATUS_CHOICES, default = STATUS_PENDING)
+    created_at = models.DateTimeField(default = timezone.now, verbose_name = 'Дата создания')
+    updated_at = models.DateTimeField(auto_now = True, verbose_name = 'Дата обновления')
+
+    def __str__(self):
+        return f"Запрос на возврат для заказа №{self.order.id} | Статус: {self.get_status_display()}"
+
+    class Meta:
+        verbose_name = 'Заявка на возврат'
+        verbose_name_plural = 'Заявки на возврат'

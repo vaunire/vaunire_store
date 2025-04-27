@@ -1,18 +1,20 @@
-import logging
 from django import views
 from django.contrib import messages
 from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 
 from accounts.mixins import NotificationsMixin
 from accounts.models import Customer
 from cart.mixins import CartMixin
-from cart.models import Cart
+from cart.models import Cart, CartProduct
 from catalog.models import Artist
 
 from .forms import OrderForm
-from .models import Order
+from .models import Order, ReturnRequest
 
 
 class CheckoutView(CartMixin, NotificationsMixin, views.View):
@@ -126,3 +128,57 @@ class MakeOrderView(CartMixin, views.View):
             return redirect('/')
         # Если форма невалидна, возвращаем пользователя на страницу оформления
         return redirect('cart')
+
+class SubmitReturnView(views.View):
+    """Обрабатывает запрос на возврат товара"""
+    def post(self, request, order_id, *args, **kwargs):
+        try:
+            order = Order.objects.get(id = order_id, customer__user = request.user)
+            customer = order.customer
+        except Order.DoesNotExist:
+            messages.error(request, 'Заказ не найден или вы не имеете к нему доступа.')
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        # Проверка срока подачи возврата (14 дней с даты получения)
+        if order.order_date < timezone.now() - timedelta(days=14):
+            messages.error(request, 'Срок для подачи запроса на возврат истек.')
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        # Получение данных из формы
+        product_ids = request.POST.getlist('return-products')
+        reason = request.POST.get('return-reason')
+        details = request.POST.get('return-details', '')
+        file = request.FILES.get('return-file')
+
+        # Проверка, что товары принадлежат заказу
+        products = CartProduct.objects.filter(id__in = product_ids, cart = order.cart)
+        if not products.exists():
+            messages.error(request, 'Выбранные товары не относятся к этому заказу.')
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        # Создание запроса на возврат
+        return_request = ReturnRequest.objects.create(
+            customer = customer,
+            order = order,
+            reason = reason,
+            details = details,
+            file = file if file else None
+        )
+        return_request.products.set(products)
+
+        messages.success(request, 'Запрос на возврат успешно отправлен. Мы свяжемся с вами в ближайшее время.')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+class CancelReturnView(views.View):
+    """Отменяет/Удаляет заявку на возврат"""
+    def get(self, request, return_id, *args, **kwargs):
+        try:
+            return_request = ReturnRequest.objects.get(
+                id = return_id,
+                order__customer__user = request.user,
+                status = 'pending'
+            )
+            return_request.delete() 
+            messages.success(request, 'Заявка на возврат успешно отменена.')
+        except ReturnRequest.DoesNotExist:
+            messages.error(request, 'Заявка не найдена или не может быть отменена.')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])

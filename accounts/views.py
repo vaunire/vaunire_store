@@ -12,12 +12,12 @@ from .models import Customer, Notifications
 from .forms import LoginForm, RegistrationForm  
 
 class AccountView(CartMixin, NotificationsMixin, views.View):
-    """Отображает страницу личного кабинета пользователя"""
-    def get(self, request, tab = 'account', *args, **kwargs):
-        customer = None
+    def get(self, request, tab='account', *args, **kwargs):
+        customer = request.user.customer
+        orders = customer.orders.order_by('-created_at')
         last_paid_order = None
         try:
-            customer = Customer.objects.get(user = request.user)
+            customer = Customer.objects.get(user=request.user)
             last_paid_order = customer.orders.filter(paid = True).last()
         except (Customer.DoesNotExist, AttributeError):
             pass
@@ -26,12 +26,26 @@ class AccountView(CartMixin, NotificationsMixin, views.View):
         if tab not in valid_tabs:
             tab = 'account'
 
+        orders_with_status = []
+        for order in orders:
+            has_pending_return = order.return_requests.filter(status = 'pending').exists()
+            has_approved_return = order.return_requests.filter(status = 'approved').exists()
+            orders_with_status.append({
+                'order': order,
+                'has_pending_return': has_pending_return,
+                'has_approved_return': has_approved_return
+            })
+
+        highlighted_order_id = request.GET.get('order_id')
+
         context = {
             'customer': customer,
             'cart': self.cart,
             'notifications': self.notifications(request.user),
+            'orders_with_status': orders_with_status,
             'last_paid_order': last_paid_order,
-            'active_tab': tab
+            'active_tab': tab,
+            'highlighted_order_id': highlighted_order_id,
         }
         return render(request, 'pages/account.html', context)
 

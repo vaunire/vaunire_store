@@ -1,16 +1,16 @@
 {% load humanize %}
 <div id="wishlist" class="tab-pane {% if active_tab != 'wishlist' %}hidden{% endif %}">
-    <div class="bg-white p-2.5">
-        <div class="flex items-center justify-between mb-6">
+    <div class="bg-white p-3">
+        <div class="flex items-center justify-between mb-4">
             <div class="flex items-center space-x-3 relative">
-                <h2 class="text-lg font-geologica">Лист ожидания</h2>
+                <h2 class="text-xl font-geologica font-semibold text-gray-800">Лист ожидания</h2>
                 <span class="absolute bottom-0 -left-3 w-full h-0.5 bg-blue-500 transform translate-y-1"></span>
             </div>
         </div>
-        <div class="max-h-[300px] overflow-y-auto space-y-4 pr-2 tracking-wide">
+        <div class="max-h-[300px] overflow-y-auto space-y-3 pr-1.5 tracking-wide">
             {% for album in customer.wishlist.all %}
-                <div class="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center space-x-4">
+                <div class="flex items-center justify-between bg-white p-3.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+                    <div class="flex items-center space-x-5">
                         <img src="{{ album.image.url }}" alt="{{ album.name }}" class="w-16 h-16 object-cover rounded-md">
                         <div>
                             <a href="{{ album.get_absolute_url }}" class="text-gray-800 font-medium hover:text-blue-600 transition-colors duration-300 block">
@@ -19,15 +19,21 @@
                             <a href="{{ album.artist.get_absolute_url }}" class="text-gray-600 text-sm hover:text-blue-600 transition-colors duration-300 block">
                                 {{ album.artist.name }}
                             </a>
-                            <div class="flex items-center space-x-2 mt-1.5">
-                                <span class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">{{ album.get_format }}</span>
-                                <span class="text-base text-gray-600 font-bold">{{ album.current_price|floatformat:0|default:'0'|intcomma }} ₽</span>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <span class="text-xs text-gray-600 font-normal bg-gray-100 px-2 py-1 rounded">
+                                    {% if album.styles.all %}
+                                        {% for style in album.styles.all %}
+                                            {{ style.name }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                     {% endif %}
+                                </span>
+                                <span class="text-base font-semibold">{{ album.current_price|floatformat:0|default:'0'|intcomma }} ₽</span>
                             </div>
                         </div>
                     </div>
                     <a href="{% url 'remove_from_wishlist' album_id=album.id %}" class="text-gray-400 hover:text-red-500 transition-colors duration-300 transform hover:scale-110">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
                     </a>
                 </div>

@@ -191,3 +191,9 @@ class PriceListItemAdmin(BaseAdmin):
             )
         }),
     )
+
+@admin.register(ImageGallery)
+class ImageGalleryAdmin(BaseAdmin):
+    list_display = ('content_object', 'use_in_slider')  
+    search_fields = ('content_object__name',)
+    list_filter = ('use_in_slider',)
