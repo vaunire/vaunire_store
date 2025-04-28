@@ -30,10 +30,14 @@ class AccountView(CartMixin, NotificationsMixin, views.View):
         for order in orders:
             has_pending_return = order.return_requests.filter(status = 'pending').exists()
             has_approved_return = order.return_requests.filter(status = 'approved').exists()
+            has_canceled_return = order.return_requests.filter(status = 'canceled').exists()
+            has_paid_return = order.return_requests.filter(status = 'paid').exists()
             orders_with_status.append({
                 'order': order,
                 'has_pending_return': has_pending_return,
-                'has_approved_return': has_approved_return
+                'has_approved_return': has_approved_return,
+                'has_canceled_return': has_canceled_return,
+                'has_paid_return': has_paid_return
             })
 
         highlighted_order_id = request.GET.get('order_id')
@@ -66,7 +70,6 @@ class LoginView(views.View):
             user = authenticate(username = username, password = password)
             if user:
                 login(request, user)
-                messages.success(request, 'Добро пожаловать в мир музыки!')
                 return HttpResponseRedirect('/')
         context = {
             'form': form
@@ -99,7 +102,6 @@ class RegistrationView(views.View):
             )
             user = authenticate(username = form.cleaned_data['username'], password = form.cleaned_data['password'])
             login(request, user)
-            messages.success(request, 'Вы успешно зарегистрировались!')
             return HttpResponseRedirect('/')
         context = {
             'form': form

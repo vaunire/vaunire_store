@@ -15,14 +15,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Основная функция инициализации карты
     function initMap() {
         try {
-            console.log('Инициализация карты...');
             myMap = new ymaps.Map("map", {
-                center: [64.5635, 39.8302],
+                center: [64.562961, 39.803955],
                 zoom: 14,
                 controls: ['zoomControl']
             });
-
-            myMap.setBounds([[64.45, 39.70], [64.65, 39.95]], { checkZoomRange: true });
 
             // Настройка поискового контрола
             searchControl = new ymaps.control.SearchControl({

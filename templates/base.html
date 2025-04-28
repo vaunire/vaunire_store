@@ -91,6 +91,8 @@
     {% endblock content %}
 
     <!-- Футер -->
-    {% include 'partials/layout/footer.html' %}
+    {% block footer %}
+        {% include 'partials/layout/footer.html' %}
+    {% endblock %}
 </body>
 </html>

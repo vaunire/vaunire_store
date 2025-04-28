@@ -7,7 +7,7 @@
                 <span class="absolute bottom-0 -left-3 w-full h-0.5 bg-blue-500 transform translate-y-1"></span>
             </div>
         </div>
-        <div class="max-h-[300px] overflow-y-auto space-y-3 pr-1.5 tracking-wide">
+        <div class="min-h-[370px] overflow-y-auto space-y-3 pr-1.5 tracking-wide">
             {% for album in customer.wishlist.all %}
                 <div class="flex items-center justify-between bg-white p-3.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
                     <div class="flex items-center space-x-5">
@@ -38,11 +38,12 @@
                     </a>
                 </div>
             {% empty %}
-                <div class="text-center py-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="text-gray-400 mx-auto" width="49" height="49" viewBox="0 0 32 32">
-                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M2 15v10h28V15l-4-8H6Zm0 0h8s1 5 6 5s6-5 6-5h8"/>
+                <div class="text-center py-6">
+                    <svg class="w-14 h-14 mx-auto text-gray-200 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M2 5h14v2H2z M2 9h14v2H2z M2 13h9v2H2z M2 17h9v2H2z"/>
+                        <path fill="#629bf3" d="M13 16.493C13 18.427 14.573 20 16.507 20s3.507-1.573 3.507-3.507c0-.177-.027-.347-.053-.517H20V6h2V4h-3a1 1 0 0 0-1 1v8.333a3.465 3.465 0 0 0-1.493-.346A3.51 3.51 0 0 0 13 16.493"/>
                     </svg>
-                    <p class="text-gray-600">Ваш лист ожидаемого пуст</p>
+                    <p class="text-base font-geologica font-thin">Ваш список ожидаемого пуст</p>
                 </div>
             {% endfor %}
         </div>

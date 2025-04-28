@@ -77,14 +77,14 @@
         <!-- Модальное окно для очистки корзины -->
         <div id="clearCartModal" class="fixed inset-0 bg-gray-600 bg-opacity-60 flex items-center tracking-wide justify-center z-50" style="display: none;">
             <div class="bg-white rounded-xl p-6 w-[450px] shadow-2xl border border-gray-100 transform transition-all duration-300 scale-95">
-                <div class="flex justify-center mb-2.5">
-                    <svg class="text-blue-600" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
+                <div class="flex justify-center mb-3">
+                    <svg class="text-blue-600" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
                         <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
                     </svg>
                 </div>
                 <h4 class="text-lg text-gray-800 font-bold mb-2 text-center">Вы точно хотите очистить корзину?</h4>
                 <p class="text-sm text-gray-600 mb-6 text-center">Все товары в заказе удалятся</p>
-                <div class="border-t border-gray-200 mb-3.5"></div>
+                <div class="border-t border-gray-200 mb-3"></div>
                 <div class="flex justify-between text-xs">
                     <button onclick="hideClearCartModal()" class="px-3 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 font-geologica">Отмена</button>
                     <a id="clearCartLink" href="{% url 'clear_cart' %}" class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 shadow-sm font-geologica">Подтвердить</a>

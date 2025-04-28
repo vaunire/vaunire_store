@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from catalog.models import Album, check_stock_change
 
-# pre_save — проверяем изменения перед сохранением объекта, post_save — сигнал, который срабатывает после сохранения объекта; оба используются для уведомлений.
+# pre_save — проверяем изменения перед сохранением объекта, post_save — сигнал, который срабатывает после сохранения объекта
 from django.db.models.signals import post_save, pre_save
 from django.utils.safestring import mark_safe
 
@@ -78,8 +78,10 @@ def send_notification(instance, **kwargs):
             for customer in customers:
                 Notifications.objects.create(
                     recipient = customer,
-                    text = mark_safe(f'Альбом <a href="{instance.get_absolute_url()}">"{instance.name}"</a>, '
-                                     f'который Вы ожидаете, теперь доступен для приобретения!')
+                    text=mark_safe(
+                        f'💿 Альбом <a href="{instance.get_absolute_url()}" style="color: #2563eb; text-decoration: underline;">"{instance.name}"</a>, ' \
+                        f'который Вы ожидаете, теперь доступен для приобретения!'
+                    )
                 )
                 customer.wishlist.remove(instance)
 post_save.connect(send_notification, sender = Album)

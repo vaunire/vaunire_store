@@ -6,6 +6,8 @@ from django.shortcuts import render
 
 from catalog.models import Album
 from accounts.mixins import NotificationsMixin
+from orders.forms import OrderForm
+from orders.models import Order, ReturnRequest
 
 from .models import Cart, CartProduct
 from .mixins import CartMixin
@@ -106,3 +108,32 @@ class ClearCartView(CartMixin, views.View):
         self.cart.update_totals()
         self.cart.save()
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+class CheckoutView(CartMixin, NotificationsMixin, views.View):
+    """Отображает страницу оформления заказа"""
+    def get(self, request, *args, **kwargs):
+        initial_data = {}
+        if request.user.is_authenticated:
+            # Пробуем получить данные из Customer
+            try:
+                customer = Customer.objects.get(user = request.user)
+                initial_data = {
+                    'first_name': customer.user.first_name or customer.first_name,
+                    'last_name': customer.user.last_name or customer.last_name,
+                    'phone': customer.phone,
+                    'address': customer.address,
+                }
+            except Customer.DoesNotExist:
+                # Если Customer не существует, используем данные из User
+                initial_data = {
+                    'first_name': request.user.first_name,
+                    'last_name': request.user.last_name,
+                }
+
+        form = OrderForm(initial = initial_data)
+        context = {
+            'cart': self.cart,
+            'form': form,
+            'notifications': self.notifications(request.user),
+        }
+        return render(request, 'pages/cart.html', context)

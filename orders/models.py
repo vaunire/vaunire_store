@@ -1,5 +1,11 @@
 from django.db import models
 from django.utils import timezone
+from django.utils.safestring import mark_safe
+
+from django.db.models.signals import pre_save, post_save
+from django.dispatch import receiver
+
+from accounts.models import Notifications
 
 from utils import upload_function
 
@@ -14,7 +20,7 @@ class Order(models.Model):
     STATUS_CHOICES = (
         (STATUS_NEW, 'Новый заказ'),
         (STATUS_IN_PROGRESS, 'Заказ в обработке'),
-        (STATUS_READY, 'Заказ готов'),
+        (STATUS_READY, 'Готов к выдаче'),
         (STATUS_COMPLETED, 'Заказ завершён'),
     )
 
@@ -87,9 +93,9 @@ class ReturnRequest(models.Model):
 
     STATUS_CHOICES = (
         (STATUS_PENDING, 'Ожидает рассмотрения'),
-        (STATUS_APPROVED, 'Одобрена'),
-        (STATUS_REJECTED, 'Отменена'),
-        (STATUS_PAID, 'Выплачена'),
+        (STATUS_APPROVED, 'Заявка одобрена'),
+        (STATUS_REJECTED, 'Заявка отменена'),
+        (STATUS_PAID, 'Возврат выплачен'),
     )
 
     # Причины возврата
@@ -121,3 +127,31 @@ class ReturnRequest(models.Model):
     class Meta:
         verbose_name = 'Заявка на возврат'
         verbose_name_plural = 'Заявки на возврат'
+
+# Сохраняем предыдущий статус заявки перед её обновлением
+def get_previous_status(instance, **kwargs):
+    try:
+        # Получаем текущий статус из базы данных
+        obj = ReturnRequest.objects.get(pk=instance.pk)
+        instance._previous_status = obj.status
+    except ReturnRequest.DoesNotExist:
+        # Если заявка новая, предыдущего статуса нет
+        instance._previous_status = None
+
+# Отправляем уведомление при создании или изменении статуса заявки
+@receiver(post_save, sender = ReturnRequest)
+def send_return_status_notification(sender, instance, created, **kwargs):
+    # Уведомление при изменении статуса
+    if hasattr(instance, '_previous_status') and instance._previous_status != instance.status:
+        status_display = instance.get_status_display()
+        notification_text = mark_safe(
+            f'📝 Статус вашей заявки на возврат средств по заказу №{instance.order.id} изменился! ' \
+            f'<a href="/profile/orders/?order_id={instance.order.id}" style="color: #2563eb; text-decoration: underline;">Посмотреть детали</a>'
+        )
+        Notifications.objects.create(
+            recipient = instance.customer,
+            text = notification_text
+        )
+
+# Подключаем сигналы
+pre_save.connect(get_previous_status, sender = ReturnRequest)

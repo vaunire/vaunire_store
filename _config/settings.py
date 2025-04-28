@@ -6,6 +6,8 @@ from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
+from django.utils.safestring import mark_safe
+
 # Импорт функции для загрузки переменных окружения из файла .env
 from dotenv import load_dotenv
 
@@ -76,8 +78,26 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",  # [2]
 ]
 
+# Настройки Django Unfold
 UNFOLD = {
-    "SITE_TITLE": "Vaunire | Музыкальный интернет-магазин",
+    "SITE_TITLE": mark_safe(
+        """
+        <span style="
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        ">VAUNIRE.admin</span>
+        <br>
+        <span style="
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            font-weight: 400;
+        ">Музыкальный интернет – магазин</span>
+        """
+    ),
     "SITE_HEADER": " ",
     "SITE_ICON": lambda request: static("images/logo/logo_admin.png"),
     "SITE_FAVICONS": [

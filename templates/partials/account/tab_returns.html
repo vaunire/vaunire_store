@@ -17,15 +17,15 @@
                 {% for return_request in customer.return_requests.all %}
                     <div class="return-item bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-3 px-7 flex flex-col relative" data-order-id="{{ return_request.order.id }}">
                         <div class="flex items-center justify-between gap-2 flex-wrap mb-0.5">
-                            <div class="w-[110px]">
+                            <div class="w-[130px]">
                                 <span class="block text-xs text-gray-400 font-medium">Номер заказа</span>
                                 <span class="text-gray-700 text-sm">#{{ return_request.order.id }}</span>
                             </div>
-                            <div class="w-[145px]">
+                            <div class="w-[150px]">
                                 <span class="block text-xs text-gray-400 font-medium">Дата заявки</span>
                                 <span class="text-gray-700 text-sm">{{ return_request.created_at|date:"d.m.Y" }}</span>
                             </div>
-                            <div class="w-[235px]">
+                            <div class="w-[230px]">
                                 <span class="block text-xs text-gray-400 font-medium mb-0.5">Статус</span>
                                 <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-normal rounded-md h-6
                                     {% if return_request.status == 'paid' %}bg-green-100 text-green-700
@@ -35,8 +35,8 @@
                                     {{ return_request.get_status_display }}
                                 </span>
                             </div>
-                            <div class="flex items-center gap-4 w-[220px]">
-                                <div class="w-[190px] -ml-8">
+                            <div class="flex items-center gap-4 w-[225px]">
+                                <div class="w-[175px] -ml-8">
                                     <span class="block text-xs text-gray-400 font-medium">Кол-во товаров</span>
                                     <span class="text-gray-700 font-semibold text-sm">{{ return_request.products.count }}</span>
                                 </div>
@@ -160,15 +160,16 @@
                 </div>
                 {% if customer.return_requests.count > 4 %}
                     <div class="text-center mt-4">
-                        <a href="#" id="show-all-returns" class="text-blue-600 text-sm font-medium hover:text-blue-800 transition-colors duration-200">Показать все</a>
+                        <a href="#" id="show-all-returns" class="text-blue-500 text-sm font-medium hover:text-blue-800 transition-colors duration-200">Показать все</a>
                     </div>
                 {% endif %}
             {% else %}
-                <div class="text-center py-12">
-                    <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                <div class="text-center py-4">
+                    <svg class="w-14 h-14 mx-auto text-gray-200 mb-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                        <path fill="currentColor" stroke="currentColor" stroke-width="1" d="M22 22v6H6V4h10V2H6a2 2 0 0 0-2 2v24a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6Z"/>
+                        <path fill="#629bf3" stroke="#629bf3" stroke-width="1.1" d="M14.7 20H12v-2.7l9.44-9.45l2.71 2.71ZM25.56 9.15l-2.71-2.71l2.27-2.27l2.71 2.71Z"/>
                     </svg>
-                    <p class="text-lg font-medium text-gray-400">У вас пока нет заявок на возврат</p>
+                    <p class="text-base font-geologica font-thin">У Вас нет заявок на возврат</p>
                 </div>
             {% endif %}
         </div>

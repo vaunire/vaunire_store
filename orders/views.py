@@ -7,7 +7,6 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 
-from accounts.mixins import NotificationsMixin
 from accounts.models import Customer
 from cart.mixins import CartMixin
 from cart.models import Cart, CartProduct
@@ -15,36 +14,6 @@ from catalog.models import Artist
 
 from .forms import OrderForm
 from .models import Order, ReturnRequest
-
-
-class CheckoutView(CartMixin, NotificationsMixin, views.View):
-    """Отображает страницу оформления заказа"""
-    def get(self, request, *args, **kwargs):
-        initial_data = {}
-        if request.user.is_authenticated:
-            # Пробуем получить данные из Customer
-            try:
-                customer = Customer.objects.get(user = request.user)
-                initial_data = {
-                    'first_name': customer.user.first_name or customer.first_name,
-                    'last_name': customer.user.last_name or customer.last_name,
-                    'phone': customer.phone,
-                    'address': customer.address,
-                }
-            except Customer.DoesNotExist:
-                # Если Customer не существует, используем данные из User
-                initial_data = {
-                    'first_name': request.user.first_name,
-                    'last_name': request.user.last_name,
-                }
-
-        form = OrderForm(initial = initial_data)
-        context = {
-            'cart': self.cart,
-            'form': form,
-            'notifications': self.notifications(request.user),
-        }
-        return render(request, 'pages/cart.html', context)
 
 class MakeOrderView(CartMixin, views.View):
     """Создаёт новый заказ на основе данных из формы, проверяет наличие товаров и их количество на складе, сохраняет заказ и обновляет остатки"""

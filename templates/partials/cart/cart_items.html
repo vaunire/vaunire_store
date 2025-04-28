@@ -7,16 +7,16 @@
 
 <div class="space-y-3.5">
     {% for item in cart.products.all %}
-        <div class="flex items-start bg-white rounded-lg shadow-sm p-5 border border-gray-200 relative">
+        <div class="flex items-center bg-white rounded-lg shadow-sm p-5 border border-gray-200 relative">
             <div class="flex items-start">
                 <button class="text-gray-400 hover:text-gray-600 transition-colors duration-200 mr-4 mt-0.5" onclick="showDeleteModal('{{ item.content_object.ct_model }}', '{{ item.content_object.slug }}', '{{ item.display_name|escapejs }}', '{{ item.content_object.image.url|escapejs }}')">
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
 
                 <div class="flex-shrink-0 relative">
-                    <img src="{{ item.content_object.image.url }}" alt="{{ item.display_name }}" class="w-24 h-24 object-cover rounded-lg">
+                    <img src="{{ item.content_object.image.url }}" alt="{{ item.display_name }}" class="w-20 h-20 object-cover rounded-lg">
                     {% if item.content_object.condition %}
                         <span class="absolute top-1 right-1 w-7 h-6 flex items-center justify-center font-semibold font-geologica rounded-md text-[9.5px] bg-gray-100 opacity-90 text-gray-700">
                             {{ item.content_object.condition|truncatechars:2|upper }}
@@ -34,7 +34,7 @@
                         <div class="mt-1 text-sm text-gray-600">
                             <div class="space-x-1.5 -ml-0.5">
                                 {% if item.content_object.get_format %}
-                                    <span class="inline-block px-2 py-1 text-xs font-medium tracking-wide text-gray-700 bg-gray-100 rounded">
+                                    <span class="inline-block px-2 py-[3px] text-xs font-medium tracking-wide text-gray-600 bg-gray-100 rounded">
                                         {% if item.content_object.styles.all %}
                                         {% for style in item.content_object.styles.all %}
                                             {{ style.name }}{% if not forloop.last %}, {% endif %}
@@ -43,16 +43,15 @@
                                     </span>
                                 {% endif %}
                                 {% if item.content_object.genre %}
-                                    <span class="inline-flex items-center px-2 py-1 text-xs tracking-wide font-medium text-gray-700 bg-gray-100 rounded">
+                                    <span class="inline-flex items-center px-2 py-[3px] text-xs tracking-wide font-medium text-gray-600 bg-gray-100 rounded">
                                         {{ item.content_object.genre }}
                                     </span>
                                 {% endif %}
                             </div>
-                            <div class="mt-1 text-[13px] space-y-0.5 tracking-wide">
-                                <p> Формат:
-                                    {{ item.content_object.get_format }} 
-                                </p>
-                                <p class="mt-0.5">Артикул: {{ item.content_object.article }}</p>
+                            <div class="mt-2 text-xs font-normal tracking-wide flex items-center gap-2 text-gray-600">
+                                <span>Формат: {{ item.content_object.get_format }}</span>
+                                <span class="text-gray-300">|</span>
+                                <span>Артикул: {{ item.content_object.article }}</span>
                             </div>
                         </div>
                     </div>

@@ -24,7 +24,7 @@ class LoginForm(forms.ModelForm):
         if not user:
             raise forms.ValidationError(f'Пользователь с логином {username} не найден в системе.')
         if not user.check_password(password):
-            raise forms.ValidationError('Введен неверный пароль.')
+            raise forms.ValidationError('Неправильный пароль. Попробуйте еще раз.')
         return self.cleaned_data
     
 class RegistrationForm(forms.ModelForm):
