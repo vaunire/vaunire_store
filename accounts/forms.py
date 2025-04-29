@@ -75,4 +75,34 @@ class RegistrationForm(forms.ModelForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'phone', 'password', 'confirm_password']
 
+class ProfileEditForm(forms.ModelForm):
+    phone = forms.CharField(max_length = 25, required = False, label = 'Телефон')
+    address = forms.CharField(max_length = 255, required = False, label = 'Адрес')
+    first_name = forms.CharField(max_length = 150, required = False, label = "Имя")
+    last_name = forms.CharField(max_length = 150, required = False, label = "Фамилия")
 
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
+    def __init__(self, *args, **kwargs):
+        self.customer = kwargs.pop('customer', None)
+        super().__init__(*args, **kwargs)
+        if self.customer:
+            self.fields['phone'].initial = self.customer.phone
+            self.fields['address'].initial = self.customer.address
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': 'text-sm block w-full rounded-lg pl-12 pr-4 py-3 bg-transparent border-b-1 border-gray-200 focus:border-b-blue-500 outline-none transition-all duration-300 placeholder-gray-400',
+                'placeholder': field.label,
+                'disabled': 'disabled',
+            })
+
+    def save(self, commit = True):
+        user = super().save(commit = commit)
+        if self.customer:
+            self.customer.phone = self.cleaned_data['phone']
+            self.customer.address = self.cleaned_data['address']
+            if commit:
+                self.customer.save()
+        return user

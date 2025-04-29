@@ -1,26 +1,29 @@
 from django import views
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
 from catalog.models import Album
 from cart.mixins import CartMixin
 
 from .mixins import NotificationsMixin
 from .models import Customer, Notifications  
-from .forms import LoginForm, RegistrationForm  
+from .forms import LoginForm, RegistrationForm, ProfileEditForm
 
 class AccountView(CartMixin, NotificationsMixin, views.View):
     def get(self, request, tab='account', *args, **kwargs):
-        customer = request.user.customer
-        orders = customer.orders.order_by('-created_at')
-        last_paid_order = None
         try:
-            customer = Customer.objects.get(user=request.user)
-            last_paid_order = customer.orders.filter(paid = True).last()
+            customer = request.user.customer
         except (Customer.DoesNotExist, AttributeError):
-            pass
+            customer = None
+
+        orders = customer.orders.order_by('-created_at') if customer else []
+        last_paid_order = None
+        if customer:
+            last_paid_order = customer.orders.filter(paid=True).last()
 
         valid_tabs = ['account', 'orders', 'wishlist', 'returns']
         if tab not in valid_tabs:
@@ -42,6 +45,9 @@ class AccountView(CartMixin, NotificationsMixin, views.View):
 
         highlighted_order_id = request.GET.get('order_id')
 
+        # Создаём форму для начального состояния
+        form = ProfileEditForm(instance = request.user, customer = customer)
+
         context = {
             'customer': customer,
             'cart': self.cart,
@@ -50,6 +56,8 @@ class AccountView(CartMixin, NotificationsMixin, views.View):
             'last_paid_order': last_paid_order,
             'active_tab': tab,
             'highlighted_order_id': highlighted_order_id,
+            'form': form,
+            'is_editing': False,
         }
         return render(request, 'pages/account.html', context)
 
@@ -107,6 +115,51 @@ class RegistrationView(views.View):
             'form': form
         }
         return render(request, 'auth/registration.html', context)
+    
+@method_decorator(login_required, name = 'dispatch') # Декоратор проверки авторизации для ВСЕХ методов класса
+class UpdateProfileView(CartMixin, NotificationsMixin, views.View):
+    def get(self, request, *args, **kwargs):
+        try:
+            customer = request.user.customer
+        except Customer.DoesNotExist:
+            customer = Customer(user=request.user)
+            customer.save()
+
+        is_editing = request.GET.get('edit', False)
+        form = ProfileEditForm(instance = request.user, customer = customer)
+
+        return render(request, 'pages/account.html', {
+            'form': form,
+            'customer': customer,
+            'is_editing': is_editing,
+            'active_tab': 'account',
+            'cart': self.cart,
+            'notifications': self.notifications(request.user),
+        })
+
+    def post(self, request, *args, **kwargs):
+        try:
+            customer = request.user.customer
+        except Customer.DoesNotExist:
+            customer = Customer(user=request.user)
+            customer.save()
+
+        form = ProfileEditForm(request.POST, instance=request.user, customer=customer)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Профиль успешно обновлён!')
+            return redirect('account_tab', tab='account')
+        else:
+            messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
+
+        return render(request, 'pages/account.html', {
+            'form': form,
+            'customer': customer,
+            'is_editing': True,
+            'active_tab': 'account',
+            'cart': self.cart,
+            'notifications': self.notifications(request.user),
+        })
 
 class AddToWishlist(views.View):
     """Добавляет альбом в список ожидания пользователя"""

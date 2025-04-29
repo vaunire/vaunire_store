@@ -8,6 +8,7 @@ from catalog.models import Album
 from accounts.mixins import NotificationsMixin
 from orders.forms import OrderForm
 from orders.models import Order, ReturnRequest
+from promotions.models import PromoCode
 
 from .models import Cart, CartProduct
 from .mixins import CartMixin
@@ -105,9 +106,30 @@ class ClearCartView(CartMixin, views.View):
     """Очищает корзину пользователя"""
     def get(self, request, *args, **kwargs):
         CartProduct.objects.filter(cart = self.cart).delete()
+        self.cart.applied_promocode = None 
         self.cart.update_totals()
         self.cart.save()
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+class ApplyPromoCodeView(CartMixin, views.View):
+    """Применяет промокод к корзине"""
+    def post(self, request, *args, **kwargs):
+        if not self.cart:
+            messages.error(request, 'Корзина пуста или недоступна.')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'cart'))
+        code = request.POST.get('promo_code')
+        try:
+            promocode = PromoCode.objects.get(code = code)
+            if promocode.apply_to_cart(self.cart):
+                self.cart.applied_promocode = promocode
+                self.cart.save()
+                messages.success(request, f'Промокод {promocode.code} успешно применен!')
+            else:
+                messages.error(request, 'Промокод недействителен или не применим.')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'cart'))
+        except PromoCode.DoesNotExist:
+            messages.error(request, 'Промокод не найден.')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'cart'))
 
 class CheckoutView(CartMixin, NotificationsMixin, views.View):
     """Отображает страницу оформления заказа"""

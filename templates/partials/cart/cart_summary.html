@@ -23,53 +23,64 @@
                         <span class="text-lg font-bold text-blue-600">{{ cart.final_price|floatformat:0|intcomma }} ₽</span>
                     </div>
                 </div>
-                <div class="flex justify-between text-xs text-gray-600 border-gray-200 border-t pt-2">
-                    <span class="text-xs">Ваша корзина</span>
+                <div class="flex justify-between text-xs text-gray-700 border-gray-200 border-t pt-2">
+                    <span class="text-xs font-light">Ваша корзина</span>
                 </div>
                 {% for item in cart.products.all %}
                     <div class="text-sm text-gray-600">
                         <div class="flex justify-between">
                             <div class="flex items-baseline max-w-[280px]">
-                                <span class="text-gray-500 mr-1.5 text-xs">{{ item.quantity }} x</span>
+                                <span class="text-gray-500 font-light mr-1.5 text-xs">{{ item.quantity }} x</span>
                                 <span class="text-black">{{ item.display_name }}</span>
                             </div>
                             <span class="font-bold text-gray-800">{{ item.final_price|floatformat:0|intcomma }} ₽</span>
                         </div>
                         {% if item.content_object.get_format %}
-                            <span class="inline-block px-2 ml-4 py-0.5 text-xs text-gray-500 mt-0.5">
+                            <span class="inline-block px-2 ml-4 font-light py-0.5 text-xs text-gray-600 mt-0.5">
                                 {{ item.content_object.get_format }}
                             </span>
                         {% endif %}
                     </div>
                 {% endfor %}
                 <div class="mt-4">
-                    <div class="flex justify-between text-gray-600 border-gray-200 border-t pt-2">
+                    <div class="flex justify-between text-gray-700 font-light border-gray-200 border-t pt-2">
                         <span class="text-xs">Промокоды, скидки, акции</span>
                     </div>
                     <div class="flex justify-between text-sm pt-2">
-                        <span class="font-normal">Акция firstorder</span>
-                        <span class="font-bold text-blue-600">- 1500 ₽</span>
+                        {% if cart.applied_promocode %}
+                            <span class="font-normal">Промокод: {{ cart.applied_promocode.code }}</span>
+                            <span class="font-bold text-blue-600">
+                                - {{ cart.discount|floatformat:0|intcomma }} ₽
+                            </span>
+                        {% else %}
+                            <span class="font-normal">Промокод не применен</span>
+                            <span class="font-bold text-blue-600">0 ₽</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
-            <div class="flex items-center space-x-2">
-                <input type="text" id="promo-code" placeholder="Введите промокод" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="promo-button" class="p-2.5 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors duration-200 focus:ring-2 focus:ring-gray-500 focus:outline-none disabled:bg-gray-200 disabled:text-gray-400" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
-                </button>
-            </div>
+            <form method="POST" action="{% url 'apply_promocode' %}">
+                {% csrf_token %}
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="promo-code" name="promo_code" placeholder="Введите промокод" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" id="promo-button" class="p-2.5 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors duration-200 focus:ring-2 focus:ring-gray-500 focus:outline-none disabled:bg-gray-200 disabled:text-gray-400" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
         </div>
 
         <!-- Кнопка "Очистить корзину" -->
         <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
             <button onclick="showClearCartModal()" class="w-full px-4 py-2 bg-white text-gray-600 text-center rounded-md border border-gray-300 hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center space-x-1.5 shadow-sm hover:shadow-md active:shadow-inner">
-                <svg class="text-blue-500"  xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M2 5.27L3.28 4L5 5.72l.28.28l1 1l2 2L16 16.72l2 2l2 2L18.73 22l-1.46-1.46c-.34.29-.77.46-1.27.46H8c-1.1 0-2-.9-2-2V9.27zM8 19h7.73L8 11.27zM18 7v9.18l-2-2V9h-5.18l-2-2zm-2.5-3H19v2H7.82l-2-2H8.5l1-1h5z"/></svg>
+                <svg class="text-blue-500" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M2 5.27L3.28 4L5 5.72l.28.28l1 1l2 2L16 16.72l2 2l2 2L18.73 22l-1.46-1.46c-.34.29-.77.46-1.27.46H8c-1.1 0-2-.9-2-2V9.27zM8 19h7.73L8 11.27zM18 7v9.18l-2-2V9h-5.18l-2-2zm-2.5-3H19v2H7.82l-2-2H8.5l1-1h5z"/>
+                </svg>
                 <span class="text-[13px] font-semibold tracking-wide">Очистить корзину</span>
             </button>
         </div>

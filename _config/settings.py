@@ -60,10 +60,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'catalog',   # Приложение для музыкального каталога (альбомы, артисты и т.д.)
-    'cart',      # Приложение для управления корзиной
-    'orders',    # Приложение для заказов
-    'accounts',  # Приложение для управления пользователями 
+    'catalog',     # Приложение для музыкального каталога (альбомы, артисты и т.д.)
+    'cart',        # Приложение для управления корзиной
+    'orders',      # Приложение для заказов
+    'accounts',    # Приложение для управления пользователями 
+    'promotions',  # Приложение для акций и промокодов
 ]
 
 # Список промежуточных слоёв для обработки запросов
@@ -200,6 +201,28 @@ UNFOLD = {
                 ],
             },
             {
+                "title": _("Акции и промокоды"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Акции"),
+                        "icon": "shoppingmode",
+                        "link": reverse_lazy("admin:promotions_promotion_changelist"),
+                    },
+                    {
+                        "title": _("Промокоды"),
+                        "icon": "checkbook",
+                        "link": reverse_lazy("admin:promotions_promocode_changelist"),
+                    },
+                    {
+                        "title": _("Лояльности"),
+                        "icon": "redeem",
+                        "link": reverse_lazy("admin:promotions_customerloyalty_changelist"),
+                    },
+                ],
+            },
+            {
                 "title": _("Корзина"),
                 "separator": True,
                 "collapsible": True,
@@ -211,7 +234,7 @@ UNFOLD = {
                     },
                     {
                         "title": _("Продукты корзины"),
-                        "icon": "remove_shopping_cart",
+                        "icon": "add_shopping_cart",
                         "link": reverse_lazy("admin:cart_cartproduct_changelist"),
                     },
                 ],

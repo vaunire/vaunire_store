@@ -1,11 +1,13 @@
 from django.urls import path
+from . import views
 from django.contrib.auth.views import LogoutView
 
-from .views import AccountView, LoginView, RegistrationView, ClearNotificationsView, AddToWishlist, RemoveFromWishlist, AddToFavorite, RemoveFromFavorite
+from .views import AccountView, LoginView, RegistrationView, ClearNotificationsView, AddToWishlist, RemoveFromWishlist, AddToFavorite, RemoveFromFavorite, UpdateProfileView
 
 urlpatterns = [
     path('', AccountView.as_view(), name = 'account'),
     path('<str:tab>/', AccountView.as_view(), name = 'account_tab'),
+    path('profile/update/', UpdateProfileView.as_view(), name = 'update_profile'),
 
     path('sign/in/', LoginView.as_view(), name = 'login'),
     path('sign/up/', RegistrationView.as_view(), name = 'registration'),

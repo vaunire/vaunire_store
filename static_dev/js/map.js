@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     provider: 'yandex#search',
                     noPlacemark: true,
                     boundedBy: [[64.45, 39.70], [64.65, 39.95]],
-                    placeholderContent: 'Введите адрес, включая подъезд и квартиру',
+                    placeholderContent: 'Введите Ваш адрес',
                     fitMaxWidth: true
                 }
             });

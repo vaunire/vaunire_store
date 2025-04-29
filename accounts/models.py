@@ -18,9 +18,10 @@ class Customer(models.Model):
     wishlist = models.ManyToManyField('catalog.Album', verbose_name = 'Список ожидания', blank = True)
     favorite = models.ManyToManyField('catalog.Album', verbose_name = 'Понравившиеся альбомы', blank = True, related_name = 'favorited_by')
 
-    phone = models.CharField(max_length = 20, verbose_name = 'Номер телефона')
+    phone = models.CharField(max_length = 25, verbose_name = 'Номер телефона')
     email = models.EmailField(verbose_name = 'Электронная почта', blank = True, null = True)
     address = models.CharField(max_length = 255, verbose_name='Адрес доставки', blank = True, null = True)
+    last_updated = models.DateTimeField(auto_now = True, verbose_name = 'Последнее обновление данных')
 
     def __str__(self):
             return f"{self.user.username}"
@@ -31,7 +32,6 @@ class Customer(models.Model):
 
 # ❒ Кастомный менеджер для работы с уведомлениями
 class NotificationManager(models.Manager):
-
     # Возвращает базовый QuerySet для модели уведомлений
     def get_queryset(self):
         return super().get_queryset()

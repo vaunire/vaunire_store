@@ -3,6 +3,8 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
+from promotions.models import PromoCode
+
 # operator — модуль для динамической работы с атрибутами объектов, нужен для attrgetter
 import operator
 
@@ -12,6 +14,8 @@ class Cart(models.Model):
     owner = models.ForeignKey('accounts.Customer', verbose_name = 'Покупатель', on_delete = models.CASCADE)
     total_products = models.IntegerField(default = 0, verbose_name = 'Общее кол-во товара')
     final_price = models.DecimalField(max_digits = 10, decimal_places = 2, verbose_name = 'Общая цена', null = True, blank = True)
+    original_price = models.DecimalField(max_digits = 10, decimal_places = 2, verbose_name = 'Оригинальная цена', null = True, blank = True)
+    applied_promocode = models.ForeignKey(PromoCode, verbose_name = 'Примененный промокод', null = True, blank = True, on_delete = models.SET_NULL)
     in_order = models.BooleanField(default = False, verbose_name = 'В заказе')
     anonymous_user = models.BooleanField(default = False, verbose_name = 'Анонимный пользователь')
 
@@ -23,16 +27,22 @@ class Cart(models.Model):
             verbose_name_plural = 'Корзины'
 
     def update_totals(self):
-        # Пересчитываем итоги, но НЕ вызываем save
+        # Пересчитывает итоги корзины, сохраняя оригинальную цену
         cart_products = self.products.all()
         self.total_products = sum(cp.quantity for cp in cart_products) or 0
-        self.final_price = sum(float(cp.final_price) for cp in cart_products) or 0.0
+        self.original_price = sum(float(cp.final_price) for cp in cart_products) or 0.0
+        self.final_price = self.original_price
+
+        # Применяем промокод, если он есть
+        if self.applied_promocode:
+            self.applied_promocode.apply_to_cart(self)  # Без request
 
     def save(self, *args, **kwargs):
         if self.pk:  # Если объект уже существует в базе
             self.update_totals()
         else:  # Для новых объектов устанавливаем начальные значения
             self.total_products = 0
+            self.original_price = 0.0
             self.final_price = 0.0
         super().save(*args, **kwargs)
 
@@ -40,6 +50,12 @@ class Cart(models.Model):
     # Возвращает список объектов (например, Album), находящихся в корзине.
     def products_in_cart(self):
         return [cart_product.content_object for cart_product in self.products.all()]
+
+    @property
+    def discount(self):
+        if self.original_price and self.final_price and self.original_price > self.final_price:
+            return self.original_price - self.final_price
+        return 0
 
 # ❒ Промежуточная модель для хранения товаров в корзине
 class CartProduct(models.Model):

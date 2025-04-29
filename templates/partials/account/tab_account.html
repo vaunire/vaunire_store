@@ -1,64 +1,193 @@
 {% load static %}
-<div id="account" class="tab-pane {% if active_tab != 'account' %}hidden{% endif %} transition-opacity duration-300">
-    <div class="bg-white p-3">
-        <!-- Заголовок и кнопка редактирования -->
-        <div class="flex items-center justify-between mb-6">
+<style>
+    /* Резервные стили для полей формы */
+    .form-input {
+        width: 100%;
+        background-color: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        transition: all 0.2s ease;
+    }
+    .form-input:focus {
+        outline: none;
+        ring: 2px;
+        ring-color: #3b82f6;
+    }
+    .form-input:disabled {
+        background-color: #eff6ff;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+</style>
+
+<div id="account" class="tab-pane {% if active_tab != 'account' %}hidden{% endif %}">
+    <div class="bg-white p-3 min-h-[470px]">
+        <!-- Общий заголовок -->
+        <div class="flex items-center justify-between mb-2.5">
             <div class="flex items-center space-x-3 relative">
                 <h2 class="text-xl font-geologica font-semibold text-gray-800">Данные аккаунта</h2>
                 <span class="absolute bottom-0 -left-3 w-full h-0.5 bg-blue-500 transform translate-y-1"></span>
             </div>
-            <a href="#" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-xs font-geologica tracking-wide rounded-lg hover:bg-blue-600 transition-colors duration-300">
-                <svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 512 512">
-                    <path fill="#ffffff" d="m497.9 142.1l-46.1 46.1c-4.7 4.7-12.3 4.7-17 0l-111-111c-4.7-4.7-4.7-12.3 0-17l46.1-46.1c18.7-18.7 49.1-18.7 67.9 0l60.1 60.1c18.8 18.7 18.8 49.1 0 67.9M284.2 99.8L21.6 362.4L.4 483.9c-2.9 16.4 11.4 30.6 27.8 27.8l121.5-21.3l262.6-262.6c4.7-4.7 4.7-12.3 0-17l-111-111c-4.8-4.7-12.4-4.7-17.1 0M124.1 339.9c-5.5-5.5-5.5-14.3 0-19.8l154-154c5.5-5.5 14.3-5.5 19.8 0s5.5 14.3 0 19.8l-154 154c-5.5 5.5-14.3 5.5-19.8 0M88 424h48v36.3l-64.5 11.3l-31.1-31.1L51.7 376H88z"/>
-                </svg>
-                Редактировать
-            </a>
         </div>
-        
 
-        <div class="flex flex-col min-h-[360px] sm:flex-row text-base">
-            <!-- Данные -->
-            <dl class="flex-1 space-y-5">
-                <!-- Имя -->
-                <div class="flex items-center group">
-                    <dt class="w-32 text-gray-600 font-medium text-sm">Имя</dt>
-                    <dd class="flex-1 text-gray-900 font-medium group-hover:text-blue-600 transition-colors duration-200">
-                        {{ request.user.username|default:"Не указано" }}
-                    </dd>
-                </div>
-                <!-- Email -->
-                <div class="flex items-center group">
-                    <dt class="w-32 text-gray-600 font-medium text-sm">Email</dt>
-                    <dd class="flex-1 text-gray-900 font-medium group-hover:text-blue-600 transition-colors duration-200">
-                        {{ customer.email|default:request.user.email|default:"Не указан" }}
-                    </dd>
-                </div>
-                <!-- Телефон -->
-                <div class="flex items-center group">
-                    <dt class="w-32 text-gray-600 font-medium text-sm">Телефон</dt>
-                    <dd class="flex-1 text-gray-900 font-medium group-hover:text-blue-600 transition-colors duration-200">
-                        {{ customer.phone|default:"Не указан" }}
-                    </dd>
-                </div>
-                <!-- Адрес -->
-                <div class="flex items-start group">
-                    <dt class="w-32 text-gray-600 font-medium text-sm">Адрес</dt>
-                    <dd class="flex-1 text-gray-900 font-medium break-words group-hover:text-blue-600 transition-colors duration-200">
-                        {{ customer.address|default:"Не указан" }}
-                    </dd>
-                </div>
-                <!-- Номер карты -->
-                <div class="flex items-center group">
-                    <dt class="w-32 text-gray-600 font-medium text-sm">Номер карты</dt>
-                    <dd class="flex-1 font-medium {% if last_paid_order %}text-gray-900 group-hover:text-blue-600{% else %}text-gray-500{% endif %} transition-colors duration-200">
-                        {% if last_paid_order %}
-                            **** **** **** {{ last_paid_order.payment_id|slice:"-4:" }}
-                        {% else %}
-                            Карта не привязана
+        <!-- Основная сетка -->
+        <div class="grid grid-cols-1 gap-6 -ml-4 tracking-wide">
+            <!-- Блок личных данных -->
+            <div class="p-4 max-w-[700px]">
+                <form method="POST" action="{% url 'update_profile' %}" id="profileForm" class="space-y-4 -mt-5">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                        <div role="alert" class="rounded-sm border-s-4 border-red-500 bg-red-50 p-2.5">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <p class="text-xs ml-1 text-red-700">{{ error }}</p>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <p class="text-xs ml-1 text-red-700">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Имя и фамилия -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="{{ form.first_name.id_for_label }}" class="flex items-center mb-1.5">
+                                <svg class="text-blue-600 mr-1.5 opacity-85" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
+                                    <path d="M15 11h7v2h-7zm1 4h6v2h-6zm-2-8h8v2h-8zM4 19h10v-1c0-2.757-2.243-5-5-5H7c-2.757 0-5 2.243-5 5v1h2zm4-7c1.995 0 3.5-1.505 3.5-3.5S9.995 5 8 5S4.5 6.505 4.5 8.5S6.005 12 8 12z" fill="currentColor"/>
+                                </svg>
+                                <span class="text-sm font-light">Имя</span>
+                            </label>
+                            <div class="relative pl-1">
+                                {{ form.first_name }}
+                            </div>
+                            {% if form.first_name.errors %}
+                                <p class="text-xs text-red-700 mt-1">{{ form.first_name.errors }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.last_name.id_for_label }}" class="flex items-center mb-1.5">
+                                <svg class="text-blue-600 mr-1.5 opacity-85" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
+                                    <path d="M15 11h7v2h-7zm1 4h6v2h-6zm-2-8h8v2h-8zM4 19h10v-1c0-2.757-2.243-5-5-5H7c-2.757 0-5 2.243-5 5v1h2zm4-7c1.995 0 3.5-1.505 3.5-3.5S9.995 5 8 5S4.5 6.505 4.5 8.5S6.005 12 8 12z" fill="currentColor"/>
+                                </svg>
+                                <span class="text-sm font-light">Фамилия</span>
+                            </label>
+                            <div class="relative pl-1">
+                                {{ form.last_name }}
+                            </div>
+                            {% if form.last_name.errors %}
+                                <p class="text-xs text-red-700 mt-1">{{ form.last_name.errors }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Электронная почта и телефон -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="{{ form.email.id_for_label }}" class="flex items-center mb-1.5">
+                                <svg class="text-blue-600 mr-1.5 opacity-85" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                                    <g fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0 0 16 4H4a2 2 0 0 0-1.997 1.884"/>
+                                    <path d="m18 8.118l-8 4l-8-4V14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2z"/></g>
+                                </svg>
+                                <span class="text-sm font-light">Электронная почта</span>
+                            </label>
+                            <div class="relative pl-1">
+                                {{ form.email }}
+                            </div>
+                            {% if form.email.errors %}
+                                <p class="text-xs text-red-700 mt-1">{{ form.email.errors }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.phone.id_for_label }}" class="flex items-center mb-1.5">
+                                <svg class="text-blue-600 mr-1 ml-0.5 opacity-85" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                                    <path d="M20.487 17.14l-4.065-3.696a1.001 1.001 0 0 0-1.391.043l-2.393 2.461c-.576-.11-1.734-.471-2.926-1.66c-1.192-1.193-1.553-2.354-1.66-2.926l2.459-2.394a1 1 0 0 0 .043-1.391L6.859 3.513a1 1 0 0 0-1.391-.087l-2.17 1.861a1 1 0 0 0-.29.649c-.015.25-.301 6.172 4.291 10.766C11.305 20.707 16.323 21 17.705 21c.202 0 .326-.006.359-.008a.992.992 0 0 0 .648-.291l1.86-2.171a.997.997 0 0 0-.085-1.39z" fill="currentColor"/>
+                                </svg>
+                                <span class="text-sm font-light">Номер телефона</span>
+                            </label>
+                            <div class="relative pl-2">
+                                {{ form.phone }}
+                            </div>
+                            {% if form.phone.errors %}
+                                <p class="text-xs text-red-700 mt-1">{{ form.phone.errors }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Адрес -->
+                    <div>
+                        <label for="{{ form.address.id_for_label }}" class="flex items-center mb-1.5">
+                            <svg class="text-blue-600 mr-1 -mt-0.5 opacity-85" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                <path d="M12 2C7.589 2 4 5.589 4 9.995C3.971 16.44 11.696 21.784 12 22c0 0 8.029-5.56 8-12c0-4.411-3.589-8-8-8zm0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4s4 1.79 4 4s-1.79 4-4 4z" fill="currentColor"/>
+                            </svg>
+                            <span class="text-sm font-light">Адрес</span>
+                        </label>
+                        <div class="relative pl-1">
+                            {{ form.address }}
+                        </div>
+                        {% if form.address.errors %}
+                            <p class="text-xs text-red-700 mt-1">{{ form.address.errors }}</p>
                         {% endif %}
-                    </dd>
-                </div>
-            </dl>
+                    </div>
+
+                    <!-- Кнопка "Редактировать" и последнее изменение -->
+                    <div class="flex items-center justify-start space-x-3">
+                        {% if not is_editing %}
+                        <div class="flex gap-3 text-xs font-geologica">
+                            <a href="{% url 'update_profile' %}?edit=true" class="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                                Редактировать
+                            </a>
+                        </div>
+                        <span class="text-gray-400 opacity-90 font-thin ml-1"> | </span>
+                        {% if customer.last_updated %}
+                        <span class="text-[13px] tracking-wide text-gray-600 font-light">
+                            Последнее изменение было {{ customer.last_updated|date:"d F в H:i" }}
+                        </span>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+
+                    {% if is_editing %}
+                        <div class="flex justify-end gap-3 text-xs font-geologica">
+                            <a href="{% url 'account_tab' 'account' %}" class="px-4 py-2 -mt-5 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Отмена</a>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 -mt-5 text-white rounded-md hover:bg-blue-700">Сохранить</button>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- JavaScript для управления визуальным состоянием полей -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Account tab script running');
+        const profileForm = document.getElementById('profileForm');
+        if (!profileForm) {
+            console.error('Profile form not found');
+            return;
+        }
+
+        const isEditing = {{ is_editing|lower }};
+        const inputs = profileForm.querySelectorAll('input, textarea');
+
+        inputs.forEach(input => {
+
+            // Добавляем базовый класс
+            input.classList.add('form-input');
+            if (isEditing) {
+                input.removeAttribute('disabled');
+            } else {
+                input.setAttribute('disabled', 'disabled');
+            }
+        });
+    });
+</script>

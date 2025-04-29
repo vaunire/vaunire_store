@@ -9,7 +9,7 @@
             </div>
         </div>
         <!-- Контент возвратов -->
-        <div id="returns-container" class="space-y-3 tracking-wide min-h-[370px] overflow-hidden pr-2">
+        <div id="returns-container" class="space-y-3 tracking-wide min-h-[400px] overflow-hidden pr-2">
             <div class="flex justify-end mb-2">
                 <a href="#" id="hide-returns" class="hidden text-gray-600 text-sm font-medium hover:text-gray-800 transition-colors duration-200">Скрыть</a>
             </div>
@@ -25,7 +25,7 @@
                                 <span class="block text-xs text-gray-400 font-medium">Дата заявки</span>
                                 <span class="text-gray-700 text-sm">{{ return_request.created_at|date:"d.m.Y" }}</span>
                             </div>
-                            <div class="w-[230px]">
+                            <div class="w-[250px]">
                                 <span class="block text-xs text-gray-400 font-medium mb-0.5">Статус</span>
                                 <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-normal rounded-md h-6
                                     {% if return_request.status == 'paid' %}bg-green-100 text-green-700
@@ -36,7 +36,7 @@
                                 </span>
                             </div>
                             <div class="flex items-center gap-4 w-[225px]">
-                                <div class="w-[175px] -ml-8">
+                                <div class="w-[180px] -ml-10">
                                     <span class="block text-xs text-gray-400 font-medium">Кол-во товаров</span>
                                     <span class="text-gray-700 font-semibold text-sm">{{ return_request.products.count }}</span>
                                 </div>
@@ -53,21 +53,32 @@
                                            class="p-1.5 bg-gray-100 text-gray-400 rounded-md hover:bg-gray-200 hover:text-blue-600 transition-all duration-300 hover:scale-105 cursor-pointer" 
                                            title="Отменить заявку">
                                             <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
                                         </a>
                                     {% else %}
                                         <span class="p-1.5 bg-gray-100 text-gray-300 rounded-md cursor-not-allowed" 
                                               title="Отмена недоступна">
                                             <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
                                         </span>
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <!-- Причина возврата -->
+                        <div class="border-t border-gray-200 mt-3 mb-2"></div>
+                        <div class="flex justify-between items-center">
+                            <div class="tracking-wide flex items-center gap-2 font-light">
+                                <span class="text-[13px]">Причина:</span>
+                                <span class="text-gray-700 text-[13px]">{{ return_request.get_reason_display }}</span>
+                            </div>
+                            <a href="#" class="text-blue-600 hover:text-blue-800 text-[13px] font-light flex items-center gap-1 transition-colors">
+                                <span>Условия возврата товара</span>
+                            </a>
+                        </div>
+                    </div>  
                     <!-- Модальное окно для деталей возврата -->
                     <div id="modal-return-details-{{ return_request.id }}" class="fixed inset-0 bg-gray-800 bg-opacity-60 flex items-center justify-center z-50" style="display: none;">
                         <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -113,21 +124,21 @@
                             </div>
                             <!-- Общая информация -->
                             <div class="mt-4 text-sm border border-gray-100 rounded-xl p-3.5 bg-white shadow-sm">
-                                <div class="grid grid-cols-1 gap-y-2.5">
-                                    <p class="text-gray-500"><span class="font-normal text-black">Дата заявки:</span> {{ return_request.created_at|date:"d.m.Y" }}</p>
-                                    <p class="text-gray-500"><span class="font-normal text-black">Причина:</span> {{ return_request.get_reason_display }}</p>
-                                    <p class="text-gray-500"><span class="font-normal text-black">Подробности:</span> {{ return_request.details|default:"Не указано" }}</p>
+                                <div class="grid grid-cols-1 gap-y-2.5 font-light">
+                                    <p class="text-gray-700"><span class="text-black">Дата заявки:</span> {{ return_request.created_at|date:"d.m.Y" }}</p>
+                                    <p class="text-gray-700"><span class="text-black">Причина:</span> {{ return_request.get_reason_display }}</p>
+                                    <p class="text-gray-700"><span class="text-black">Подробности:</span> {{ return_request.details|default:"Не указано" }}</p>
                                     <div class="flex flex-wrap gap-x-3.5 gap-y-2">
                                         {% if return_request.file %}
-                                            <p class="text-gray-500">
-                                                <span class="font-normal text-black">Прикрепленный файл:</span>
+                                            <p class="text-gray-700">
+                                                <span class="text-black">Прикрепленный файл:</span>
                                                 <a href="{{ return_request.file.url }}" class="text-blue-600 text-[13px] ml-1 hover:text-blue-800" target="_blank">Скачать</a>
                                             </p>
                                         {% endif %}
                                         <span class="text-gray-400 opacity-90 font-thin"> | </span>
                                         <div class="flex items-center gap-2 -mt-0.5">
-                                            <span class="font-normal text-black">Статус:</span>
-                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-normal rounded-md h-6
+                                            <span class="font-light text-black">Статус:</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-light rounded-md h-6
                                                 {% if return_request.status == 'paid' %}bg-green-100 text-green-700
                                                 {% elif return_request.status == 'pending' %}bg-blue-100 text-blue-700
                                                 {% elif return_request.status == 'approved' %}bg-green-100 text-green-700
@@ -158,16 +169,14 @@
                         </div>
                     </div>
                 </div>
-                {% if customer.return_requests.count > 4 %}
+                {% if customer.return_requests.count > 3 %}
                     <div class="text-center mt-4">
                         <a href="#" id="show-all-returns" class="text-blue-500 text-sm font-medium hover:text-blue-800 transition-colors duration-200">Показать все</a>
                     </div>
                 {% endif %}
             {% else %}
-                <div class="text-center py-4">
-                    <svg class="w-14 h-14 mx-auto text-gray-200 mb-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-                        <path fill="currentColor" stroke="currentColor" stroke-width="1" d="M22 22v6H6V4h10V2H6a2 2 0 0 0-2 2v24a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6Z"/>
-                        <path fill="#629bf3" stroke="#629bf3" stroke-width="1.1" d="M14.7 20H12v-2.7l9.44-9.45l2.71 2.71ZM25.56 9.15l-2.71-2.71l2.27-2.27l2.71 2.71Z"/>
+                <div class="text-center py-2">
+                    <svg class="w-14 h-14 mx-auto text-gray-200 mb-2.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m21 18.15l-15-15V1h9l6 6zm-.5 5.15L16.2 19H6V8.8L.7 3.5l1.4-1.4l19.8 19.8zM14 8h5.5L14 2.5L19.5 8L14 2.5zM2 23V8h2v13h12v2z"/>
                     </svg>
                     <p class="text-base font-geologica font-thin">У Вас нет заявок на возврат</p>
                 </div>

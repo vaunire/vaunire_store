@@ -40,10 +40,10 @@ class OrdersInline(TabularInline):
     extra = 0
 
     def get_readonly_fields(self, request, obj=None):
-        return self.fields # Делаем все поля read-only автоматически
+        return self.fields 
 
     def has_add_permission(self, request, obj):
-        return False # Запрещаем добавление новых заказов через инлайн
+        return False 
 
     def order_number(self, obj):
         return obj.id
@@ -70,10 +70,10 @@ class OrdersInline(TabularInline):
     def payment_status(self, obj):
         """Отображает статус оплаты заказа"""
         if obj.paid:
-            return "Заказ оплачен"  # Если paid = True, сразу возвращаем "Оплачен"
+            return "Заказ оплачен"
         elif obj.payments.exists():
             payment = obj.payments.first()
-            return payment.get_status_display()  # Иначе берём статус из Payment
+            return payment.get_status_display() 
         return "Заказ не оплачен"
     payment_status.short_description = 'Статус оплаты'
 
@@ -87,7 +87,7 @@ class OrdersInline(TabularInline):
 
 @admin.register(Customer)
 class CustomerAdmin(BaseAdmin):
-    list_display = ('user', 'phone', 'email', 'is_active')
+    list_display = ('user', 'phone', 'email', 'is_active', 'last_updated')
     search_fields = ('user__username', 'phone', 'email')
     list_filter = (
         'is_active',
@@ -105,6 +105,10 @@ class CustomerAdmin(BaseAdmin):
                 'address',
             )
         }),
+        ('Системная информация', {
+            'fields': ('last_updated',),
+            'classes': ('collapse',),
+        }),
         ('Предпочтения', {
             'fields': (
                 'wishlist',
@@ -113,6 +117,7 @@ class CustomerAdmin(BaseAdmin):
             'classes': ('collapse',),
         }),
     )
+    readonly_fields = ('last_updated',)
 
 @admin.register(Notifications)
 class NotificationsAdmin(BaseAdmin):
