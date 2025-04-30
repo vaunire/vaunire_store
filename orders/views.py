@@ -109,7 +109,7 @@ class SubmitReturnView(views.View):
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
         # Проверка срока подачи возврата (14 дней с даты получения)
-        if order.order_date < timezone.now() - timedelta(days=14):
+        if order.order_date < timezone.now() - timedelta(days = 14):
             messages.error(request, 'Срок для подачи запроса на возврат истек.')
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
 

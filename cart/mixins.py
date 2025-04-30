@@ -16,11 +16,11 @@ class CartMixin(views.generic.detail.SingleObjectMixin, views.View):
         if request.user.is_authenticated:
             # Получаем или создаём профиль покупателя
             customer, created = Customer.objects.get_or_create(
-                user=request.user,
-                defaults={'phone': '', 'email': request.user.email or '', 'first_name': request.user.first_name, 'last_name': request.user.last_name}
+                user = request.user,
+                defaults = {'phone': '', 'email': request.user.email or '', 'first_name': request.user.first_name, 'last_name': request.user.last_name}
             )
             # Ищем активную корзину (не в заказе) или создаём новую
-            cart = Cart.objects.filter(owner=customer, in_order=False).first()
+            cart = Cart.objects.filter(owner = customer, in_order = False).first()
             if not cart:
                 cart = Cart.objects.create(owner=customer)
         self.cart = cart  # Сохраняем корзину в атрибут экземпляра

@@ -25,7 +25,7 @@
                                 <span class="block text-xs text-gray-400 font-medium">Дата заявки</span>
                                 <span class="text-gray-700 text-sm">{{ return_request.created_at|date:"d.m.Y" }}</span>
                             </div>
-                            <div class="w-[250px]">
+                            <div class="w-[240px]">
                                 <span class="block text-xs text-gray-400 font-medium mb-0.5">Статус</span>
                                 <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-normal rounded-md h-6
                                     {% if return_request.status == 'paid' %}bg-green-100 text-green-700
@@ -35,7 +35,7 @@
                                     {{ return_request.get_status_display }}
                                 </span>
                             </div>
-                            <div class="flex items-center gap-4 w-[225px]">
+                            <div class="flex items-center gap-4 w-[205px]">
                                 <div class="w-[180px] -ml-10">
                                     <span class="block text-xs text-gray-400 font-medium">Кол-во товаров</span>
                                     <span class="text-gray-700 font-semibold text-sm">{{ return_request.products.count }}</span>
@@ -97,7 +97,7 @@
                             </div>
                             <!-- Товары в заявке на возврат -->
                             <div class="space-y-3">
-                                <h4 class="text-[13px] font-light -mb-0.5">Товары для возврата ({{ return_request.products.count }})</h4>
+                                <h4 class="text-[13px] font-thin -mb-0.5">Товары для возврата ({{ return_request.products.count }})</h4>
                                 {% for item in return_request.products.all %}
                                     <div class="flex items-center gap-4">
                                         <img src="{{ item.content_object.image.url }}" alt="{{ item.content_object.name }}" class="w-16 h-16 object-cover rounded-md shadow-sm">

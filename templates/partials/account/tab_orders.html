@@ -156,7 +156,7 @@
                             </div>
                             <!-- Товары в заказе -->
                             <div class="space-y-3">
-                                <h4 class="text-[13px] font-light -mb-0.5">Количество товаров ({{ order.cart.products.all|length }})</h4>
+                                <h4 class="text-[13px] font-thin -mb-0.5">Количество товаров ({{ order.cart.products.all|length }})</h4>
                                 {% for item in order.cart.products.all %}
                                     <div class="flex items-center gap-4">
                                         <img src="{{ item.content_object.image.url }}" alt="{{ item.content_object.name }}" class="w-16 h-16 object-cover rounded-md shadow-sm">

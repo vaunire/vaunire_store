@@ -15,7 +15,7 @@ class Promotion(models.Model):
     start_date = models.DateTimeField(verbose_name = "Дата начала")
     end_date = models.DateTimeField(verbose_name = "Дата окончания")
     discount_percentage = models.DecimalField(max_digits = 5, decimal_places = 2, validators = [MinValueValidator(0), MaxValueValidator(100)], verbose_name = "Процент скидки")
-    albums = models.ManyToManyField(Album, blank = True, verbose_name = "Альбомы, участвующие в акции")
+    albums = models.ManyToManyField('catalog.Album', blank = True, verbose_name = "Альбомы, участвующие в акции", related_name = 'promotions')
     is_active = models.BooleanField(default = True, verbose_name = "Активна")
 
     class Meta:
@@ -33,8 +33,7 @@ class Promotion(models.Model):
 # ❒ Модель промокода с фиксированной или процентной скидкой
 class PromoCode(models.Model):
     code = models.CharField(max_length = 20, unique = True, verbose_name = "Код")
-    discount_percentage = models.DecimalField(max_digits = 5, decimal_places = 2, validators = [MinValueValidator(0), MaxValueValidator(100)], default = 0, verbose_name = "Процент скидки")
-    discount_amount = models.DecimalField(max_digits = 10, decimal_places = 2, validators = [MinValueValidator(0)], default = 0, verbose_name = "Фиксированная скидка (руб)")
+    discount_amount = models.DecimalField(max_digits = 10, decimal_places = 2, validators = [MinValueValidator(0)], verbose_name = "Фиксированная скидка (руб)")
     valid_from = models.DateTimeField(verbose_name = "Действует с")
     valid_until = models.DateTimeField(verbose_name = "Действует до")
     max_uses = models.PositiveIntegerField(default = 0, verbose_name = "Максимальное количество использований (0 = без ограничений)")
@@ -70,13 +69,10 @@ class PromoCode(models.Model):
                 return False, "Промокод истек или еще не действует."
             if self.max_uses > 0 and self.times_used >= self.max_uses:
                 return False, "Промокод достиг лимита использований."
-            if cart.final_price < self.min_purchase_amount:
-                return False, f"Сумма корзины должна быть не менее {self.min_purchase_amount} ₽."
-            if self.discount_percentage > 0:
-                discount = cart.final_price * (self.discount_percentage / Decimal('100.00'))
-                cart.final_price -= discount
-        elif self.discount_amount > 0:
-            cart.final_price -= self.discount_amount
+        if cart.final_price < self.min_purchase_amount:
+            return False, f"Сумма корзины должна быть не менее {self.min_purchase_amount} ₽."
+        
+        cart.final_price -= self.discount_amount
         if cart.final_price < 0:
             cart.final_price = Decimal('0.00')
         self.times_used += 1

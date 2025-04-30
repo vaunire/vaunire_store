@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from .models import Order
 
@@ -10,8 +11,9 @@ class OrderForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['order_date'].label = 'Дата получения заказа'
     
-    order_date = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'})
+    order_date = forms.DateTimeField(
+        initial = timezone.now,
+        widget = forms.DateTimeInput(attrs = {'type': 'datetime-local'})
     )
 
     class Meta:

@@ -53,7 +53,7 @@ class PromotionAdmin(BaseAdmin):
 
 @admin.register(PromoCode)
 class PromoCodeAdmin(BaseAdmin):
-    list_display = ('code', 'discount_percentage', 'discount_amount', 'valid_from', 'valid_until', 'is_active')
+    list_display = ('code', 'discount_amount', 'valid_from', 'valid_until', 'is_active')
     search_fields = ('code',)
     list_filter = (
         ('is_active', ChoicesDropdownFilter),
@@ -64,7 +64,6 @@ class PromoCodeAdmin(BaseAdmin):
         ('Основная информация', {
             'fields': (
                 'code',
-                'discount_percentage',
                 'discount_amount',
                 'is_active',
                 'min_purchase_amount',

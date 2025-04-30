@@ -3,6 +3,8 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
+from decimal import Decimal
+
 from promotions.models import PromoCode
 
 # operator — модуль для динамической работы с атрибутами объектов, нужен для attrgetter
@@ -13,7 +15,7 @@ import operator
 class Cart(models.Model):
     owner = models.ForeignKey('accounts.Customer', verbose_name = 'Покупатель', on_delete = models.CASCADE)
     total_products = models.IntegerField(default = 0, verbose_name = 'Общее кол-во товара')
-    final_price = models.DecimalField(max_digits = 10, decimal_places = 2, verbose_name = 'Общая цена', null = True, blank = True)
+    final_price = models.DecimalField(max_digits = 10, decimal_places = 2, verbose_name = 'Финальная цена', null = True, blank = True)
     original_price = models.DecimalField(max_digits = 10, decimal_places = 2, verbose_name = 'Оригинальная цена', null = True, blank = True)
     applied_promocode = models.ForeignKey(PromoCode, verbose_name = 'Примененный промокод', null = True, blank = True, on_delete = models.SET_NULL)
     in_order = models.BooleanField(default = False, verbose_name = 'В заказе')
@@ -27,24 +29,42 @@ class Cart(models.Model):
             verbose_name_plural = 'Корзины'
 
     def update_totals(self):
-        # Пересчитывает итоги корзины, сохраняя оригинальную цену
+
+        if not self.pk:  # Если объект еще не сохранен
+            self.original_price = 0
+            self.final_price = 0
+            self.action_discount = 0
+            self.promocode_discount = 0
+            return
+
         cart_products = self.products.all()
         self.total_products = sum(cp.quantity for cp in cart_products) or 0
-        self.original_price = sum(float(cp.final_price) for cp in cart_products) or 0.0
-        self.final_price = self.original_price
+        # Рассчитываем оригинальную цену (без скидок)
+        self.original_price = sum(cp.quantity * cp.content_object.current_price for cp in cart_products) or Decimal('0.00')
+        # Рассчитываем финальную цену (с учетом акций)
+        self.final_price = sum(cp.quantity * cp.content_object.discounted_price for cp in cart_products) or Decimal('0.00')
 
-        # Применяем промокод, если он есть
+        # Применяем скидку по программе лояльности
+        if self.owner:
+            loyalty = self.owner.loyalty_records.first()
+            if loyalty and loyalty.discount_percentage > 0:
+                discount = self.final_price * (loyalty.discount_percentage / Decimal('100.00'))
+                self.final_price -= discount
+
+        # Применяем промокод
         if self.applied_promocode:
-            self.applied_promocode.apply_to_cart(self)  # Без request
+            success, message = self.applied_promocode.apply_to_cart(self)
+            if not success:
+                self.applied_promocode = None  # Сбрасываем промокод, если он невалиден
+
+        if self.final_price < 0:
+            self.final_price = Decimal('0.00')
 
     def save(self, *args, **kwargs):
-        if self.pk:  # Если объект уже существует в базе
-            self.update_totals()
-        else:  # Для новых объектов устанавливаем начальные значения
-            self.total_products = 0
-            self.original_price = 0.0
-            self.final_price = 0.0
-        super().save(*args, **kwargs)
+        if not self.pk:  # Если объект новый, сначала сохранить
+            super().save(*args, **kwargs)  # Сохраняем, чтобы получить pk
+        self.update_totals()
+        super().save(*args, **kwargs)  # Сохраняем с обновленными totals
 
     @property
     # Возвращает список объектов (например, Album), находящихся в корзине.
@@ -53,7 +73,7 @@ class Cart(models.Model):
 
     @property
     def discount(self):
-        if self.original_price and self.final_price and self.original_price > self.final_price:
+        if self.original_price > self.final_price:
             return self.original_price - self.final_price
         return 0
 
@@ -78,11 +98,11 @@ class CartProduct(models.Model):
 
     def __str__(self):
         return f"Продукт: {self.content_object.name}"
-
+        
     def get_product_price(self):
         # Возвращает текущую цену продукта из прайс-листа для Album
         if self.content_type.model == 'album': 
-            return self.content_object.current_price  
+            return self.content_object.discounted_price  
         # elif self.content_type.model == 'service':
         #     return self.content_object.price
         raise ValueError(f"Объект {self.content_object} не поддерживает определение цены")

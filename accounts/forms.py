@@ -91,12 +91,6 @@ class ProfileEditForm(forms.ModelForm):
         if self.customer:
             self.fields['phone'].initial = self.customer.phone
             self.fields['address'].initial = self.customer.address
-        for field in self.fields.values():
-            field.widget.attrs.update({
-                'class': 'text-sm block w-full rounded-lg pl-12 pr-4 py-3 bg-transparent border-b-1 border-gray-200 focus:border-b-blue-500 outline-none transition-all duration-300 placeholder-gray-400',
-                'placeholder': field.label,
-                'disabled': 'disabled',
-            })
 
     def save(self, commit = True):
         user = super().save(commit = commit)

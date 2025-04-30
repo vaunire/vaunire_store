@@ -5,6 +5,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
 from datetime import date
+from decimal import Decimal
+from django.utils import timezone
 
 # slugify — функция для генерации URL-совместимых строк
 from slugify import slugify
@@ -199,6 +201,24 @@ class Album(models.Model):
             pricelist_item = self.items.filter(price_list = active_pricelist).first()
             return pricelist_item.price if pricelist_item else 0
         return 0
+    
+    @property
+    def active_promotion(self):
+        #Возвращает активную акцию для альбома, если она есть
+        return self.promotions.filter(
+            is_active=True,
+            start_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+
+    @property
+    def discounted_price(self):
+        # Возвращает цену со скидкой, если есть активная акция
+        if self.active_promotion:
+            discount = self.current_price * (self.active_promotion.discount_percentage / Decimal('100.00'))
+            discounted_price = self.current_price - discount
+            return max(discounted_price, Decimal('0.00'))
+        return self.current_price
 
     class Meta:
         verbose_name = 'Альбом'
