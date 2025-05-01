@@ -16,7 +16,7 @@ class PaymentInline(TabularInline):
     model = Payment
     fields = ('payment_id', 'divider', 'status', 'payment_method', 'amount', 'payment_date')
     readonly_fields = ('divider', )
-    extra = 1
+    extra = 0
 
     def divider(self, obj):
         return ":"

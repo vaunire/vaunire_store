@@ -10,5 +10,9 @@
 static/
 media/
 
+# Бинарники Stripe CLI
+stripe
+stripe.exe
+
 # Кэш Python
 __pycache__/

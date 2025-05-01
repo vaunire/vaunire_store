@@ -42,8 +42,8 @@
                                         {{ style.name }}{% if not forloop.last %}, {% endif %}
                                     {% endfor %}
                                 {% endif %}</span>
-                                <span class="text-gray-400">|</span>
-                                <span>Артикул: {{ item.content_object.article }}</span>
+                                <span class="text-gray-300">|</span>
+                                <span>{{ item.content_object.genre.name }}</span>
                             </div>
                             <div class="mt-2 w-full h-px bg-gray-200"></div>
                             <div class="mt-1.5 text-[13px] font-light">123</div>
@@ -60,7 +60,7 @@
                                     <p class="text-lg font-bold text-gray-800">
                                         {{ item.content_object.discounted_price|floatformat:0|intcomma }} ₽
                                     </p>
-                                    <p class="text-[13px] font-thin -mt-0.5 text-gray-400 line-through">
+                                    <p class="text-sm font-thin -mt-0.5 text-gray-400 opacity-65 line-through">
                                         {{ item.content_object.current_price|floatformat:0|intcomma }} ₽
                                     </p>
                                 </div>
@@ -104,12 +104,12 @@
                 <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
             </svg>
         </div>
-        <h4 class="text-lg text-gray-900 font-semibold mb-3 text-center">Удалить товар из заказа?</h4>
+        <h4 class="text-lg text-gray-900 font-bold mb-3 text-center">Удалить товар из заказа?</h4>
         <div class="flex justify-center mb-3">
             <img id="itemImage" src="" alt="Item Image" class="w-20 h-20 object-cover rounded-lg hidden">
         </div>
         <p id="itemName" class="text-sm mb-2 text-center"></p>
-        <p class="text-sm text-gray-600 mb-5 text-center">Товар будет удален из вашей корзины</p>
+        <p class="text-sm font-thin mb-5 text-center">Товар будет удален из вашей корзины</p>
         <div class="border-t border-gray-200 mb-4"></div>
         <div class="flex justify-between tracking-wide text-xs">
             <button onclick="hideDeleteModal()" class="px-3 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 font-geologica">Отмена</button>

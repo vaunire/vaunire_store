@@ -1,11 +1,16 @@
+from datetime import timedelta
+
+import stripe
 from django import views
+from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
-from datetime import timedelta
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 from accounts.models import Customer
 from cart.mixins import CartMixin
@@ -13,7 +18,10 @@ from cart.models import Cart, CartProduct
 from catalog.models import Artist
 
 from .forms import OrderForm
-from .models import Order, ReturnRequest
+from .models import Order, Payment, ReturnRequest
+
+# Настройка Stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class MakeOrderView(CartMixin, views.View):
     """Создаёт новый заказ на основе данных из формы, проверяет наличие товаров и их количество на складе, сохраняет заказ и обновляет остатки"""
@@ -75,28 +83,171 @@ class MakeOrderView(CartMixin, views.View):
             new_order.comment = form.cleaned_data['comment']
             new_order.save()
 
-            # Обновление данных в Customer (если они изменились)
+            # Обновление данных в Customer
             customer.first_name = form.cleaned_data['first_name']
             customer.last_name = form.cleaned_data['last_name']
             customer.phone = form.cleaned_data['phone']
             customer.address = form.cleaned_data['address']
             customer.save()
 
-            # Обновляем корзину и связываем с заказом
-            self.cart.in_order = True
-            self.cart.save()
-            new_order.save()
-            customer.orders.add(new_order)
-
             # Обновление остатков на складе
             for item in self.cart.products.all():
                 item.content_object.stock -= item.quantity
                 item.content_object.save()
+            
+            # Создание сессии Stripe
+            try:
+                # Конвертируем final_price в копейки (Почему-то Stripe понимает сумму только в мин. единицах валюты)
+                amount = int(self.cart.final_price * 100)
+                checkout_session = stripe.checkout.Session.create(
+                    payment_method_types = ['card'],
+                    line_items = [
+                        {
+                            'price_data': {
+                                'currency': 'rub',
+                                'product_data': {
+                                    'name': f'Заказ №{new_order.id}',
+                                },
+                                'unit_amount': amount,
+                            },
+                            'quantity': 1,
+                        },
+                    ],
+                    mode = 'payment',
+                    success_url = request.build_absolute_uri(reverse('payment_success')) + '?session_id={CHECKOUT_SESSION_ID}',
+                    cancel_url = request.build_absolute_uri(reverse('payment_cancel')),
+                    metadata = {'order_id': new_order.id},
+                )
 
-            messages.success(request, 'Спасибо за заказ! Менеджер свяжется с вами в ближайшее время.')
-            return redirect('/')
+                # Создаем запись о платеже
+                Payment.objects.create(
+                    order = new_order,
+                    amount = self.cart.final_price,
+                    payment_id = checkout_session.id,
+                    status = 'pending',
+                    payment_method = 'Stripe'
+                )
+
+                # Помечаем корзину как in_order только после создания платежа
+                self.cart.in_order = True
+                self.cart.save()
+                customer.orders.add(new_order)
+
+                # Перенаправляем на страницу оплаты Stripe
+                return redirect(checkout_session.url, code = 303)
+
+            except stripe.error.StripeError as e:
+                messages.error(request, 'Ошибка при создании платежа. Пожалуйста, попробуйте снова.')
+                return redirect('checkout')
+
+        else:
+            messages.error(request, 'Мы уже держим ваш заказ, осталось лишь немного поправить!')
+        print("Form errors:", form.errors)  
         # Если форма невалидна, возвращаем пользователя на страницу оформления
         return redirect('cart')
+    
+class PaymentSuccessView(views.View):
+    """Обрабатывает успешную оплату"""
+    def get(self, request, *args, **kwargs):
+        session_id = request.GET.get('session_id')
+        if not session_id:
+            return redirect('/')
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            order_id = session.metadata.get('order_id')
+            order = Order.objects.get(id=order_id)
+
+            # Проверяем, не был ли заказ уже оплачен
+            if not order.paid:
+                order.paid = True
+                order.status = 'in_progress'  # Обновляем статус заказа
+                order.save()
+
+                payment = Payment.objects.get(payment_id=session_id)
+                payment.status = 'success'
+                payment.payment_date = timezone.now()
+                payment.save()
+
+                messages.success(request, 'Оплата прошла успешно! Ваш заказ в обработке.')
+            else:
+                messages.info(request, 'Заказ уже был оплачен.')
+            return redirect('/')
+
+        except (stripe.error.StripeError, Order.DoesNotExist, Payment.DoesNotExist):
+            messages.error(request, 'Ошибка при обработке платежа.')
+            return redirect('/')
+
+class PaymentCancelView(views.View):
+    """Обрабатывает отмену оплаты"""
+    def get(self, request, *args, **kwargs):
+        messages.error(request, 'Оплата была отменена. Вы можете попробовать снова.')
+        return redirect('cart')
+
+class StripeWebhookView(views.View):
+    """
+    Класс для обработки вебхуков Stripe.
+
+    Цель:
+    - Принимать уведомления от Stripe о событиях (например, успешная оплата).
+    - Обновлять заказы и платежи в базе данных для надёжного учёта транзакций.
+
+    Вебхуки — это POST-запросы от Stripe, отправляемые на сервер при событиях.
+    Этот класс проверяет подлинность запросов и обрабатывает событие checkout.session.completed.
+
+    Полезное видео для понимания вебхуков:
+    - Listen IT | Что такое Webhook за 12 минут - https://www.youtube.com/watch?v=_NlHzAaLH4g&t=86s
+
+    Возвращает:
+            HttpResponse: Статус 200 (успех) или 400 (ошибка).
+    """
+    @method_decorator(csrf_exempt) 
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # Извлечение данных запроса
+        payload = request.body # Тело запроса с JSON-данными события
+        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')  # Подпись для проверки
+        endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+        try:
+            # Валидация подписи для защиты от поддельных запросов
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret
+            )
+        except ValueError:
+            # Возвращаем ошибку 400, если тело запроса некорректно
+            return HttpResponse(status = 400)
+        except stripe.error.SignatureVerificationError:
+            # Возвращаем ошибку 400, если подпись не совпадает, что указывает на поддельный запрос
+            return HttpResponse(status = 400)
+
+        # Обрабатываем событие успешной оплаты (checkout.session.completed)
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            order_id = session.get('metadata', {}).get('order_id')
+
+            # Если метаданные отсутствуют или order_id неверный, обработка пропускается
+            if not order_id:
+                return HttpResponse(status = 200)  # Возвращаем 200, чтобы не блокировать Stripe
+
+            # Обновляем заказ и платёж в базе данных
+            try:
+                order = Order.objects.get(id = order_id)
+                if not order.paid:
+                    order.paid = True
+                    order.status = 'in_progress'
+                    order.save()
+
+                    # Находим связанный платёж по ID сессии Stripe
+                    payment = Payment.objects.get(payment_id = session['id'])
+                    payment.status = 'success'
+                    payment.payment_date = timezone.now()
+                    payment.save()
+            except (Order.DoesNotExist, Payment.DoesNotExist):
+                # Заказ или платёж не найдены (например, удалены или неверный ID)
+                pass
+        # Возвращаем HTTP-ответ 200, чтобы уведомить Stripe об успешной обработке
+        return HttpResponse(status = 200)
 
 class SubmitReturnView(views.View):
     """Обрабатывает запрос на возврат товара"""

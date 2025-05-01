@@ -204,11 +204,11 @@ class Album(models.Model):
     
     @property
     def active_promotion(self):
-        #Возвращает активную акцию для альбома, если она есть
+        # Возвращает активную акцию для альбома, если она есть
         return self.promotions.filter(
-            is_active=True,
-            start_date__lte=timezone.now(),
-            end_date__gte=timezone.now()
+            is_active = True,
+            start_date__lte = timezone.now(),
+            end_date__gte = timezone.now()
         ).first()
 
     @property

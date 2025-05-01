@@ -11,7 +11,7 @@ class OrderForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['order_date'].label = 'Дата получения заказа'
     
-    order_date = forms.DateTimeField(
+    order_date = forms.DateField(
         initial = timezone.now,
         widget = forms.DateTimeInput(attrs = {'type': 'datetime-local'})
     )

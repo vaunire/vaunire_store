@@ -80,7 +80,6 @@ window.addEventListener('load', () => {
     const validTabs = ['account', 'orders', 'wishlist', 'returns'];
     const tabToActivate = validTabs.includes(path) ? path : 'account';
 
-    console.log(`Initial tab: ${tabToActivate}`);
     activateTab(tabToActivate);
 
     if (!validTabs.includes(path)) {

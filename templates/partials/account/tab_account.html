@@ -10,7 +10,6 @@
         font-size: 13px;
         letter-spacing: 0.7px;
         line-height: 1.1rem;
-        transition: all 0.2s ease;
     }
     .form-input:focus {
         outline: none;
@@ -154,13 +153,7 @@
 <!-- JavaScript для управления визуальным состоянием полей -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        console.log('Account tab script running');
         const profileForm = document.getElementById('profileForm');
-        if (!profileForm) {
-            console.error('Profile form not found');
-            return;
-        }
-    
         const isEditing = {{ is_editing|lower }};
         const inputs = profileForm.querySelectorAll('input, textarea');
     

@@ -1,0 +1,48 @@
+{% load static %}
+
+<!-- Пагинация, выровненная по правому краю -->
+<nav class="mt-6 mr-3.5 flex justify-end items-center space-x-2">
+
+    {% if page_obj.has_previous %}
+        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}"
+           class="px-3 py-1.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors duration-200 flex items-center font-geologica text-sm">
+        </a>
+    {% endif %}
+
+    <!-- Показываем номера страниц -->
+    {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+            <!-- Текущая страница выделена -->
+            <span class="px-2 py-1 bg-blue-600 text-white font-geologica font-bold text-xs rounded w-6 h-6 flex items-center justify-center">{{ num }}</span>
+        {% elif num == 1 or num == page_obj.paginator.num_pages or num > page_obj.number|add:-3 and num <= page_obj.number|add:1 %}
+            <!-- Показываем первую, последнюю или ближайшие к текущей страницы (до текущей + 1) -->
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}"
+               class="px-3 py-1 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center font-geologica text-sm transition-colors duration-200">{{ num }}</a>
+        {% elif num == page_obj.number|add:2 and num <= page_obj.paginator.num_pages %}
+            <!-- Показываем серую страницу (+1 от последней кликабельной) -->
+            <span class="px-3 py-1 text-gray-400 opacity-50 cursor-not-allowed rounded-full w-6 h-6 flex items-center justify-center font-geologica text-xs">{{ num }}</span>
+        {% else %}
+            <!-- Показываем "..." для пропущенных страниц -->
+            {% if num == 2 and page_obj.number > 4 %}
+                <span class="px-2 py-1 text-gray-400 font-geologica text-sm">...</span>
+            {% elif num == page_obj.paginator.num_pages|add:-1 and page_obj.number < num|add:-2 %}
+                <span class="px-2 py-1 text-gray-400 font-geologica text-sm">...</span>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    <!-- Если текущая страница последняя, добавляем серую страницу (+1) -->
+    {% if page_obj.number == page_obj.paginator.num_pages %}
+        <span class="px-3 py-1 text-gray-400 opacity-50 cursor-not-allowed rounded-full w-8 h-8 flex items-center justify-center font-geologica text-sm">{{ page_obj.paginator.num_pages|add:1 }}</span>
+    {% endif %}
+
+    {% if page_obj.has_next %}
+        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
+           class="px-3 py-1.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors duration-200 flex items-center font-geologica text-sm">
+            Следующая
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    {% endif %}
+</nav>

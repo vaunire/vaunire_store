@@ -125,12 +125,12 @@
                             <!-- Общая информация -->
                             <div class="mt-4 text-sm border border-gray-100 rounded-xl p-3.5 bg-white shadow-sm">
                                 <div class="grid grid-cols-1 gap-y-2.5 font-light">
-                                    <p class="text-gray-700"><span class="text-black">Дата заявки:</span> {{ return_request.created_at|date:"d.m.Y" }}</p>
-                                    <p class="text-gray-700"><span class="text-black">Причина:</span> {{ return_request.get_reason_display }}</p>
-                                    <p class="text-gray-700"><span class="text-black">Подробности:</span> {{ return_request.details|default:"Не указано" }}</p>
+                                    <p><span class="text-black">Дата заявки:</span> {{ return_request.created_at|date:"d.m.Y" }}</p>
+                                    <p><span class="text-black">Причина:</span> {{ return_request.get_reason_display }}</p>
+                                    <p><span class="text-black">Подробности:</span> {{ return_request.details|default:"Не указано" }}</p>
                                     <div class="flex flex-wrap gap-x-3.5 gap-y-2">
                                         {% if return_request.file %}
-                                            <p class="text-gray-700">
+                                            <p>
                                                 <span class="text-black">Прикрепленный файл:</span>
                                                 <a href="{{ return_request.file.url }}" class="text-blue-600 text-[13px] ml-1 hover:text-blue-800" target="_blank">Скачать</a>
                                             </p>
@@ -138,7 +138,7 @@
                                         <span class="text-gray-400 opacity-90 font-thin"> | </span>
                                         <div class="flex items-center gap-2 -mt-0.5">
                                             <span class="font-light text-black">Статус:</span>
-                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-light rounded-md h-6
+                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-normal rounded-md h-6
                                                 {% if return_request.status == 'paid' %}bg-green-100 text-green-700
                                                 {% elif return_request.status == 'pending' %}bg-blue-100 text-blue-700
                                                 {% elif return_request.status == 'approved' %}bg-green-100 text-green-700

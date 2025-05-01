@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.utils.decorators import method_decorator
+from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 
 from catalog.models import Album
@@ -116,7 +117,7 @@ class RegistrationView(views.View):
         }
         return render(request, 'auth/registration.html', context)
     
-@method_decorator(login_required, name = 'dispatch') # Декоратор проверки авторизации для ВСЕХ методов класса
+@method_decorator(login_required, name = 'dispatch') # Декоратор проверки авторизации 
 class UpdateProfileView(CartMixin, NotificationsMixin, views.View):
     def get(self, request, *args, **kwargs):
         try:
@@ -160,6 +161,27 @@ class UpdateProfileView(CartMixin, NotificationsMixin, views.View):
             'cart': self.cart,
             'notifications': self.notifications(request.user),
         })
+
+class FavoritesView(CartMixin, NotificationsMixin, views.View):
+    """Представление для отображения избранных альбомов пользователя"""
+    def get(self, request, *args, **kwargs):
+        # Получаем клиента, связанного с пользователем
+        customer = request.user.customer
+        # Получаем все альбомы из списка избранного
+        albums = customer.favorite.all().order_by('-id').distinct()
+
+        # Пагинация: 15 альбомов на страницу (5 в строке, 3 строки)
+        paginator = Paginator(albums, 15)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'albums': page_obj, 
+            'page_obj': page_obj,
+            'cart': self.cart,
+            'notifications': self.notifications(request.user),
+        }
+        return render(request, 'pages/favorites.html', context)
 
 class AddToWishlist(views.View):
     """Добавляет альбом в список ожидания пользователя"""

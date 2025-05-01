@@ -19,12 +19,17 @@
 
     <!-- Форма -->
     <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-200 relative {% if not user.is_authenticated %}blur-sm{% endif %} transition-all duration-300">
-        <form method="POST" action="{% url 'order' %}" class="space-y-3 -mt-5 tracking-wide" id="order-form">
+        <form method="POST" action="{% url 'order' %}" class="space-y-4 -mt-6 tracking-wide" id="order-form">
             {% csrf_token %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <!-- Имя -->
                 <div class="input-wrapper">
-                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">Имя</label>
+                    <label for="{{ form.first_name.id_for_label }}" class="flex items-center mb-1.5">
+                        <svg class="text-blue-600 mr-1.5 opacity-75" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                            <path d="M15 11h7v2h-7zm1 4h6v2h-6zm-2-8h8v2h-8zM4 19h10v-1c0-2.757-2.243-5-5-5H7c-2.757 0-5 2.243-5 5v1h2zm4-7c1.995 0 3.5-1.505 3.5-3.5S9.995 5 8 5S4.5 6.505 4.5 8.5S6.005 12 8 12z" fill="currentColor"/>
+                        </svg>
+                        <span class="text-sm font-light">Имя</span>
+                    </label>
                     <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}" 
                            value="{% if form.first_name.value %}{{ form.first_name.value }}{% elif user.first_name %}{{ user.first_name }}{% endif %}"
                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -35,7 +40,12 @@
                 </div>
                 <!-- Фамилия -->
                 <div class="input-wrapper">
-                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">Фамилия</label>
+                    <label for="{{ form.last_name.id_for_label }}" class="flex items-center mb-1.5">
+                        <svg class="text-blue-600 mr-1.5 opacity-75" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                            <path d="M15 11h7v2h-7zm1 4h6v2h-6zm-2-8h8v2h-8zM4 19h10v-1c0-2.757-2.243-5-5-5H7c-2.757 0-5 2.243-5 5v1h2zm4-7c1.995 0 3.5-1.505 3.5-3.5S9.995 5 8 5S4.5 6.505 4.5 8.5S6.005 12 8 12z" fill="currentColor"/>
+                        </svg>
+                        <span class="text-sm font-light">Фамилия</span>
+                    </label>
                     <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}" 
                            value="{% if form.last_name.value %}{{ form.last_name.value }}{% elif user.last_name %}{{ user.last_name }}{% endif %}"
                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -48,7 +58,12 @@
 
             <!-- Телефон -->
             <div class="input-wrapper">
-                <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">Телефон</label>
+                <label for="{{ form.phone.id_for_label }}" class="flex items-center mb-1.5">
+                    <svg class="text-blue-600 mr-1 opacity-75" xmlns="http://www.w3.org/2000/svg" width="17.5" height="17.5" viewBox="0 0 24 24">
+                        <path d="M20.487 17.14l-4.065-3.696a1.001 1.001 0 0 0-1.391.043l-2.393 2.461c-.576-.11-1.734-.471-2.926-1.66c-1.192-1.193-1.553-2.354-1.66-2.926l2.459-2.394a1 1 0 0 0 .043-1.391L6.859 3.513a1 1 0 0 0-1.391-.087l-2.17 1.861a1 1 0 0 0-.29.649c-.015.25-.301 6.172 4.291 10.766C11.305 20.707 16.323 21 17.705 21c.202 0 .326-.006.359-.008a.992.992 0 0 0 .648-.291l1.86-2.171a.997.997 0 0 0-.085-1.39z" fill="currentColor"/>
+                    </svg>
+                    <span class="text-sm font-light">Телефон</span>
+                </label>
                 <input type="tel" name="phone" id="{{ form.phone.id_for_label }}" 
                        value="{% if form.phone.value %}{{ form.phone.value }}{% elif user.customer.phone %}{{ user.customer.phone }}{% endif %}"
                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -60,7 +75,13 @@
 
             <!-- Способ доставки -->
             <div>
-                <label for="id_buying_type" class="block text-sm font-medium text-gray-700 mb-1.5">Способ доставки</label>
+                <label for="id_buying_type" class="flex items-center mb-1.5">
+                    <svg class="text-blue-600 mr-[5px] -mb-0.5 opacity-75" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="m9.564 8.73l.515 1.863c.485 1.755.727 2.633 1.44 3.032c.713.4 1.618.164 3.428-.306l1.92-.5c1.81-.47 2.715-.705 3.127-1.396c.412-.692.17-1.57-.316-3.325l-.514-1.862c-.485-1.756-.728-2.634-1.44-3.033c-.714-.4-1.619-.164-3.429.307l-1.92.498c-1.81.47-2.715.706-3.126 1.398c-.412.691-.17 1.569.315 3.324"/>
+                        <path fill="currentColor" d="M2.277 5.247a.75.75 0 0 1 .924-.522l1.703.472A2.707 2.707 0 0 1 6.8 7.075l2.151 7.786l.158.547a2.96 2.96 0 0 1 1.522 1.267l.31-.096l8.87-2.305a.75.75 0 1 1 .378 1.452l-8.837 2.296l-.33.102c-.006 1.27-.883 2.432-2.21 2.776c-1.59.414-3.225-.502-3.651-2.044c-.426-1.543.518-3.129 2.108-3.542a3.35 3.35 0 0 1 .237-.052L5.354 7.474a1.207 1.207 0 0 0-.85-.831L2.8 6.17a.75.75 0 0 1-.523-.923"/>
+                    </svg>
+                    <span class="text-sm font-light">Способ доставки</span>
+                </label>
                 <select name="buying_type" id="id_buying_type"
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                         required>
@@ -74,7 +95,12 @@
 
             <!-- Адрес (Яндекс.Карта) -->
             <div class="form-group input-wrapper">
-                <label for="address" class="block text-sm font-medium text-gray-700">Адрес доставки</label>
+                <label for="address" class="flex items-center">
+                    <svg class="text-blue-600 mr-1 -mt-0.5 opacity-75" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                        <path d="M12 2C7.589 2 4 5.589 4 9.995C3.971 16.44 11.696 21.784 12 22c0 0 8.029-5.56 8-12c0-4.411-3.589-8-8-8zm0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4s4 1.79 4 4s-1.79 4-4 4z" fill="currentColor"/>
+                    </svg>
+                    <span class="text-sm font-light">Адрес доставки</span>
+                </label>
                 <div id="map"></div>
                 <input type="hidden" id="address" name="address" 
                        value="{% if form.address.value %}{{ form.address.value }}{% elif user.customer.address %}{{ user.customer.address }}{% endif %}">
@@ -84,7 +110,12 @@
 
             <!-- Дата доставки -->
             <div>
-                <label for="{{ form.order_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">Дата получения заказа</label>
+                <label for="{{ form.order_date.id_for_label }}" class="flex items-center mb-1.5">
+                    <svg class="text-blue-600 mr-1.5 opacity-75" xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M7.75 4a.75.75 0 0 0-1.5 0v1.816a3.375 3.375 0 0 0-2.872 2.899l-.087.653c-.015.11-.029.221-.042.332a.493.493 0 0 0 .492.55H20.26a.493.493 0 0 0 .492-.55c-.014-.11-.027-.222-.042-.332l-.087-.653a3.375 3.375 0 0 0-2.872-2.899V4a.75.75 0 0 0-1.5 0v1.668a47.911 47.911 0 0 0-8.5 0zm13.195 8.226a.494.494 0 0 0-.496-.476H3.551a.494.494 0 0 0-.496.476a28.92 28.92 0 0 0 .33 5.41a3.01 3.01 0 0 0 2.678 2.532l1.193.118c3.155.31 6.333.31 9.488 0l1.193-.118a3.01 3.01 0 0 0 2.678-2.532a28.99 28.99 0 0 0 .33-5.41"/>
+                    </svg>
+                    <span class="text-sm font-light">Дата получения заказа</span>
+                </label>
                 <input type="date" name="order_date" id="id_order_date"
                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                        required>
@@ -95,7 +126,15 @@
 
             <!-- Комментарий -->
             <div class="input-wrapper">
-                <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">Комментарий к заказу</label>
+                <label for="{{ form.comment.id_for_label }}" class="flex items-center mb-1.5">
+                    <svg class="text-blue-600 mr-1.5 opacity-75" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                        <g fill="none">
+                            <path d="M24 0v24H0V0zM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035c-.01-.004-.019-.001-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022m-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/>
+                            <path fill="currentColor" d="M19 10a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3v.966c0 1.06-1.236 1.639-2.05.96L14.638 19H12a3 3 0 0 1-3-3v-3a3 3 0 0 1 3-3zm-3-6a3 3 0 0 1 3 3v1h-8a4 4 0 0 0-4 4v4c0 1.044.4 1.996 1.056 2.708L7 19.5c-.824.618-2 .03-2-1V17a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"/>
+                        </g>
+                    </svg>
+                    <span class="text-sm font-light">Комментарий к заказу</span>
+                </label>
                 <textarea name="comment" id="{{ form.comment.id_for_label }}"
                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                           placeholder="Дополнительные пожелания (необязательно)" rows="4">{{ form.comment.value|default:'' }}</textarea>
@@ -107,8 +146,8 @@
             <!-- Согласие -->
             <div class="flex items-center">
                 <input type="checkbox" id="agreement" name="agreement" class="h-3.5 w-3.5 text-blue-600 focus:outline-none border-gray-300 rounded-sm" required>
-                <label for="agreement" class="ml-2.5 text-sm text-gray-600 leading-tight">
-                    <a href="#" class="text-blue-600 underline">Я согласен с использованием моих персональных данных для обработки данного обращения</a>
+                <label for="agreement" class="ml-2.5 text-sm text-gray-600 leading-tight flex items-center">
+                    <span><a href="#" class="text-blue-600 underline">Я согласен с использованием моих персональных данных для обработки данного обращения</a></span>
                 </label>
             </div>
             <button type="submit" class="w-full px-6 py-3 bg-blue-500 text-white flex items-center justify-center space-x-1.5 rounded-lg hover:bg-blue-600 transition-all duration-300 shadow-md">

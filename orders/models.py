@@ -43,7 +43,7 @@ class Order(models.Model):
 
     first_name = models.CharField(max_length = 100, verbose_name = 'Имя', blank = True, null = True)
     last_name = models.CharField(max_length = 100, verbose_name = 'Фамилия', blank = True, null = True)
-    phone = models.CharField(max_length = 20, verbose_name = 'Номер телефона')
+    phone = models.CharField(max_length = 30, verbose_name = 'Номер телефона')
     email = models.EmailField(verbose_name = 'Электронная почта', blank = True, null = True)
     address = models.CharField(max_length = 255, verbose_name='Адрес доставки', blank = True, null = True)
     comment = models.TextField(verbose_name = 'Комментарий', blank = True, null = True)

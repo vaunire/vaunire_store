@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Vaunire | Избранные товары</title>
+{% endblock %}
+
+{% block content %}
+<main class="flex-grow">
+    <div class="container mx-auto max-w-[1340px] px-5 py-6">
+        <div class="flex-1">
+            <div class="mb-5">
+                <div class="relative inline-block">
+                    <h1 class="text-2xl font-geologica font-semibold text-gray-800 mt-1 relative z-10">
+                        Избранные товары
+                    </h1>
+                    {% if page_obj.paginator.count > 0 %}
+                        <span class="absolute -top-1 -right-2.5 text-3xl text-blue-600 opacity-25 font-bold font-geologica tracking-wide blur-xs">
+                            {{ page_obj.paginator.count }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-3">
+                {% for album in page_obj %}
+                    <div class="w-[calc(20%-12px)] min-w-[calc(20%-10px)] flex-shrink-0">
+                        {% include 'partials/catalog/card.html' with album=album %}
+                    </div>
+                {% empty %}
+                    <p class="text-gray-600 w-full font-light text-center py-8">В избранном пока нет альбомов</p>
+                {% endfor %}
+                
+                {% if page_obj|length > 0 %}
+                    {% with remaining=5|add:0 %}
+                        {% for i in "12345" %}
+                            {% if forloop.counter0 >= page_obj|length and forloop.counter0 < 5 %}
+                                <div class="w-[calc(20%-8px)] min-w-[calc(20%-8px)] flex-shrink-0"></div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+
+            <!-- Пагинация -->
+            {% include 'partials/layout/pagination.html' %}
+        </div>
+    </div>
+</main>
+{% endblock content %}

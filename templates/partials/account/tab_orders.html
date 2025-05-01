@@ -174,7 +174,14 @@
                                         </div>
                                         <div class="text-sm font-semibold text-gray-900 flex items-center">
                                             <span class="font-light text-xs text-gray-500 mr-1.5">{{ item.quantity }} шт. ×</span>
-                                            {{ item.content_object.current_price|floatformat:0|default:'0'|intcomma }} ₽
+                                            {% if item.content_object.discounted_price and item.content_object.discounted_price < item.content_object.current_price %}
+                                            <div class="flex flex-col items-center mt-4">
+                                                <span>{{ item.content_object.discounted_price|floatformat:0|intcomma }} ₽</span>
+                                                <span class="text-xs text-gray-400 font-thin opacity-80 line-through ml-2">{{ item.content_object.current_price|floatformat:0|intcomma }} ₽</span>
+                                            </div>
+                                            {% else %}
+                                                <span>{{ item.content_object.current_price|floatformat:0|intcomma }} ₽</span>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 {% empty %}
@@ -184,8 +191,8 @@
                             <!-- Общая информация -->
                             <div class="mt-4 text-sm border border-gray-100 rounded-xl p-3.5 bg-white shadow-sm">
                                 <div class="grid grid-cols-1 gap-y-2.5 font-light">
-                                    <p class="text-gray-700"><span class="font-light text-black">Дата получения:</span> {{ order.order_date|date:"d.m.Y" }} <span class="text-gray-600 font-light text-xs">с 11:00 - 20:00</span></p>
-                                    <div class="text-gray-700 flex items-center gap-1">
+                                    <p><span class="text-black">Дата получения:</span> {{ order.order_date|date:"d.m.Y" }} <span class="text-gray-600 font-light text-xs">с 11:00 - 20:00</span></p>
+                                    <div class="flex font-light items-center gap-1">
                                         <span class="font-light text-black">Адрес:</span> {{ order.address }}
                                         <a href="https://yandex.ru/maps/?text={{ order.address|urlencode }}" target="_blank" class="text-blue-600 underline ml-1 relative flex font-normal gap-1 hover:text-blue-800 text-xs items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="13.5" height="13.5" viewBox="0 0 24 24">
@@ -194,11 +201,11 @@
                                         </a>
                                     </div>
                                     <div class="flex flex-wrap gap-x-3 gap-y-2">
-                                        <p class="text-gray-700"><span class="font-light text-black">Тип доставки: </span>{{ order.get_buying_type_display }}</p>
+                                        <p><span class="font-light text-black">Тип доставки: </span>{{ order.get_buying_type_display }}</p>
                                         <span class="text-gray-400 opacity-90 font-thin"> | </span>
                                         <div class="flex items-center gap-2 -mt-0.5">
                                             <span class="font-light text-black">Статус:</span>
-                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-light rounded-md h-6 
+                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-normal rounded-md h-6 
                                                 {% if order.status == 'completed' %}bg-green-100 text-green-700
                                                 {% elif order.status == 'in_progress' %}bg-blue-100 text-blue-700
                                                 {% elif order.status == 'canceled' %}bg-red-100 text-red-700
