@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let images = [];
         try {
-            images = JSON.parse(carousel.dataset.images);
+            const cleanedDataImages = carousel.dataset.images.replace(/\s+/g, ' ').trim();
+            images = JSON.parse(cleanedDataImages);
         } catch (e) {
             console.error('Invalid JSON in data-images:', carousel.dataset.images, e);
             images = [carousel.querySelector('[data-carousel-image]')?.src || ''];
@@ -20,12 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const dotElements = dotsContainer ? dotsContainer.querySelectorAll('[data-dot-index]') : [];
 
         if (totalImages !== imageElements.length) {
-            console.error('Mismatch: totalImages and imageElements do not match');
+            console.error(`Mismatch: totalImages (${totalImages}) and imageElements (${imageElements.length}) do not match`);
+            return;
         }
         if (totalImages !== dotElements.length) {
-            console.error('Mismatch: totalImages and dotElements do not match');
+            console.error(`Mismatch: totalImages (${totalImages}) and dotElements (${dotElements.length}) do not match`);
+            return;
         }
-
         if (!dotsContainer || dotElements.length === 0) {
             console.error('Dots container or dot elements not found');
             return;
@@ -46,24 +48,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn('Invalid index or no image element:', newIndex);
                 return;
             }
-            if (newIndex === currentIndex) return;
 
-            // Сбрасываем все точки
             dotElements.forEach(dot => {
                 dot.classList.remove('bg-black/80');
                 dot.classList.add('bg-black/20');
             });
 
-            // Сбрасываем z-index текущего изображения
             imageElements[currentIndex].classList.remove('z-10');
             imageElements[currentIndex].classList.add('z-0');
 
-            // Обновляем индекс и изображение
             currentIndex = newIndex;
             imageElements[currentIndex].classList.remove('z-0');
             imageElements[currentIndex].classList.add('z-10');
 
-            // Активируем текущую точку
             if (dotElements[currentIndex]) {
                 dotElements[currentIndex].classList.remove('bg-black/20');
                 dotElements[currentIndex].classList.add('bg-black/80');
@@ -96,16 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         carousel.addEventListener('mouseleave', () => {
+            clearTimeout(debounceTimeout);
             updateCarousel(0);
         });
 
-        if (dotElements[0]) {
-            dotElements[0].classList.remove('bg-black/20');
-            dotElements[0].classList.add('bg-black/80');
-        }
-
-        if (imageElements[0]) {
-            imageElements[0].classList.add('z-10');
-        }
+        updateCarousel(0);
     });
 });

@@ -1,4 +1,7 @@
 from django import views
+from django.utils import timezone
+from datetime import timedelta
+from django.db import models
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
@@ -9,6 +12,8 @@ from django.contrib.auth.decorators import login_required
 
 from catalog.models import Album
 from cart.mixins import CartMixin
+
+from orders.models import Order
 
 from .mixins import NotificationsMixin
 from .models import Customer, Notifications  
@@ -229,3 +234,57 @@ class ClearNotificationsView(views.View):
     def get(request, *args, **kwargs):
         Notifications.objects.mark_unread_as_read(request.user.customer)
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+def dashboard_callback(request, context):
+    # Получаем данные за последние 14 дней
+    end_date = timezone.now().date()
+    start_date = end_date - timedelta(days=14)
+
+    # Данные для графика регистраций
+    registrations = Customer.objects.filter(
+        last_updated__date__range=[start_date, end_date]
+    ).extra(
+        select={'day': 'date(last_updated)'}
+    ).values('day').annotate(count=models.Count('id')).order_by('day')
+
+    registration_labels = []
+    registration_counts = []
+    current_date = start_date
+    while current_date <= end_date:
+        registration_labels.append(current_date.strftime('%Y-%m-%d'))
+        count = next((item['count'] for item in registrations if item['day'] == current_date), 0)
+        registration_counts.append(count)
+        current_date += timedelta(days=1)
+
+    # Данные для графика заказов
+    orders = Order.objects.filter(
+        created_at__date__range=[start_date, end_date]
+    ).extra(
+        select={'day': 'date(created_at)'}
+    ).values('day').annotate(count=models.Count('id')).order_by('day')
+
+    order_labels = []
+    order_counts = []
+    current_date = start_date
+    while current_date <= end_date:
+        order_labels.append(current_date.strftime('%Y-%m-%d'))
+        count = next((item['count'] for item in orders if item['day'] == current_date), 0)
+        order_counts.append(count)
+        current_date += timedelta(days=1)
+
+    # Данные для таблицы последних альбомов
+    latest_albums = Album.objects.select_related('artist').order_by('-id')[:5]
+
+    context.update({
+        "registration_data": {
+            "labels": registration_labels,
+            "counts": registration_counts
+        },
+        "order_data": {
+            "labels": order_labels,
+            "counts": order_counts
+        },
+        "latest_albums": latest_albums
+    })
+
+    return context

@@ -82,6 +82,7 @@ MIDDLEWARE = [
 
 # Настройки Django Unfold
 UNFOLD = {
+    "DASHBOARD_CALLBACK": "accounts.views.dashboard_callback",
     "SITE_TITLE": mark_safe(
         """
         <span style="
@@ -263,6 +264,20 @@ UNFOLD = {
                 ],
             },
         ],
+    },
+    "COLORS": {
+            "primary": {
+                "50": "239 246 255",    # bg-blue-50
+                "100": "219 234 254",   # bg-blue-100
+                "200": "191 219 254",   # bg-blue-200
+                "300": "147 197 253",   # bg-blue-300
+                "400": "96 165 250",    # bg-blue-400
+                "500": "59 130 246",    # bg-blue-500 (основной)
+                "600": "37 99 235",     # bg-blue-600 
+                "700": "29 78 216",     # bg-blue-700
+                "800": "30 64 175",     # bg-blue-800
+                "900": "30 58 138",     # bg-blue-900
+            },
     },
 }
 

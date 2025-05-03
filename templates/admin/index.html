@@ -1,15 +1,292 @@
 {% extends 'unfold/layouts/base.html' %}
-{% load i18n unfold %}
+{% load i18n static unfold %}
 
 {% block breadcrumbs %}{% endblock %}
 
 {% block title %}
-Информационная панель
+    {% if subtitle %}
+        {{ subtitle }} |
+    {% endif %}
+    Информационная панель | {{ site_title|default:_('Django site admin') }}
+{% endblock %}
+
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
 {% endblock %}
 
 {% block content %}
     {% component "unfold/components/container.html" %}
+        <div class="dashboard-container">
+            <!-- Заголовок -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Информационная панель</h1>
+                <p class="dashboard-subtitle">Статистика регистраций и заказов за последние 14 дней</p>
+            </div>
 
+            <!-- Сетка для графиков -->
+            <div class="charts-grid">
+                <!-- График регистраций -->
+                <div class="chart-card">
+                    <h2 class="chart-title">
+                        Регистрации пользователей
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="registrationsChart"></canvas>
+                    </div>
+                </div>
 
+                <!-- График заказов -->
+                <div class="chart-card">
+                    <h2 class="chart-title">
+                        Заказы
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="ordersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Таблица последних альбомов -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h2 class="table-title">
+                        Последние добавленные альбомы
+                    </h2>
+                    <a href="{% url 'admin:catalog_album_changelist' %}" class="add-button">
+                        Добавить альбом
+                    </a>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Название</th>
+                                <th>Исполнитель</th>
+                                <th>Дата релиза</th>
+                                <th>Артикул</th>
+                                <th>Наличие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for album in latest_albums %}
+                                <tr>
+                                    <td>{{ album.id }}</td>
+                                    <td>{{ album.name }}</td>
+                                    <td>{{ album.artist.name }}</td>
+                                    <td>{{ album.release_date|date:"d.m.Y" }}</td>
+                                    <td>{{ album.article }}</td>
+                                    <td>
+                                        {% if album.out_of_stock %}
+                                            <span class="stock-status stock-out">Нет в наличии</span>
+                                        {% else %}
+                                            <span class="stock-status stock-in">{{ album.stock }} шт.</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="empty-table">Нет добавленных альбомов</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Подключение Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+        
+        <script>
+            // Форматирование дат для графиков (DD MMM)
+            function formatChartDates(labels) {
+                return labels.map(label => {
+                    const date = new Date(label.split('.').reverse().join('-'));
+                    return date.toLocaleDateString('ru-RU', { 
+                        day: '2-digit', 
+                        month: 'short' 
+                    }).replace('.', '');
+                });
+            }
+
+            // Градиент для графика регистраций
+            const ctxRegistrations = document.getElementById('registrationsChart').getContext('2d');
+            const registrationGradient = ctxRegistrations.createLinearGradient(0, 0, 0, 280);
+            registrationGradient.addColorStop(0, 'rgba(59, 130, 246, 0.15)');
+            registrationGradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+            // Градиент для графика заказов
+            const ctxOrders = document.getElementById('ordersChart').getContext('2d');
+            const orderGradient = ctxOrders.createLinearGradient(0, 0, 0, 280);
+            orderGradient.addColorStop(0, 'rgba(16, 185, 129, 0.15)');
+            orderGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+            // Данные для графика регистраций
+            const registrationData = {{ registration_data|safe }};
+            const registrationLabels = formatChartDates(registrationData.labels);
+
+            new Chart(document.getElementById('registrationsChart'), {
+                type: 'line',
+                data: {
+                    labels: registrationLabels,
+                    datasets: [{
+                        label: 'Регистрации',
+                        data: registrationData.counts,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: registrationGradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: 'rgb(59, 130, 246)',
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.03)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6B7280',
+                                font: { 
+                                    family: 'Mulish',
+                                    size: 11 
+                                },
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#6B7280',
+                                font: { 
+                                    family: 'Mulish',
+                                    size: 11 
+                                },
+                                maxRotation: 0,
+                                autoSkipPadding: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                            titleFont: { 
+                                family: 'Mulish',
+                                size: 12, 
+                                weight: 'normal' 
+                            },
+                            bodyFont: { 
+                                family: 'Mulish',
+                                size: 12 
+                            },
+                            padding: 10,
+                            cornerRadius: 4,
+                            boxPadding: 6,
+                            usePointStyle: true
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+
+            // Данные для графика заказов
+            const orderData = {{ order_data|safe }};
+            const orderLabels = formatChartDates(orderData.labels);
+
+            new Chart(document.getElementById('ordersChart'), {
+                type: 'line',
+                data: {
+                    labels: orderLabels,
+                    datasets: [{
+                        label: 'Заказы',
+                        data: orderData.counts,
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: orderGradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: 'rgb(16, 185, 129)',
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.03)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6B7280',
+                                font: { 
+                                    family: 'Mulish',
+                                    size: 11 
+                                },
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#6B7280',
+                                font: { 
+                                    family: 'Mulish',
+                                    size: 11 
+                                },
+                                maxRotation: 0,
+                                autoSkipPadding: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                            titleFont: { 
+                                family: 'Mulish',
+                                size: 12, 
+                                weight: 'normal' 
+                            },
+                            bodyFont: { 
+                                family: 'Mulish',
+                                size: 12 
+                            },
+                            padding: 10,
+                            cornerRadius: 4,
+                            boxPadding: 6,
+                            usePointStyle: true
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        </script>
     {% endcomponent %}
 {% endblock %}
