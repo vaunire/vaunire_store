@@ -22,6 +22,7 @@
     <!-- Контент -->
     <main class="flex-grow">
         <div class="container mx-auto max-w-[1325px] px-4 py-6">
+            {% include 'partials/catalog/highlights.html' %}
             <div class="flex flex-col lg:flex-row gap-5">
                 <!-- Фильтры (слева) -->
                 <div class="w-full lg:w-64">
@@ -31,16 +32,61 @@
                 <!-- Альбомы (справа) -->
                 <div class="flex-1">
                     <div class="mb-5">
-                        <div class="relative inline-block">
-                            <h1 class="text-2xl font-geologica font-semibold text-gray-800 mt-1 relative z-10">
-                              Музыкальный каталог
-                            </h1>
-                            {% if page_obj.paginator.count > 0 %}
-                              <span class="absolute -top-1 -right-2.5 text-3xl text-blue-600 opacity-25 font-bold font-geologica tracking-wide blur-xs">
-                                {{ page_obj.paginator.count }} 
-                              </span>
-                            {% endif %}
-                          </div>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div class="relative inline-block">
+                                <h1 class="text-2xl font-geologica font-semibold text-gray-800 mt-1 relative z-10">
+                                  Музыкальный каталог
+                                </h1>
+                                {% if page_obj.paginator.count > 0 %}
+                                  <span class="absolute -top-1 -right-2.5 text-3xl text-blue-600 opacity-25 font-bold font-geologica tracking-wide blur-xs">
+                                    {{ page_obj.paginator.count }} 
+                                  </span>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center gap-3.5 mt-2 tracking-wide">
+                            <!-- Показывать по -->
+                            <div class="relative text-[13px]">
+                                <label for="show-per-page" class="font-light mr-1.5 font-mulish">Показывать по:</label>
+                                <select id="show-per-page" class="bg-white text-[13px] border-0 text-gray-800 rounded-md pr-[22px] py-0.5 font-mulish transition-colors appearance-none focus:ring-0 cursor-pointer">
+                                    <option value="20" selected>20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                            <!-- Сортировать по -->
+                            <div class="relative text-[13px]">
+                                <label for="sort-by" class="font-light mr-1.5 font-mulish">Сортировать по:</label>
+                                <select id="sort-by" class="bg-white text-[13px] text-gray-800 border-0 rounded-md py-0.5 font-mulishtransition-colors appearance-none focus:ring-0 cursor-pointer">
+                                    <option value="newest">Сначала новые</option>
+                                    <option value="oldest">Сначала старые</option>
+                                    <option value="cheapest">Сначала дешевле</option>
+                                    <option value="most-expensive">Сначала дороже</option>
+                                    <option value="most-viewed">Более просматриваемые</option>
+                                    <option value="least-viewed">Менее просматриваемые</option>
+                                    <option value="popular">Сначала популярные</option>
+                                    <option value="unpopular">Сначала не популярные</option>
+                                    <option value="title-asc">По названию: А-Я</option>
+                                    <option value="title-desc">По названию: Я-А</option>
+                                    <option value="artist-asc">По исполнителю: А-Я</option>
+                                    <option value="artist-desc">По исполнителю: Я-А</option>
+                                    <option value="label-asc">По лейблу: А-Я</option>
+                                    <option value="label-desc">По лейблу: Я-А</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <button class="p-1.5 bg-white rounded-md hover:bg-blue-50 focus:outline-none transition-colors view-mode-btn active:bg-blue-100" title="Карточки">
+                                    <svg class="h-4 w-4 text-gray-500 hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                                    </svg>
+                                </button>
+                                <button class="p-1.5 bg-white rounded-md hover:bg-blue-50 focus:outline-none transition-colors view-mode-btn active:bg-blue-100" title="Список">
+                                    <svg class="h-4 w-4 text-gray-500 hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M4 6h16M4 12h16M4 18h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                         {% for album in albums %}

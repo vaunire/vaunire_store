@@ -2,7 +2,7 @@
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from django.db import models
+from django.db import models, connection
 from django.urls import reverse
 from datetime import date
 from decimal import Decimal
@@ -132,6 +132,49 @@ class Artist(models.Model):
         verbose_name = 'Исполнитель'
         verbose_name_plural = 'Исполнители'
 
+class AlbumManager(models.Manager):
+    def get_month_bestseller(self):
+        now = timezone.now()
+        current_year = now.year
+        current_month = now.month
+
+        query = """
+            SELECT 
+                ca.id, 
+                ca.name AS album_name, 
+                ca.artist_id, 
+                a.name AS artist_name,
+                SUM(cp.quantity) AS total_sold,
+                ca.slug AS album_slug,
+                a.slug AS artist_slug
+            FROM orders_order o
+            INNER JOIN cart_cart cc ON o.cart_id = cc.id
+            INNER JOIN cart_cartproduct cp ON cp.cart_id = cc.id
+            INNER JOIN catalog_album ca ON cp.object_id = ca.id
+            INNER JOIN catalog_artist a ON ca.artist_id = a.id
+            INNER JOIN django_content_type dct ON cp.content_type_id = dct.id
+            WHERE 
+                o.status = 'completed'
+                AND EXTRACT(YEAR FROM o.created_at) = %s
+                AND EXTRACT(MONTH FROM o.created_at) = %s
+                AND dct.model = 'album'
+            GROUP BY ca.id, ca.name, ca.artist_id, a.name, ca.slug, a.slug
+            ORDER BY total_sold DESC
+            LIMIT 1
+        """
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, [current_year, current_month])
+            result = cursor.fetchone()
+
+            if result:
+                # Получаем объект Album
+                album = Album.objects.select_related('artist', 'genre').prefetch_related('styles').get(id=result[0])
+                # Добавляем атрибут total_sold к объекту Album
+                album.total_sold = result[4]
+                return album
+            return None
+
 # ❒ Модель для хранения информации о музыкальных альбомах
 class Album(models.Model):
     name = models.CharField(max_length = 255, verbose_name = 'Название альбома')
@@ -152,6 +195,7 @@ class Album(models.Model):
     offer_of_the_week = models.BooleanField(default = False, verbose_name = "Предложение недели")
     image = models.ImageField(upload_to = upload_function)
     slug = models.SlugField(blank = True, help_text = 'Оставьте пустым для автозаполнения')
+    objects = AlbumManager()
 
     # Добавляем GenericRelation для связи с ImageGallery
     image_gallery = GenericRelation('ImageGallery', related_query_name = 'albums')

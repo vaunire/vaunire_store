@@ -1,27 +1,21 @@
+{% load static %}
+
 <!-- Контейнер фильтров -->
 <div class="filter-container bg-white p-5 rounded-lg shadow-sm border border-gray-200 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-gray-100">
     <form method="GET" action="" id="filter-form">
-        <!-- Сохранение текущих GET-параметров для пагинации -->
-        {% for key, value in request.GET.items %}
-            {% if key != 'page' %}
-                {% if value %}
-                    <input type="hidden" name="{{ key }}" value="{{ value }}">
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-
         <!-- Фильтр по цене -->
         <div class="mb-4">
             <h4 class="text-sm mb-3">Цена</h4>
-            <div class="slider-container mb-4">
+            <div class="slider-container mb-4 relative">
                 <div class="absolute top-1/2 left-0 right-0 h-1.5 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
                 <div id="price-range-track" class="absolute top-1/2 h-1.5 bg-blue-500 rounded-full transform -translate-y-1/2" style="left: 0%; right: 0%;"></div>
-                <input type="range" id="min_price_range" name="min_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ min_price }}" class="w-full">
-                <input type="range" id="max_price_range" name="max_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ max_price }}" class="w-full">
+                <!-- Ползунки используют фиксированные min_price_default и max_price_default -->
+                <input type="range" id="min_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ min_price|default:min_price_default }}" class="w-full">
+                <input type="range" id="max_price_range" min="{{ min_price_default }}" max="{{ max_price_default }}" value="{{ max_price|default:max_price_default }}" class="w-full">
             </div>
             <div class="flex items-center justify-between gap-2">
-                <input type="number" name="min_price" id="min_price" value="{{ min_price }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="от {{ min_price_default }}">
-                <input type="number" name="max_price" id="max_price" value="{{ max_price }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="до {{ max_price_default }}">
+                <input type="number" name="min_price" id="min_price" value="{{ min_price|default:min_price_default }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="от {{ min_price_default }}">
+                <input type="number" name="max_price" id="max_price" value="{{ max_price|default:max_price_default }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="до {{ max_price_default }}">
             </div>
         </div>
 
@@ -84,15 +78,15 @@
         <!-- Фильтр по году выпуска -->
         <div class="mb-4">
             <h4 class="text-sm mb-3">Год выпуска</h4>
-            <div class="slider-container mb-4">
+            <div class="slider-container mb-4 relative">
                 <div class="absolute top-1/2 left-0 right-0 h-1.5 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
                 <div id="year-range-track" class="absolute top-1/2 h-1.5 bg-blue-500 rounded-full transform -translate-y-1/2" style="left: 0%; right: 0%;"></div>
-                <input type="range" id="min_year_range" name="min_year_range" min="{{ min_year_default }}" max="{{ max_year_default }}" value="{{ min_year }}" class="w-full">
-                <input type="range" id="max_year_range" name="max_year_range" min="{{ min_year_default }}" max="{{ max_year_default }}" value="{{ max_year }}" class="w-full">
+                <input type="range" id="min_year_range" min="{{ min_year_default }}" max="{{ max_year_default }}" value="{{ min_year|default:min_year_default }}" class="w-full">
+                <input type="range" id="max_year_range" min="{{ min_year_default }}" max="{{ max_year_default }}" value="{{ max_year|default:max_year_default }}" class="w-full">
             </div>
             <div class="flex items-center justify-between gap-2">
-                <input type="number" name="min_year" id="min_year" value="{{ min_year }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="от {{ min_year_default }}">
-                <input type="number" name="max_year" id="max_year" value="{{ max_year }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="до {{ max_year_default }}">
+                <input type="number" name="min_year" id="min_year" value="{{ min_year|default:min_year_default }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="от {{ min_year_default }}">
+                <input type="number" name="max_year" id="max_year" value="{{ max_year|default:max_year_default }}" class="w-1/2 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="до {{ max_year_default }}">
             </div>
         </div>
 

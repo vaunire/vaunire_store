@@ -1,0 +1,48 @@
+{% if albums or artists %}
+    <div class="p-2">
+        {% if albums %}
+            <h4 class="px-2 text-sm mt-0.5 tracking-wide font-medium text-black">Альбомы</h4>
+            {% for album in albums %}
+                <a href="{% url 'album_detail' artist_slug=album.artist.slug album_slug=album.slug %}" 
+                   class="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors duration-300 rounded-md flex items-center">
+                    {% if album.image %}
+                        <img src="{{ album.image.url }}" alt="{{ album.name }}" class="w-10 h-10 object-cover rounded mr-3">
+                    {% else %}
+                        <div class="w-10 h-10 bg-gray-200 rounded mr-3 flex items-center justify-center">
+                            <span class="text-xs text-gray-500">Нет фото</span>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <span class="font-medium">{{ album.name }}</span>
+                        <span class="text-xs text-gray-500 block">{{ album.artist.name }} ({{ album.release_date|date:"Y" }})</span>
+                    </div>
+                </a>
+            {% endfor %}
+        {% endif %}
+        {% if artists %}
+            <h4 class="px-2 text-sm font-medium text-black mt-1">Исполнители</h4>
+            {% for artist in artists %}
+                <a href="{% url 'artist_detail' artist_slug=artist.slug %}" 
+                   class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-300 rounded-md flex items-center">
+                    {% if artist.image %}
+                        <img src="{{ artist.image.url }}" alt="{{ artist.name }}" class="w-10 h-10 object-cover rounded mr-3">
+                    {% else %}
+                        <div class="w-10 h-10 bg-gray-200 rounded mr-3 flex items-center justify-center">
+                            <span class="text-xs text-gray-500">Нет фото</span>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <span class="font-medium">{{ artist.name }}</span>
+                        {% if artist.genre %}
+                            <span class="text-xs text-gray-500 block">{{ artist.genre.name }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% else %}
+    <div class="p-2">
+        <p class="px-4 py-2 text-[13px] text-gray-600">Ничего не найдено</p>
+    </div>
+{% endif %}

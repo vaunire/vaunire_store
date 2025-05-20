@@ -11,8 +11,51 @@ function debounce(func, wait) {
     };
 }
 
+// Хранилище для отслеживания текущих значений фильтров
+let filterState = {
+    min_price: null,
+    max_price: null,
+    min_year: null,
+    max_year: null,
+    in_stock: null,
+    offer_of_the_week: null,
+    genres: [],
+    styles: [],
+    min_price_default: null, // Добавляем для хранения фиксированного диапазона
+    max_price_default: null
+};
+
+// Инициализация начального состояния фильтров
+function initializeFilterState() {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Получаем дефолтные значения из ползунков
+    const minPriceDefault = parseInt(document.getElementById('min_price_range').min) || 0;
+    const maxPriceDefault = parseInt(document.getElementById('max_price_range').max) || 10000;
+    const minYearDefault = parseInt(document.getElementById('min_year_range').min) || 1900;
+    const maxYearDefault = parseInt(document.getElementById('max_year_range').max) || 2025;
+
+    // Сохраняем фиксированные значения
+    filterState.min_price_default = minPriceDefault;
+    filterState.max_price_default = maxPriceDefault;
+
+    // Инициализируем filterState с проверкой валидности
+    filterState.min_price = urlParams.get('min_price') ? parseInt(urlParams.get('min_price')) : null;
+    filterState.max_price = urlParams.get('max_price') ? parseInt(urlParams.get('max_price')) : null;
+    filterState.min_year = urlParams.get('min_year') ? parseInt(urlParams.get('min_year')) : null;
+    filterState.max_year = urlParams.get('max_year') ? parseInt(urlParams.get('max_year')) : null;
+    filterState.in_stock = urlParams.get('in_stock') === '1' ? '1' : null;
+    filterState.offer_of_the_week = urlParams.get('offer_of_the_week') === '1' ? '1' : null;
+    filterState.genres = urlParams.getAll('genres');
+    filterState.styles = urlParams.getAll('styles');
+
+    // Синхронизируем ползунки и поля ввода
+    updatePriceSlider();
+    updateYearSlider();
+}
+
 // Обновление ползунка цены
-function updatePriceSlider() {
+function updatePriceSlider(changed = false) {
     const minSlider = document.getElementById('min_price_range');
     const maxSlider = document.getElementById('max_price_range');
     const minInput = document.getElementById('min_price');
@@ -35,7 +78,7 @@ function updatePriceSlider() {
         }
     }
 
-    // Обновление полей ввода в реальном времени
+    // Обновление полей ввода
     minInput.value = minValue;
     maxInput.value = maxValue;
 
@@ -44,6 +87,13 @@ function updatePriceSlider() {
     const maxPercent = ((maxValue - minLimit) / (maxLimit - minLimit)) * 100;
     rangeTrack.style.left = `${minPercent}%`;
     rangeTrack.style.right = `${100 - maxPercent}%`;
+
+    // Обновляем filterState и отправляем форму, если изменено
+    if (changed) {
+        filterState.min_price = minValue !== filterState.min_price_default ? minValue : null;
+        filterState.max_price = maxValue !== filterState.max_price_default ? maxValue : null;
+        submitForm();
+    }
 }
 
 // Синхронизация ползунков цены с полями ввода
@@ -66,11 +116,13 @@ function syncPriceSlidersFromInputs() {
     minSlider.value = minValue;
     maxSlider.value = maxValue;
 
-    updatePriceSlider();
+    filterState.min_price = minValue !== filterState.min_price_default ? minValue : null;
+    filterState.max_price = maxValue !== filterState.max_price_default ? maxValue : null;
+    updatePriceSlider(true);
 }
 
 // Обновление ползунка года
-function updateYearSlider() {
+function updateYearSlider(changed = false) {
     const minSlider = document.getElementById('min_year_range');
     const maxSlider = document.getElementById('max_year_range');
     const minInput = document.getElementById('min_year');
@@ -93,7 +145,7 @@ function updateYearSlider() {
         }
     }
 
-    // Обновление полей ввода в реальном времени
+    // Обновление полей ввода
     minInput.value = minValue;
     maxInput.value = maxValue;
 
@@ -102,6 +154,13 @@ function updateYearSlider() {
     const maxPercent = ((maxValue - minLimit) / (maxLimit - minLimit)) * 100;
     rangeTrack.style.left = `${minPercent}%`;
     rangeTrack.style.right = `${100 - maxPercent}%`;
+
+    // Обновляем filterState и отправляем форму, если изменено
+    if (changed) {
+        filterState.min_year = minValue !== minLimit ? minValue : null;
+        filterState.max_year = maxValue !== maxLimit ? maxValue : null;
+        submitForm();
+    }
 }
 
 // Синхронизация ползунков года с полями ввода
@@ -124,7 +183,9 @@ function syncYearSlidersFromInputs() {
     minSlider.value = minValue;
     maxSlider.value = maxValue;
 
-    updateYearSlider();
+    filterState.min_year = minValue !== parseInt(minSlider.min) ? minValue : null;
+    filterState.max_year = maxValue !== parseInt(maxSlider.max) ? maxValue : null;
+    updateYearSlider(true);
 }
 
 // Переключение видимости списка
@@ -135,66 +196,93 @@ function toggleList(listId, buttonId, toggleClass) {
     const filterContainer = document.querySelector('.filter-container');
 
     if (list.classList.contains('list-limited')) {
-        // Открываем список
         list.classList.remove('list-limited');
         items.forEach(item => item.classList.remove('hidden'));
         button.textContent = 'Скрыть';
-
-        // Убираем ограничение высоты контейнера
         filterContainer.style.maxHeight = 'none';
         filterContainer.style.overflowY = 'visible';
     } else {
-        // Закрываем список
         list.classList.add('list-limited');
         items.forEach(item => item.classList.add('hidden'));
         button.textContent = 'Посмотреть все';
-
-        // Возвращаем исходное состояние контейнера
         filterContainer.style.maxHeight = '';
         filterContainer.style.overflowY = 'auto';
     }
 }
 
-// Отправка формы
-function submitForm(changedParams = {}) {
-    const form = document.getElementById('filter-form');
-    const formData = new FormData(form);
-    const currentParams = new URLSearchParams(window.location.search);
+// Отправка формы с фильтрацией параметров
+function submitForm() {
+    const newParams = new URLSearchParams();
 
-    // Обновляем только измененные параметры
-    for (const [key, value] of Object.entries(changedParams)) {
-        if (value) {
-            formData.set(key, value);
-        } else {
-            formData.delete(key);
-        }
-    }
+    // Используем фиксированные дефолтные значения
+    const minPriceDefault = filterState.min_price_default;
+    const maxPriceDefault = filterState.max_price_default;
+    const minYearDefault = parseInt(document.getElementById('min_year_range').min) || 1900;
+    const maxYearDefault = parseInt(document.getElementById('max_year_range').max) || 2025;
 
-    // Проверяем, изменились ли параметры
-    let hasChanges = false;
-    const newParams = new URLSearchParams(formData);
-    for (const key of newParams.keys()) {
-        if (newParams.get(key) !== currentParams.get(key)) {
-            hasChanges = true;
-            break;
-        }
+    // Добавляем параметры цены, только если они отличаются от дефолтных
+    if (filterState.min_price !== null && filterState.min_price !== minPriceDefault) {
+        newParams.set('min_price', filterState.min_price);
     }
-    if (!hasChanges && currentParams.toString() !== newParams.toString()) {
-        hasChanges = true;
+    if (filterState.max_price !== null && filterState.max_price !== maxPriceDefault) {
+        newParams.set('max_price', filterState.max_price);
     }
 
-    // Отправляем форму только если есть изменения
-    if (hasChanges) {
-        const url = new URL(window.location.href);
-        url.search = newParams.toString();
-        window.location.href = url.toString();
+    // Добавляем параметры года, только если они отличаются от дефолтных
+    if (filterState.min_year !== null && filterState.min_year !== minYearDefault) {
+        newParams.set('min_year', filterState.min_year);
     }
+    if (filterState.max_year !== null && filterState.max_year !== maxYearDefault) {
+        newParams.set('max_year', filterState.max_year);
+    }
+
+    // Добавляем жанры
+    filterState.genres.forEach(genre => {
+        newParams.append('genres', genre);
+    });
+
+    // Добавляем стили
+    filterState.styles.forEach(style => {
+        newParams.append('styles', style);
+    });
+
+    // Добавляем параметры переключателей
+    if (filterState.in_stock) {
+        newParams.set('in_stock', '1');
+    }
+    if (filterState.offer_of_the_week) {
+        newParams.set('offer_of_the_week', '1');
+    }
+
+    // Сохраняем текущую страницу пагинации
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get('page');
+    if (page) {
+        newParams.set('page', page);
+    }
+
+    // Обновляем URL
+    const url = new URL(window.location.href);
+    url.search = newParams.toString();
+    window.location.href = url.toString();
 }
 
 // Сброс формы
 function resetForm() {
     const form = document.getElementById('filter-form');
     form.reset();
+    filterState = {
+        min_price: null,
+        max_price: null,
+        min_year: null,
+        max_year: null,
+        in_stock: null,
+        offer_of_the_week: null,
+        genres: [],
+        styles: [],
+        min_price_default: filterState.min_price_default,
+        max_price_default: filterState.max_price_default
+    };
     updatePriceSlider();
     updateYearSlider();
     window.location.href = '/';
@@ -202,8 +290,7 @@ function resetForm() {
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
-    updatePriceSlider();
-    updateYearSlider();
+    initializeFilterState();
 
     // Дебонсер для текстовых полей
     const debouncedSubmit = debounce(submitForm, 300);
@@ -211,38 +298,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Обработчики для полей ввода цены
     document.getElementById('min_price').addEventListener('input', () => {
         syncPriceSlidersFromInputs();
-        debouncedSubmit();
     });
     document.getElementById('max_price').addEventListener('input', () => {
         syncPriceSlidersFromInputs();
-        debouncedSubmit();
     });
 
-    // Обработчики для ползунков цены (обновление в реальном времени, отправка после отпускания)
-    document.getElementById('min_price_range').addEventListener('input', updatePriceSlider);
-    document.getElementById('max_price_range').addEventListener('input', updatePriceSlider);
-    document.getElementById('min_price_range').addEventListener('change', submitForm);
-    document.getElementById('max_price_range').addEventListener('change', submitForm);
+    // Обработчики для ползунков цены
+    document.getElementById('min_price_range').addEventListener('input', () => updatePriceSlider());
+    document.getElementById('max_price_range').addEventListener('input', () => updatePriceSlider());
+    document.getElementById('min_price_range').addEventListener('change', () => updatePriceSlider(true));
+    document.getElementById('max_price_range').addEventListener('change', () => updatePriceSlider(true));
 
     // Обработчики для полей ввода года
     document.getElementById('min_year').addEventListener('input', () => {
         syncYearSlidersFromInputs();
-        debouncedSubmit();
     });
     document.getElementById('max_year').addEventListener('input', () => {
         syncYearSlidersFromInputs();
-        debouncedSubmit();
     });
 
-    // Обработчики для ползунков года (обновление в реальном времени, отправка после отпускания)
-    document.getElementById('min_year_range').addEventListener('input', updateYearSlider);
-    document.getElementById('max_year_range').addEventListener('input', updateYearSlider);
-    document.getElementById('min_year_range').addEventListener('change', submitForm);
-    document.getElementById('max_year_range').addEventListener('change', submitForm);
+    // Обработчики для ползунков года
+    document.getElementById('min_year_range').addEventListener('input', () => updateYearSlider());
+    document.getElementById('max_year_range').addEventListener('input', () => updateYearSlider());
+    document.getElementById('min_year_range').addEventListener('change', () => updateYearSlider(true));
+    document.getElementById('max_year_range').addEventListener('change', () => updateYearSlider(true));
 
     // Обработчики для чекбоксов жанров и стилей
     document.querySelectorAll('input[name="genres"], input[name="styles"]').forEach(checkbox => {
         checkbox.addEventListener('change', () => {
+            filterState.genres = Array.from(document.querySelectorAll('input[name="genres"]:checked')).map(cb => cb.value);
+            filterState.styles = Array.from(document.querySelectorAll('input[name="styles"]:checked')).map(cb => cb.value);
             submitForm();
         });
     });
@@ -252,8 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
         checkbox.addEventListener('change', (e) => {
             const isChecked = e.target.checked;
             const paramName = e.target.name;
-            const paramValue = isChecked ? '1' : '';
-            submitForm({ [paramName]: paramValue });
+            filterState[paramName] = isChecked ? '1' : null;
+            submitForm();
         });
     });
 

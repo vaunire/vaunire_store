@@ -97,26 +97,34 @@ class MakeOrderView(CartMixin, views.View):
             
             # Создание сессии Stripe
             try:
-                # Конвертируем final_price в копейки (Почему-то Stripe понимает сумму только в мин. единицах валюты)
-                amount = int(self.cart.final_price * 100)
-                checkout_session = stripe.checkout.Session.create(
-                    payment_method_types = ['card'],
-                    line_items = [
-                        {
-                            'price_data': {
-                                'currency': 'rub',
-                                'product_data': {
-                                    'name': f'Заказ №{new_order.id}',
-                                },
-                                'unit_amount': amount,
-                            },
-                            'quantity': 1,
+                line_items = []
+                for item in self.cart.products.all():
+                    product_data = {
+                        'name': f"{item.content_object.artist.name} - {item.content_object.name}",
+                        'description': f"Артикул: {item.content_object.article} | Формат: {item.content_object.get_format() or 'Не указан'}",
+                    }
+                    # Добавляем изображение, если оно есть
+                    if item.content_object.image and item.content_object.image.url:
+                        product_data['images'] = [request.build_absolute_uri(item.content_object.image.url)]
+                    else:
+                        product_data['images'] = ['https://via.placeholder.com/150']  # Заглушка для отсутствующих изображений
+
+                    line_items.append({
+                        'price_data': {
+                            'currency': 'rub',
+                            'product_data': product_data,
+                            'unit_amount': int(item.content_object.discounted_price * 100),
                         },
-                    ],
-                    mode = 'payment',
-                    success_url = request.build_absolute_uri(reverse('payment_success')) + '?session_id={CHECKOUT_SESSION_ID}',
-                    cancel_url = request.build_absolute_uri(reverse('payment_cancel')),
-                    metadata = {'order_id': new_order.id},
+                        'quantity': item.quantity,
+                    })
+
+                checkout_session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    line_items=line_items,
+                    mode='payment',
+                    success_url=request.build_absolute_uri(reverse('payment_success')) + '?session_id={CHECKOUT_SESSION_ID}',
+                    cancel_url=request.build_absolute_uri(reverse('payment_cancel')),
+                    metadata={'order_id': new_order.id},
                 )
 
                 # Создаем запись о платеже
@@ -151,7 +159,9 @@ class PaymentSuccessView(views.View):
     def get(self, request, *args, **kwargs):
         session_id = request.GET.get('session_id')
         if not session_id:
+            messages.error(request, 'Ошибка: сессия оплаты не найдена.')
             return redirect('/')
+        
         try:
             session = stripe.checkout.Session.retrieve(session_id)
             order_id = session.metadata.get('order_id')
@@ -160,18 +170,23 @@ class PaymentSuccessView(views.View):
             # Проверяем, не был ли заказ уже оплачен
             if not order.paid:
                 order.paid = True
-                order.status = 'in_progress'  # Обновляем статус заказа
+                order.status = 'in_progress'
                 order.save()
 
                 payment = Payment.objects.get(payment_id=session_id)
                 payment.status = 'success'
                 payment.payment_date = timezone.now()
                 payment.save()
-
-                messages.success(request, 'Оплата прошла успешно! Ваш заказ в обработке.')
-            else:
-                messages.info(request, 'Заказ уже был оплачен.')
-            return redirect('/')
+            
+            # Получаем товары из корзины для передачи в шаблон
+            cart_products = order.cart.products.all()
+            
+            context = {
+                'order': order,
+                'cart_products': cart_products,
+                'total_price': order.cart.final_price,
+            }
+            return render(request, 'pages/paid_success.html', context)
 
         except (stripe.error.StripeError, Order.DoesNotExist, Payment.DoesNotExist):
             messages.error(request, 'Ошибка при обработке платежа.')
