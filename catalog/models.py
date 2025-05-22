@@ -27,10 +27,42 @@ class MediaType(models.Model):
         verbose_name = 'Медианоситель'
         verbose_name_plural = 'Медианосители'
 
+# ❒ Модель для хранения стран
+class Country(models.Model):
+    name = models.CharField(max_length = 100, verbose_name = 'Название страны')
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Страна'
+        verbose_name_plural = 'Страны'
+
+# ❒ Модель для хранения информации о музыкальных лейблах
+class Label(models.Model):
+    name = models.CharField(max_length = 255, verbose_name = 'Название лейбла', unique = True)
+    country = models.ForeignKey(Country, on_delete = models.SET_NULL, verbose_name = 'Страна', blank = True, null = True)
+    description = models.TextField(verbose_name = 'Описание', blank = True, null = True)
+    founded_year = models.PositiveIntegerField(verbose_name = 'Год основания', blank = True, null = True)
+    slug = models.SlugField(blank = True, help_text = 'Оставьте пустым для автозаполнения')
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name, lowercase=True)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Лейбл'
+        verbose_name_plural = 'Лейблы'
+
 # ❒ Модель для хранения информации об участниках музыкальных групп или исполнителях
 class Member(models.Model):
     first_name = models.CharField(max_length = 255, verbose_name = 'Имя музыканта')
     last_name = models.CharField(max_length = 255, verbose_name = 'Фамилия музыканта', blank = True, null = True)
+    country = models.ForeignKey(Country, on_delete = models.SET_NULL, verbose_name = 'Страна', blank = True, null = True)
     birth_date = models.DateField(verbose_name = 'Дата рождения', blank = True, null = True)
     role = models.CharField(max_length = 100, verbose_name = 'Роль в группе', blank = True, null = True)
     slug = models.SlugField(blank = True, help_text = 'Оставьте пустым для автозаполнения')
@@ -106,7 +138,7 @@ class Style(models.Model):
 class Artist(models.Model):
     name = models.CharField(max_length = 255, verbose_name = 'Исполнитель/группа')
     description = models.TextField(verbose_name = 'Описание', blank = True, null = True)
-    country = models.CharField(max_length = 100, verbose_name = 'Страна', blank = True, null = True)
+    country = models.ForeignKey(Country, on_delete = models.SET_NULL, verbose_name = 'Страна', blank = True, null = True) 
     genre = models.ForeignKey(Genre, verbose_name = 'Жанр', on_delete = models.CASCADE)
     members = models.ManyToManyField(Member, verbose_name = 'Участник', related_name = 'artist', blank = True)
 
@@ -185,8 +217,8 @@ class Album(models.Model):
     styles = models.ManyToManyField(Style, verbose_name = 'Стили', blank = True)
     tracklist = models.TextField(verbose_name = 'Трэклист', blank = True, null = True)
     description = models.TextField(verbose_name = 'Описание', default = 'Описание появится позже', blank = True, null = True) 
-    label = models.CharField(max_length = 255, verbose_name = 'Лейбл', blank = True, null = True)
-    country = models.CharField(max_length = 100, verbose_name ='Страна выпуска', blank = True, null = True)
+    label = models.ForeignKey(Label, on_delete = models.SET_NULL, verbose_name = 'Лейбл', blank = True, null = True)
+    country = models.ForeignKey(Country, on_delete = models.SET_NULL, verbose_name = 'Страна выпуска', blank = True, null = True) 
     condition = models.CharField(max_length = 50, verbose_name = 'Состояние товара', blank = True, null = True,
                                  help_text = 'Например: Mint (идеальное), Near Mint (почти идеальное), Very Good (очень хорошее) и т.д.')
     article = models.CharField(max_length = 100, verbose_name = 'Артикул', unique = True)

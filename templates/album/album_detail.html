@@ -116,7 +116,7 @@
                 {% if request.user.is_authenticated %}
                     {% if album.stock %}
                         {% if album not in cart.products_in_cart %}
-                            <a href="{% url 'add_to_cart' ct_model=album.ct_model slug=album.slug %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-bold tracking-wide flex items-center">
+                            <a href="{% url 'add_to_cart' ct_model=album.ct_model slug=album.slug %}" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-bold tracking-wide flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
@@ -129,14 +129,14 @@
                         {% endif %}
                     {% else %}
                         {% if album not in request.user.customer.wishlist.all %}
-                            <a href="{% url 'add_to_wishlist' album_id=album.id %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-semibold tracking-wide flex items-center">
+                            <a href="{% url 'add_to_wishlist' album_id=album.id %}" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-semibold tracking-wide flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                                 </svg>
                                 В ожидаемое
                             </a>
                         {% else %}
-                            <span class="text-sm text-gray-600 font-semibold py-2 px-6 bg-gray-200 rounded-lg cursor-not-allowed">
+                            <span class="text-sm text-gray-600 font-semibold py-2 px-5 bg-gray-200 rounded-lg cursor-not-allowed">
                                 В ожидаемом
                             </span>
                         {% endif %}
@@ -154,11 +154,11 @@
     </div>
 
     <!-- Описание и треклист -->
-    <div class="mt-12 space-y-6 font-mulish px-4 text-sm">
-        <div class="bg-white p-6 rounded-xl shadow-md w-[1250px]">
-            <h2 class="text-xl font-semibold text-gray-800 mb-2 relative inline-block">
+    <div class="mt-10 space-y-6 font-mulish px-4 text-sm tracking-wide leading-7">
+        <div class="bg-white p-6 rounded-xl shadow-md w-[1268px]">
+            <h2 class="text-xl font-semibold text-gray-800 mb-1 relative inline-block">
                 Описание
-                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 transform translate-y-1.5"></span>
+                <span class="absolute bottom-0 left-0 w-full h-[3px] bg-blue-500 transform translate-y-1.5"></span>
             </h2>
             <p class="text-gray-700 mt-4 overflow-y-auto">{{ album.description|default:"Описание появится позже"|safe }}</p>
         </div>

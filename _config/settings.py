@@ -88,7 +88,7 @@ UNFOLD = {
         <span style="
             font-size: 1.4rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -96,7 +96,7 @@ UNFOLD = {
         <br>
         <span style="
             font-size: 1.1rem;
-            color: #e0e0e0;
+            color: #1e3a8a;
             font-weight: 400;
         ">Музыкальный интернет – магазин</span>
         """
@@ -127,7 +127,7 @@ UNFOLD = {
                 ],
             },
             {
-                "title": _("Музыка"),
+                "title": _("Справочники"),
                 "separator": True,
                 "collapsible": True,
                 "items": [
@@ -162,82 +162,29 @@ UNFOLD = {
                         "link": reverse_lazy("admin:catalog_mediatype_changelist"),
                     },
                     {
-                        "title": _("Прайс-листы"),
-                        "icon": "currency_ruble",
-                        "link": reverse_lazy("admin:catalog_pricelist_changelist"),
+                        "title": _("Лейблы"),
+                        "icon": "instant_mix",
+                        "link": reverse_lazy("admin:catalog_label_changelist"),
                     },
                     {
-                        "title": _("Позиции прайс-листа"),
-                        "icon": "menu",
-                        "link": reverse_lazy("admin:catalog_pricelistitem_changelist"),
+                        "title": _("Страны"),
+                        "icon": "flag",
+                        "link": reverse_lazy("admin:catalog_country_changelist"),
                     },
-                ],
-            },
-            {
-                "title": _("Галерея"),
-                "separator": True,
-                "collapsible": True,
-                "items": [
                     {
                         "title": _("Галерея изображений"),
                         "icon": "image",
                         "link": reverse_lazy("admin:catalog_imagegallery_changelist"),
                     },
-                ],
-            },
-            {
-                "title": _("Пользователи"),
-                "separator": True,
-                "collapsible": True,
-                "items": [
                     {
                         "title": _("Покупатели"),
-                        "icon": "patient_list",
+                        "icon": "groups",
                         "link": reverse_lazy("admin:accounts_customer_changelist"),
                     },
                     {
                         "title": _("Уведомления"),
                         "icon": "notifications_active",
                         "link": reverse_lazy("admin:accounts_notifications_changelist"),
-                    },
-                ],
-            },
-            {
-                "title": _("Акции и промокоды"),
-                "separator": True,
-                "collapsible": True,
-                "items": [
-                    {
-                        "title": _("Акции"),
-                        "icon": "shoppingmode",
-                        "link": reverse_lazy("admin:promotions_promotion_changelist"),
-                    },
-                    {
-                        "title": _("Промокоды"),
-                        "icon": "checkbook",
-                        "link": reverse_lazy("admin:promotions_promocode_changelist"),
-                    },
-                    {
-                        "title": _("Лояльности"),
-                        "icon": "redeem",
-                        "link": reverse_lazy("admin:promotions_customerloyalty_changelist"),
-                    },
-                ],
-            },
-            {
-                "title": _("Корзина"),
-                "separator": True,
-                "collapsible": True,
-                "items": [
-                    {
-                        "title": _("Корзины"),
-                        "icon": "shopping_cart",
-                        "link": reverse_lazy("admin:cart_cart_changelist"),
-                    },
-                    {
-                        "title": _("Продукты корзины"),
-                        "icon": "add_shopping_cart",
-                        "link": reverse_lazy("admin:cart_cartproduct_changelist"),
                     },
                 ],
             },
@@ -263,21 +210,72 @@ UNFOLD = {
                     },
                 ],
             },
+            {
+                "title": _("Прайс-листы"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Прайс-листы"),
+                        "icon": "currency_ruble",
+                        "link": reverse_lazy("admin:catalog_pricelist_changelist"),
+                    },
+                    {
+                        "title": _("Позиции прайс-листа"),
+                        "icon": "menu",
+                        "link": reverse_lazy("admin:catalog_pricelistitem_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Корзина"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Корзины"),
+                        "icon": "shopping_cart",
+                        "link": reverse_lazy("admin:cart_cart_changelist"),
+                    },
+                    {
+                        "title": _("Продукты корзины"),
+                        "icon": "add_shopping_cart",
+                        "link": reverse_lazy("admin:cart_cartproduct_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Акции и промокоды"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Акции"),
+                        "icon": "shoppingmode",
+                        "link": reverse_lazy("admin:promotions_promotion_changelist"),
+                    },
+                    {
+                        "title": _("Промокоды"),
+                        "icon": "checkbook",
+                        "link": reverse_lazy("admin:promotions_promocode_changelist"),
+                    },
+                ],
+            },
         ],
     },
     "COLORS": {
-            "primary": {
-                "50": "239 246 255",    # bg-blue-50
-                "100": "219 234 254",   # bg-blue-100
-                "200": "191 219 254",   # bg-blue-200
-                "300": "147 197 253",   # bg-blue-300
-                "400": "96 165 250",    # bg-blue-400
-                "500": "59 130 246",    # bg-blue-500 (основной)
-                "600": "37 99 235",     # bg-blue-600 
-                "700": "29 78 216",     # bg-blue-700
-                "800": "30 64 175",     # bg-blue-800
-                "900": "30 58 138",     # bg-blue-900
-            },
+        "primary": {
+            "50": "239 246 255",    # bg-blue-50
+            "100": "219 234 254",   # bg-blue-100
+            "200": "191 219 254",   # bg-blue-200
+            "300": "147 197 253",   # bg-blue-300
+            "400": "96 165 250",    # bg-blue-400
+            "500": "59 130 246",    # bg-blue-500 (основной)
+            "600": "37 99 235",     # bg-blue-600 
+            "700": "29 78 216",     # bg-blue-700
+            "800": "30 64 175",     # bg-blue-800
+            "900": "30 58 138",     # bg-blue-900
+        },
     },
 }
 

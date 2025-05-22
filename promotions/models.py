@@ -81,29 +81,3 @@ class PromoCode(models.Model):
 
         messages.success(request, f'Промокод "{self.code}" успешно применен! ' \
                                   f'Скидка: {self.discount_percentage}% или {self.discount_amount} руб.')
-
-# ❒ Модель для хранения истории покупок и накопительных скидок клиента
-class CustomerLoyalty(models.Model):
-    customer = models.ForeignKey(Customer, on_delete = models.CASCADE, related_name = "loyalty_records")
-    total_amount = models.DecimalField(max_digits = 10, decimal_places = 2, validators = [MinValueValidator(0)], verbose_name = "Сумма покупки")
-    purchase_date = models.DateTimeField(auto_now_add = True)
-    applied_promocode = models.ForeignKey('PromoCode', on_delete = models.SET_NULL, null = True, blank = True)
-    applied_promotion = models.ForeignKey('Promotion', on_delete = models.SET_NULL, null = True, blank = True)
-    albums = models.ManyToManyField(Album)
-    total_spent = models.DecimalField(max_digits = 12, decimal_places = 2, default = 0, validators = [MinValueValidator(0)], verbose_name = "Общая сумма покупок")
-    discount_percentage = models.DecimalField(max_digits = 5, decimal_places = 2, default = 0, validators = [MinValueValidator(0), MaxValueValidator(100)], verbose_name = "Накопительная скидка (%)")
-
-    class Meta:
-        verbose_name = "Программа лояльности"
-        verbose_name_plural = "Программы лояльности"
-        ordering = ['-purchase_date']
-
-    def __str__(self):
-        return f"{self.customer.user.username}: {self.total_spent} руб. (Скидка: {self.discount_percentage}%)"
-
-    def update_discount(self):
-        """Обновляет процент скидки на основе общей суммы покупок"""
-        if self.total_spent >= Decimal('30000'): self.discount_percentage = Decimal('5.00')
-        elif self.total_spent >= Decimal('10000'): self.discount_percentage = Decimal('2.00')
-        else: self.discount_percentage = Decimal('0.00')
-        self.save()

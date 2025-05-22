@@ -6,19 +6,19 @@
     <!-- Контейнер для карусели -->
     <div class="relative w-full h-full cursor-pointer" data-carousel 
          data-images='[
-             "{{ album.image.url }}"{% if album.image_gallery.all|length > 0 %},{% endif %}
+             {% if album.image.url %}"{{ album.image.url }}"{% else %}"{% static 'images/placeholder.jpg' %}"{% endif %}
              {% for image in album.image_gallery.all|slice:":7" %}
-                 "{{ image.image.url }}"{% if not forloop.last %},{% endif %}
+                 {% if image.image.url %}, "{{ image.image.url }}"{% endif %}
              {% endfor %}
          ]'
-         data-total-images="{% with gallery_length=album.image_gallery.all|length %}{{ gallery_length|add:1 }}{% endwith %}">
-      <!-- Основное изображение (первое в карусели) -->
-      <img src="{{ album.image.url }}" alt="{{ album.name }}" class="absolute w-full h-full object-cover transition-all duration-300 z-10" data-carousel-image>
+         data-total-images="{% with gallery_length=album.image_gallery.all|length|default:0 %}{{ gallery_length|add:1 }}{% endwith %}">
+      <!-- Основное изображение -->
+      <img src="{{ album.image.url|default:'/static/images/placeholder.jpg' }}" alt="{{ album.name }}" class="absolute w-full h-full object-cover transition-all duration-200 z-10" data-carousel-image>
       <!-- Остальные изображения -->
       {% for image in album.image_gallery.all|slice:":7" %}
-          <img src="{{ image.image.url }}" alt="{{ album.name }} Preview" class="absolute w-full h-full object-cover transition-all duration-300 z-0" data-carousel-image loading="lazy" decoding="async">
+          <img src="{{ image.image.url|default:'/static/images/placeholder.jpg' }}" alt="{{ album.name }} Preview" class="absolute w-full h-full object-cover transition-all duration-200 z-0" data-carousel-image loading="lazy" decoding="async">
       {% endfor %}
-      <!-- Формат на черном фоне -->
+      <!-- Формат -->
       <span class="absolute bottom-2 left-2 bg-black/55 text-white text-xs font-medium px-2.5 py-1 rounded-md z-20">
         {{ album.get_format }}
       </span>
@@ -37,10 +37,14 @@
   <div class="p-3.5 relative">
     <!-- Точки переключения -->
     <div class="relative flex justify-center mb-2.5 -mt-0.5 space-x-2 z-10" data-carousel-dots>
-      {% with gallery_length=album.image_gallery.all|length|add:1 %}
+      {% with gallery_length=album.image_gallery.all|length|default:0|add:1 %}
           {% for i in "x"|ljust:gallery_length %}
-              <button type="button" class="w-1.5 h-1.5 rounded-full bg-black/20 transition-all duration-300 hover:bg-black/80 hover:scale-125 cursor-pointer focus:outline-none" data-dot-index="{{ forloop.counter0 }}" aria-label="Показать фото {{ forloop.counter }}"></button>
-          {% endfor %}
+            <button type="button" class="w-1.5 h-1.5 rounded-full bg-black/20 transition-all duration-300 hover:bg-black/80 hover:scale-125 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 {% if forloop.first %}bg-black{% endif %}" 
+                    data-dot-index="{{ forloop.counter0 }}" 
+                    aria-label="Показать фото {{ forloop.counter }}"
+                    role="tab"
+                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"></button>
+        {% endfor %}
       {% endwith %}
     </div>
 
@@ -57,7 +61,7 @@
       </div>
     </div>
 
-    <!-- Состояние (condition) -->
+    <!-- Состояние -->
     {% if album.condition %}
       <span class="absolute top-[30px] right-3 w-8 h-6 flex items-center justify-center font-geologica font-normal rounded-md text-[10px] bg-gray-100 text-gray-600" title="Состояние: {{ album.condition }}">
         {{ album.condition|truncatechars:2|upper }}
@@ -84,7 +88,6 @@
 
     <!-- Цена и кнопки -->
     <div class="mt-1.5 flex items-center justify-between">
-      <!-- Цена -->
       <div class="flex items-center gap-1.5">
         {% if album.active_promotion %}
           <span class="text-xl font-bold">{{ album.discounted_price|floatformat:0|intcomma }} ₽</span>
@@ -93,14 +96,11 @@
           <span class="text-xl font-bold">{{ album.current_price|floatformat:0|intcomma }} ₽</span>
         {% endif %}
       </div>
-
-      <!-- Кнопки -->
       <div class="flex items-center gap-2 opacity-75">
-        <!-- Кнопка "В корзину" -->
         {% if request.user.is_authenticated %}
           {% if album.stock %}
             {% if album not in cart.products_in_cart %}
-              <a href="{% url 'add_to_cart' ct_model=album.ct_model slug=album.slug %}" class="p-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-300 " title="Добавить в корзину">
+              <a href="{% url 'add_to_cart' ct_model=album.ct_model slug=album.slug %}" class="p-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-300" title="Добавить в корзину">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                   <path fill-rule="evenodd" d="M10 2.25a1.75 1.75 0 00-1.582 1c-.684.006-1.216.037-1.692.223A3.25 3.25 0 005.3 4.563c-.367.493-.54 1.127-.776 1.998l-.047.17-.513 2.964c-.185.128-.346.28-.486.459-.901 1.153-.472 2.87.386 6.301.545 2.183.818 3.274 1.632 3.91C6.31 21 7.435 21 9.685 21h4.63c2.25 0 3.375 0 4.189-.635c.814-.636 1.086-1.727 1.632-3.91.858-3.432 1.287-5.147.386-6.301a2.186 2.186 0 00-.487-.46l-.513-2.962-.046-.17c-.237-.872-.41-1.506-.776-2a3.25 3.25 0 00-1.426-1.089c-.476-.186-1.009-.217-1.692-.222A1.75 1.75 0 0014 2.25zm8.418 6.896l-.362-2.088c-.283-1.04-.386-1.367-.56-1.601a1.75 1.75 0 00-.768-.587c-.22-.086-.486-.111-1.148-.118A1.75 1.75 0 0114 5.75h-4a1.75 1.75 0 01-1.58-.998c-.663.007-.928.032-1.148.118a1.75 1.75 0 00-.768.587c-.174.234-.277.56-.560 1.6l-.362 2.089C6.58 9 7.91 9 9.685 9h4.63c1.775 0 3.105 0 4.103.146M8 12.25a.75.75 0 01.75.75v4a.75.75 0 01-1.5 0v-4a.75.75 0 01.75-.75m8.75.75a.75.75 0 00-1.5 0v4a.75.75 0 001.5 0v-4M12 12.25a.75.75 0 01.75.75v4a.75.75 0 01-1.5 0v-4a.75.75 0 01.75-.75" clip-rule="evenodd"/>
                 </svg>
@@ -127,8 +127,6 @@
               </a>
             {% endif %}
           {% endif %}
-
-          <!-- Кнопка "В избранное" -->
           {% if album in request.user.customer.favorite.all %}
             <a href="{% url 'remove_from_favorite' album_id=album.id %}" class="p-1.5 bg-gray-100 text-red-500 rounded-md hover:bg-gray-200 transition-all duration-300" title="Удалить из избранного">
               <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -143,7 +141,6 @@
             </a>
           {% endif %}
         {% else %}
-          <!-- Кнопка для неавторизованных -->
           <a href="{% url 'login' %}" class="p-1.5 bg-gray-100 text-gray-400 rounded-md hover:bg-gray-200 transition-all duration-300" title="Авторизуйтесь для добавления">
             <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.73 22.73L2.77 2.77L2 2l-.73-.73L0 2.54l4.39 4.39l2.21 4.66l-1.35 2.45c-.16.28-.25.61-.25.96c0 1.1.9 2 2 2h7.46l1.38 1.38A1.997 1.997 0 0 0 17 22c.67 0 1.26-.33 1.62-.84L21.46 24zM7.42 15c-.14 0-.25-.11-.25-.25l.03-.12l.9-1.63h2.36l2 2zm8.13-2c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H6.54zM7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2s-.9-2-2-2"/>
@@ -157,7 +154,7 @@
 
 <!-- Предварительная загрузка изображений -->
 {% for image in album.image_gallery.all|slice:":7" %}
-  <link rel="preload" href="{{ image.image.url }}" as="image">
+  <link rel="preload" href="{{ image.image.url|default:'/static/images/placeholder.jpg' }}" as="image">
 {% endfor %}
 
 <!-- JavaScript для карусели -->

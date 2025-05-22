@@ -11,7 +11,7 @@ from unfold.contrib.filters.admin import (
 from unfold.contrib.forms.widgets import WysiwygWidget
 
 from .models import (Album, Artist, Genre, ImageGallery, MediaType, Member,
-                     PriceList, PriceListItem, Style)
+                     PriceList, PriceListItem, Style, Country, Label)
 
 class BaseAdmin(ModelAdmin):
     list_filter_submit = True 
@@ -50,6 +50,32 @@ class StyleAdmin(BaseAdmin):
     search_fields = ('name', 'genre__name') 
     list_filter = (
         ('genre', RelatedDropdownFilter),  
+    )
+
+@admin.register(Country)
+class CountryAdmin(BaseAdmin):
+    list_display = ('name',)  
+    search_fields = ('name',) 
+    list_filter = ()  
+    ordering = ('name',)  
+
+@admin.register(Label)
+class LabelAdmin(BaseAdmin):
+    list_display = ('name', 'country', 'founded_year')  
+    search_fields = ('name', 'country__name') 
+    list_filter = (
+        ('country', RelatedDropdownFilter),  
+    )
+    fieldsets = (
+        ('Основная информация', {
+            'fields': (
+                'name',
+                'country',
+                'founded_year',
+                'description',
+                'slug',
+            )
+        }),
     )
 
 @admin.register(Artist)
@@ -105,7 +131,8 @@ class AlbumAdmin(BaseAdmin):
         ('genre', RelatedDropdownFilter),  
         ('media_type', RelatedDropdownFilter),  
         ('styles', MultipleRelatedDropdownFilter),  
-        'country', 
+        ('country', RelatedDropdownFilter),
+        ('label', RelatedDropdownFilter),
         'condition',  
         'out_of_stock', 
         'offer_of_the_week',  
