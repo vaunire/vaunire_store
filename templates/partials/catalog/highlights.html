@@ -1,142 +1,152 @@
+{% load static %}
+
 <!-- Контейнер для слайдера и карточек -->
 <section class="container mx-auto max-w-[1325px] px-6 ml-24 mb-8">
   <div class="flex justify-center">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
-
-        <div class="lg:col-span-2">
+      <div class="lg:col-span-2">
         <div class="relative overflow-hidden rounded-lg">
-            <!-- Swiper контейнер -->
-            <div class="swiper slider-highlights">
+          <!-- Swiper контейнер -->
+          <div class="swiper slider-highlights">
             <div class="swiper-wrapper">
-                {% for image in image_gallery %}
+              {% for image in image_gallery %}
                 {% if image.use_in_slider %}
-                    <div class="swiper-slide relative">
+                  <div class="swiper-slide relative">
                     <a href="{{ image.content_object.get_absolute_url|default:'#' }}">
-                        <img
+                      <img
                         src="{{ image.image.url|default:'/static/images/placeholder.jpg' }}"
                         alt="Image"
                         class="w-full h-[450px] object-cover rounded-lg"
-                        />
-                        <!-- Уникальное описание с вертикальной полосой -->
-                        <div class="absolute bottom-3.5 tracking-wide left-4 flex items-center gap-3 bg-black/50 text-white px-4 py-1.5 rounded-lg max-w-[90%]">
-                            <p class="text-lg font-medium font-geologica">
-                                {% if image.description %}
-                                    {{ image.description }}
-                                {% else %}
-                                    {% if forloop.first %}
-                                        Эксклюзивные виниловые пластинки для ценителей музыки
-                                    {% elif forloop.counter == 2 %}
-                                        Качественные CD и винил в идеальном состоянии для вас
-                                    {% elif forloop.counter == 3 %}
-                                        Коллекционные альбомы для настоящих меломанов ждут вас
-                                    {% else %}
-                                        Найдите редкие записи и дополните свою коллекцию
-                                    {% endif %}
-                                {% endif %}
-                            </p>
-                        </div>
+                      />
+                      <!-- Описание в центре с фоном на всю ширину -->
+                      <div class="absolute bottom-14 left-0 w-full bg-black/50 text-white py-1.5">
+                        <p class="text-lg font-medium font-geologica text-center">
+                          {% if image.description %}
+                            {{ image.description }}
+                          {% else %}
+                            {% if forloop.first %}
+                              Эксклюзивные виниловые пластинки для ценителей музыки
+                            {% elif forloop.counter == 2 %}
+                              Качественные CD и винил в идеальном состоянии для вас
+                            {% elif forloop.counter == 3 %}
+                              Коллекционные альбомы для настоящих меломанов ждут вас
+                            {% else %}
+                              Найдите редкие записи и дополните свою коллекцию
+                            {% endif %}
+                          {% endif %}
+                        </p>
+                      </div>
+                      <!-- Кнопка "Перейти к каталогу" -->
+                      <div class="absolute bottom-4 left-0 w-full text-center">
+                        <button
+                          onclick="document.getElementById('catalog-section').scrollIntoView({ behavior: 'smooth', block: 'start' })"
+                          class="bg-blue-600 text-white tracking-wide font-geologica font-medium text-[13px] px-6 py-1.5 rounded-lg hover:bg-blue-700 transition-colors duration-300"
+                        >
+                          Перейти к каталогу
+                        </button>
+                      </div>
                     </a>
-                    </div>
+                  </div>
                 {% endif %}
-                {% endfor %}
+              {% endfor %}
             </div>
             <!-- Навигация -->
             <div class="swiper-button-prev custom-swiper-button"></div>
             <div class="swiper-button-next custom-swiper-button"></div>
             <!-- Пагинация -->
             <div class="swiper-pagination custom-swiper-pagination"></div>
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
 
       <!-- Карточки -->
       <div class="flex flex-col mt-8">
-      <!-- Хит продаж месяца -->
-      <div>
-        <div class="flex items-center gap-2.5 mb-3.5">
-          <svg class="text-yellow-300 mt-1" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-            <path fill="currentColor" d="M528 448H112c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h416c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16m64-320c-26.5 0-48 21.5-48 48c0 7.1 1.6 13.7 4.4 19.8L476 239.2c-15.4 9.2-35.3 4-44.2-11.6L350.3 85C361 76.2 368 63 368 48c0-26.5-21.5-48-48-48s-48 21.5-48 48c0 15 7 28.2 17.7 37l-81.5 142.6c-8.9 15.6-28.9 20.8-44.2 11.6l-72.3-43.4c2.7-6 4.4-12.7 4.4-19.8c0-26.5-21.5-48-48-48S0 149.5 0 176s21.5 48 48 48c2.6 0 5.2-.4 7.7-.8L128 416h384l72.3-192.8c2.5.4 5.1.8 7.7.8c26.5 0 48-21.5 48-48s-21.5-48-48-48"/>
-          </svg>
-          <div class="relative inline-block">
-            <h3 class="text-lg font-semibold text-gray-800 font-geologica">Хит продаж месяца</h3>
-            <div class="absolute left-0 w-[182px] h-[3px] bg-blue-500 mb-3 rounded-full"></div>
+        <!-- Хит продаж месяца -->
+        <div>
+          <div class="flex items-center gap-2.5 mb-3.5">
+            <svg class="text-yellow-300 mt-1" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+              <path fill="currentColor" d="M528 448H112c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h416c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16m64-320c-26.5 0-48 21.5-48 48c0 7.1 1.6 13.7 4.4 19.8L476 239.2c-15.4 9.2-35.3 4-44.2-11.6L350.3 85C361 76.2 368 63 368 48c0-26.5-21.5-48-48-48s-48 21.5-48 48c0 15 7 28.2 17.7 37l-81.5 142.6c-8.9 15.6-28.9 20.8-44.2 11.6l-72.3-43.4c2.7-6 4.4-12.7 4.4-19.8c0-26.5-21.5-48-48-48S0 149.5 0 176s21.5 48 48 48c2.6 0 5.2-.4 7.7-.8L128 416h384l72.3-192.8c2.5.4 5.1.8 7.7.8c26.5 0 48-21.5 48-48s-21.5-48-48-48"/>
+            </svg>
+            <div class="relative inline-block">
+              <h3 class="text-lg font-semibold text-gray-800 font-geologica">Хит продаж месяца</h3>
+              <div class="absolute left-0 w-[182px] h-[3px] bg-blue-500 mb-3 rounded-full"></div>
+            </div>
           </div>
-        </div>
-        {% if month_bestseller %}
-          <div class="card bg-white rounded-lg shadow-md tracking-wide overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl max-w-[225px] mx-auto lg:mx-0">
-            <a href="{{ month_bestseller.get_absolute_url }}" class="block">
-              <div class="relative w-full h-[195px] overflow-hidden">
-                <img
-                  src="{{ month_bestseller.image.url }}"
-                  alt="{{ month_bestseller.name }}"
-                  class="w-full h-full object-cover"
-                />
-                <span class="absolute bottom-2 left-2 bg-black/55 text-white text-xs font-medium px-2.5 py-1 rounded-md z-20">
-                  Продано: {{ month_bestseller.total_sold }} шт.
-                </span>
-                <!-- Тег скидки -->
-                {% if month_bestseller.active_promotion %}
-                  <div class="absolute top-0 right-0 w-24 h-24 overflow-hidden z-20">
-                    <span class="absolute -top-7 -right-10 bg-blue-500 text-white text-xs font-geologica font-semibold px-9 py-1 transform rotate-45 origin-bottom-left shadow-md">
-                      Скидка
-                    </span>
-                  </div>
-                {% endif %}
-              </div>
-              <div class="p-3.5 relative">
-                <!-- Артист и альбом -->
-                <div class="flex items-start gap-[11px]">
-                  <div class="w-[3px] h-8 mt-1 bg-blue-500 rounded"></div>
-                  <div>
-                    <h5 class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300">
-                      <a href="{% url 'artist_detail' artist_slug=month_bestseller.artist.slug %}">{{ month_bestseller.artist.name }}</a>
-                    </h5>
-                    <h5 class="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors duration-300 -mt-0.5">
-                      {{ month_bestseller.name }}
-                    </h5>
-                  </div>
-                  <!-- Состояние (condition) -->
-                  {% if month_bestseller.condition %}
-                    <span class="absolute top-4 right-3 w-8 h-6 flex items-center justify-center font-geologica font-normal rounded-md text-[10px] bg-gray-100 text-gray-600" title="Состояние: {{ month_bestseller.condition }}">
-                      {{ month_bestseller.condition|truncatechars:2|upper }}
-                    </span>
+          {% if month_bestseller %}
+            <div class="card bg-white rounded-lg shadow-md tracking-wide overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl max-w-[225px] mx-auto lg:mx-0">
+              <a href="{{ month_bestseller.get_absolute_url }}" class="block">
+                <div class="relative w-full h-[195px] overflow-hidden">
+                  <img
+                    src="{{ month_bestseller.image.url }}"
+                    alt="{{ month_bestseller.name }}"
+                    class="w-full h-full object-cover"
+                  />
+                  <span class="absolute bottom-2 left-2 bg-black/55 text-white text-xs font-medium px-2.5 py-1 rounded-md z-20">
+                    Продано: {{ month_bestseller.total_sold }} шт.
+                  </span>
+                  <!-- Тег скидки -->
+                  {% if month_bestseller.active_promotion %}
+                    <div class="absolute top-0 right-0 w-24 h-24 overflow-hidden z-20">
+                      <span class="absolute -top-7 -right-10 bg-blue-500 text-white text-xs font-geologica font-semibold px-9 py-1 transform rotate-45 origin-bottom-left shadow-md">
+                        Скидка
+                      </span>
+                    </div>
                   {% endif %}
                 </div>
-                <!-- Информация -->
-                <ul class="mt-1 space-y-1 text-xs font-light">
-                  <li>
-                    {% if month_bestseller.styles.exists %}
-                      {% for style in month_bestseller.styles.all %}
-                        {{ style.name }}{% if not forloop.last %}, {% endif %}
-                      {% endfor %}
-                    {% elif month_bestseller.genre %}
-                      {{ month_bestseller.genre.name }}
-                    {% else %}
-                      <span class="text-gray-600">Жанр не указан</span>
+                <div class="p-3.5 relative">
+                  <!-- Артист и альбом -->
+                  <div class="flex items-start gap-[11px]">
+                    <div class="w-[3px] h-8 mt-1 bg-blue-500 rounded"></div>
+                    <div>
+                      <h5 class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                        <a href="{% url 'artist_detail' artist_slug=month_bestseller.artist.slug %}">{{ month_bestseller.artist.name }}</a>
+                      </h5>
+                      <h5 class="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors duration-300 -mt-0.5">
+                        {{ month_bestseller.name }}
+                      </h5>
+                    </div>
+                    <!-- Состояние (condition) -->
+                    {% if month_bestseller.condition %}
+                      <span class="absolute top-4 right-3 w-8 h-6 flex items-center justify-center font-geologica font-normal rounded-md text-[10px] bg-gray-100 text-gray-600" title="Состояние: {{ month_bestseller.condition }}">
+                        {{ month_bestseller.condition|truncatechars:2|upper }}
+                      </span>
                     {% endif %}
-                  </li>
-                  <li>
-                    {% if month_bestseller.stock > 0 %}
-                      <span class="text-green-600 font-medium">В наличии ({{ month_bestseller.stock }} шт.)</span>
-                    {% else %}
-                      <span class="text-red-600 font-medium">Нет в наличии</span>
-                    {% endif %}
-                  </li>
-                  <li>
-                    <a href="{{ month_bestseller.get_absolute_url }}" class="text-blue-600 hover:underline font-medium">
-                      Подробнее
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </a>
-          </div>
-        {% else %}
-          <div class="bg-white shadow-lg rounded-lg p-4 text-center max-w-[225px] mx-auto lg:mx-0">
-            <p class="text-gray-600 text-sm">Хит продаж месяца отсутствует</p>
-          </div>
-        {% endif %}
-      </div>
+                  </div>
+                  <!-- Информация -->
+                  <ul class="mt-1 space-y-1 text-xs font-light">
+                    <li>
+                      {% if month_bestseller.styles.exists %}
+                        {% for style in month_bestseller.styles.all %}
+                          {{ style.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                      {% elif month_bestseller.genre %}
+                        {{ month_bestseller.genre.name }}
+                      {% else %}
+                        <span class="text-gray-600">Жанр не указан</span>
+                      {% endif %}
+                    </li>
+                    <li>
+                      {% if month_bestseller.stock > 0 %}
+                        <span class="text-green-600 font-medium">В наличии ({{ month_bestseller.stock }} шт.)</span>
+                      {% else %}
+                        <span class="text-red-600 font-medium">Нет в наличии</span>
+                      {% endif %}
+                    </li>
+                    <li class="text-right">
+                      <a href="{{ month_bestseller.get_absolute_url }}" class="text-blue-600 hover:underline font-medium">
+                        Подробнее
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </a>
+            </div>
+          {% else %}
+            <div class="bg-white shadow-lg rounded-lg p-4 text-center max-w-[225px] mx-auto lg:mx-0">
+              <p class="text-gray-600 text-sm">Хит продаж месяца отсутствует</p>
+            </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
@@ -181,8 +191,12 @@
 
   /* Стили для пагинации */
   .custom-swiper-pagination {
-    text-align: right;
-    padding-right: 16px;
+    position: absolute !important;
+    top: 5px !important;
+    left: 12px !important;
+    bottom: auto !important;
+    text-align: left;
+    z-index: 10;
   }
 
   .custom-swiper-pagination .swiper-pagination-bullet {
