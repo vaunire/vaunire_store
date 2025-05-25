@@ -112,7 +112,8 @@ class RegistrationView(views.View):
             new_user.save()
             Customer.objects.create(
                 user = new_user,
-                phone = form.cleaned_data['phone']
+                phone = form.cleaned_data['phone'],
+                email = form.cleaned_data['email']
             )
             user = authenticate(username = form.cleaned_data['username'], password = form.cleaned_data['password'])
             login(request, user)

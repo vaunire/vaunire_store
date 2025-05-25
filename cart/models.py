@@ -44,13 +44,6 @@ class Cart(models.Model):
         # Рассчитываем финальную цену (с учетом акций)
         self.final_price = sum(cp.quantity * cp.content_object.discounted_price for cp in cart_products) or Decimal('0.00')
 
-        # Применяем скидку по программе лояльности
-        if self.owner:
-            loyalty = self.owner.loyalty_records.first()
-            if loyalty and loyalty.discount_percentage > 0:
-                discount = self.final_price * (loyalty.discount_percentage / Decimal('100.00'))
-                self.final_price -= discount
-
         # Применяем промокод
         if self.applied_promocode:
             success, message = self.applied_promocode.apply_to_cart(self)

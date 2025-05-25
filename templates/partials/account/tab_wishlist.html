@@ -19,7 +19,7 @@
                             <a href="{{ album.artist.get_absolute_url }}" class="text-gray-600 text-sm hover:text-blue-600 transition-colors duration-300 block">
                                 {{ album.artist.name }}
                             </a>
-                            <div class="flex items-center space-x-2 mt-1">
+                            <div class="flex items-center space-x-3 mt-1">
                                 <span class="text-xs text-gray-600 font-normal bg-gray-100 px-2 py-[3px] rounded">
                                     {% if album.styles.all %}
                                         {% for style in album.styles.all %}
@@ -27,7 +27,7 @@
                                         {% endfor %}
                                      {% endif %}
                                 </span>
-                                <span class="text-base font-semibold">{{ album.current_price|floatformat:0|default:'0'|intcomma }} ₽</span>
+                                <span class="text-base mb-0.5 font-semibold">{{ album.current_price|floatformat:0|default:'0'|intcomma }} ₽</span>
                             </div>
                         </div>
                     </div>

@@ -69,7 +69,7 @@ class OrderAdmin(BaseAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(BaseAdmin):
-    list_display = ('payment_id', 'order', 'amount', 'payment_date', 'status', 'payment_method')
+    list_display = ('get_short_payment_id', 'order', 'amount', 'payment_date', 'status', 'payment_method')
     search_fields = ('payment_id', 'order__id', 'payment_method')
     list_filter = (
         ('status', ChoicesDropdownFilter),
@@ -92,6 +92,12 @@ class PaymentAdmin(BaseAdmin):
             )
         }),
     )
+
+    def get_short_payment_id(self, obj):
+        if obj.payment_id:
+            return f"{obj.payment_id[:25]}...{obj.payment_id[-4:]}"
+        return "-"
+    get_short_payment_id.short_description = 'ID платежа'
 
 @admin.register(ReturnRequest)
 class ReturnRequestAdmin(BaseAdmin):

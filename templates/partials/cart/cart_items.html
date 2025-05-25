@@ -29,31 +29,31 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <div class="flex items-center space-x-2.5">
-                            <div class="w-[3px] h-5 bg-blue-500 rounded-full"></div>
+                            <div class="w-[3px] h-4 bg-blue-500 rounded-full"></div>
                             <a href="{% url 'album_detail' artist_slug=item.content_object.artist.slug album_slug=item.content_object.slug %}" class="text-lg font-semibold hover:text-blue-600 transition-colors duration-200">
                                 {{ item.display_name }}
                             </a>
                         </div>
                         <div class="mt-0.5 text-sm">
-                            <div class="text-[13px] font-light text-gray-600 tracking-wide flex items-center gap-2">
+                            <div class="text-[13px] font-extralight tracking-wide flex items-center gap-2">
                                 <span> 
                                 {% if item.content_object.styles.all %}
                                     {% for style in item.content_object.styles.all %}
                                         {{ style.name }}{% if not forloop.last %}, {% endif %}
                                     {% endfor %}
                                 {% endif %}</span>
-                                <span class="text-gray-300">|</span>
+                                <span class="text-gray-500">|</span>
                                 <span>{{ item.content_object.genre.name }}</span>
                             </div>
                             <div class="mt-2 w-full h-px bg-gray-200"></div>
-                            <div class="mt-1 text-[13px] tracking-wider font-light">{{item.content_object.label}}, {{item.content_object.release_date|date:"d.m.Y"}}</div>
+                            <div class="mt-1.5 text-[13px] tracking-wider font-extralight">Дата выпуска: {{item.content_object.release_date|date:"d.m.Y"}} ({{item.content_object.label.country}})</div>
                         </div>
                     </div>
                     <div class="text-right flex items-start space-x-6 mr-3">
                         <div class="flex flex-col justify-center min-h-[2rem]">
                         {% if item.content_object.active_promotion %}
                             <div class="flex flex-col space-y-0.5 items-start tracking-wide">
-                                <span class="inline-flex items-center px-2 py-0.5 ml-4 text-[10px] font-geologica font-bold tracking-wide text-white bg-blue-500 rounded-md shadow-sm">    
+                                <span class="inline-flex items-center px-2 py-0.5 ml-6 text-[10px] font-geologica font-bold tracking-wide text-white bg-blue-500 rounded-md shadow-sm">    
                                     – {{ item.content_object.active_promotion.discount_percentage|floatformat:0 }}<span class="ml-0.5">%</span>  
                                 </span>
                                 <div>

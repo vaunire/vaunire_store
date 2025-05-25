@@ -1,33 +1,43 @@
 {% extends 'base.html' %}
 
+{% load humanize %}
+
 {% block content %}
 <div class="max-w-[1300px] mx-auto mt-6">
     <!-- Breadcrumbs -->
     <nav class="flex mb-4 text-xs px-4" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1">
-            <li class="inline-flex items-center">
-                <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-                    Главная
-                </a>
-            </li>
-            <li class="inline-flex items-center gap-1">
-                <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-                <a href="{% url 'artist_detail' artist_slug=album.artist.slug %}" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-                    {{ album.artist.name }}
-                </a>
-            </li>
-            <li class="inline-flex items-center gap-1">
-                <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-                <span class="text-gray-500">
-                    {{ album.name }} ({{ album.media_type.name }})
-                </span>
-            </li>
-        </ol>
-    </nav>
+    <ol class="inline-flex items-center space-x-1">
+        <li class="inline-flex items-center">
+            <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                Главная
+            </a>
+        </li>
+        <li class="inline-flex items-center gap-1">
+            <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+            <a href="{% url 'base' %}?media_type=all" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                Музыка
+            </a>
+        </li>
+        <li class="inline-flex items-center gap-1">
+            <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+            <a href="{% url 'base' %}?media_type={{ album.media_type.id }}" class="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                {% if album.media_type.id == 1 %}Виниловые пластинки{% else %}CD диски{% endif %}
+            </a>
+        </li>
+        <li class="inline-flex items-center gap-1">
+            <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+            <span class="text-gray-500">
+                {{ album.artist.name }}. {% if album.media_type.id == 1 %}Виниловая пластинка{% else %}CD диск{% endif %} «{{ album.name }}», {{ album.format_type|default:"" }}
+            </span>
+        </li>
+    </ol>
+</nav>
 
     <!-- Основной контент -->
     <div class="flex flex-col md:flex-row items-start px-8 gap-6">
@@ -47,12 +57,12 @@
             <!-- Основное изображение -->
             <div class="relative aspect-square w-full max-w-md max-h-md">
                 <img id="mainImage" src="{{ album.image.url }}" alt="{{ album.name }}" class="w-full h-full object-cover rounded-lg shadow-md">
-                <button id="prevButton" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-300" onclick="prevImage()">
+                <button id="prevButton" class="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-white" onclick="prevImage()">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
-                <button id="nextButton" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300" onclick="nextImage()">
+                <button id="nextButton" class="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-white" onclick="nextImage()">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -104,49 +114,69 @@
                     {% endif %}
                 </li>
             </ul>
-            <div class="flex items-center space-x-4">
-                <span class="text-2xl font-bold text-gray-900">{{ album.current_price }} ₽</span>
-                {% if album.offer_of_the_weak %}
-                    <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded">Скидка</span>
+            <div class="flex items-center gap-1.5">
+                {% if album.active_promotion %}
+                    <span class="text-2xl font-bold">{{ album.discounted_price|floatformat:0|intcomma }} ₽</span>
+                    <span class="text-base text-gray-400 opacity-80 mt-1 line-through font-thin">{{ album.current_price|floatformat:0|intcomma }} ₽</span>
+                {% else %}
+                    <span class="text-2xl font-bold">{{ album.current_price|floatformat:0|intcomma }} ₽</span>
                 {% endif %}
             </div>
 
             <!-- Кнопки -->
-            <div class="flex space-x-4">
+            <div class="flex space-x-3">
                 {% if request.user.is_authenticated %}
                     {% if album.stock %}
                         {% if album not in cart.products_in_cart %}
                             <a href="{% url 'add_to_cart' ct_model=album.ct_model slug=album.slug %}" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-bold tracking-wide flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M10 2.25a1.75 1.75 0 00-1.582 1c-.684.006-1.216.037-1.692.223A3.25 3.25 0 005.3 4.563c-.367.493-.54 1.127-.776 1.998l-.047.17-.513 2.964c-.185.128-.346.28-.486.459-.901 1.153-.472 2.87.386 6.301.545 2.183.818 3.274 1.632 3.91C6.31 21 7.435 21 9.685 21h4.63c2.25 0 3.375 0 4.189-.635c.814-.636 1.086-1.727 1.632-3.91.858-3.432 1.287-5.147.386-6.301a2.186 2.186 0 00-.487-.46l-.513-2.962-.046-.17c-.237-.872-.41-1.506-.776-2a3.25 3.25 0 00-1.426-1.089c-.476-.186-1.009-.217-1.692-.222A1.75 1.75 0 0014 2.25zm8.418 6.896l-.362-2.088c-.283-1.04-.386-1.367-.56-1.601a1.75 1.75 0 00-.768-.587c-.22-.086-.486-.111-1.148-.118A1.75 1.75 0 0114 5.75h-4a1.75 1.75 0 01-1.58-.998c-.663.007-.928.032-1.148.118a1.75 1.75 0 00-.768.587c-.174.234-.277.56-.560 1.6l-.362 2.089C6.58 9 7.91 9 9.685 9h4.63c1.775 0 3.105 0 4.103.146M8 12.25a.75.75 0 01.75.75v4a.75.75 0 01-1.5 0v-4a.75.75 0 01.75-.75m8.75.75a.75.75 0 00-1.5 0v4a.75.75 0 001.5 0v-4M12 12.25a.75.75 0 01.75.75v4a.75.75 0 01-1.5 0v-4a.75.75 0 01.75-.75" clip-rule="evenodd"/>
                                 </svg>
                                 В корзину
                             </a>
                         {% else %}
-                            <span class="text-sm text-gray-600 font-semibold py-2 px-6 bg-gray-200 rounded-lg cursor-not-allowed">
+                            <span class="text-sm text-gray-600 font-semibold py-2 tracking-wide px-6 bg-gray-200 rounded-lg cursor-not-allowed">
                                 Добавлен в корзину
                             </span>
                         {% endif %}
                     {% else %}
                         {% if album not in request.user.customer.wishlist.all %}
-                            <a href="{% url 'add_to_wishlist' album_id=album.id %}" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-semibold tracking-wide flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                            <a href="{% url 'add_to_wishlist' album_id=album.id %}" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-bold tracking-wide flex items-center">
+                                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 1024 1024">
+                                    <path d="m908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5c-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3a32.05 32.05 0 0 0 .6 45.3l183.7 179.1l-43.4 252.9a31.95 31.95 0 0 0 46.4 33.7L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2c17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9l183.7-179.1c5-4.9 8.3-11.3 9.3-18.3c2.7-17.5-9.5-33.7-27-36.3"/>
                                 </svg>
                                 В ожидаемое
                             </a>
                         {% else %}
-                            <span class="text-sm text-gray-600 font-semibold py-2 px-5 bg-gray-200 rounded-lg cursor-not-allowed">
+                            <span class="text-sm text-gray-600 font-semibold tracking-wide py-2 px-5 bg-gray-200 rounded-lg cursor-not-allowed">
                                 В ожидаемом
                             </span>
                         {% endif %}
                     {% endif %}
+                    {% if album in request.user.customer.favorite.all %}
+                        <a href="{% url 'remove_from_favorite' album_id=album.id %}" class="p-2 bg-gray-200 text-red-400 rounded-md hover:bg-gray-300 transition-all duration-300" title="Удалить из избранного">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'add_to_favorite' album_id=album.id %}" class="p-2 bg-gray-200 text-gray-400 rounded-md hover:bg-gray-300 transition-all duration-300" title="Добавить в избранное">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                        </a>
+                    {% endif %}
                 {% else %}
-                    <a href="{% url 'login' %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-semibold tracking-wide flex items-center">
+                    <a href="{% url 'login' %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-bold tracking-wide flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                         </svg>
                         Авторизуйтесь
+                    </a>
+                    <a href="{% url 'login' %}" class="p-2 bg-gray-200 text-gray-400 rounded-md hover:bg-gray-300 transition-all duration-300" title="Авторизуйтесь для добавления">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
                     </a>
                 {% endif %}
             </div>
@@ -154,21 +184,21 @@
     </div>
 
     <!-- Описание и треклист -->
-    <div class="mt-10 space-y-6 font-mulish px-4 text-sm tracking-wide leading-7">
-        <div class="bg-white p-6 rounded-xl shadow-md w-[1268px]">
+    <div class="mt-8 space-y-6 font-mulish px-4 text-sm tracking-wide leading-7">
+        <div class="bg-white p-8 rounded-xl shadow-md w-[1270px]">
             <h2 class="text-xl font-semibold text-gray-800 mb-1 relative inline-block">
                 Описание
                 <span class="absolute bottom-0 left-0 w-full h-[3px] bg-blue-500 transform translate-y-1.5"></span>
             </h2>
-            <p class="text-gray-700 mt-4 overflow-y-auto">{{ album.description|default:"Описание появится позже"|safe }}</p>
+            <p class="text-gray-700 mt-3.5 overflow-y-auto">{{ album.description|default:"Описание появится позже"|safe }}</p>
         </div>
         {% if album.tracklist %}
-            <div class="bg-white p-6 rounded-xl shadow-md w-full">
+            <div class="bg-white p-8 rounded-xl shadow-md w-full">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4 relative inline-block">
                     Треклист
-                    <span class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 transform translate-y-1.5"></span>
+                    <span class="absolute bottom-0 left-0 w-full h-[3px] bg-blue-500 transform translate-y-1.5"></span>
                 </h2>
-                <div class="mt-1 leading-relaxed text-sm">
+                <div class="mt-1.5 ml-5 leading-7 text-sm">
                     {{ album.tracklist|safe }}
                 </div>
             </div>
@@ -188,16 +218,25 @@
     ];
     let currentIndex = 0;
 
+    function updateButtonVisibility() {
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+        prevButton.classList.toggle('hidden', currentIndex === 0);
+        nextButton.classList.toggle('hidden', currentIndex === images.length - 1);
+    }
+
     function changeMainImage(src) {
         const mainImage = document.getElementById('mainImage');
         mainImage.src = src;
         currentIndex = images.indexOf(src);
+        updateButtonVisibility();
     }
 
     function prevImage() {
         if (currentIndex > 0) {
             currentIndex--;
             document.getElementById('mainImage').src = images[currentIndex];
+            updateButtonVisibility();
         }
     }
 
@@ -205,7 +244,11 @@
         if (currentIndex < images.length - 1) {
             currentIndex++;
             document.getElementById('mainImage').src = images[currentIndex];
+            updateButtonVisibility();
         }
     }
+
+    // Initialize button visibility on page load
+    updateButtonVisibility();
 </script>
 {% endblock content %}

@@ -90,6 +90,18 @@ class BaseView(CartMixin, NotificationsMixin, views.View):
         # Получаем активный прайс-лист
         active_pricelist = PriceList.objects.filter(is_active=True).first()
 
+        # Фильтрация по типу носителя
+        selected_media_type = request.GET.get('media_type', 'all')
+        if selected_media_type != 'all':
+            try:
+                media_type_id = int(selected_media_type)
+                albums_query = albums_query.filter(media_type__id=media_type_id)
+                active_filters['selected_media_type'] = selected_media_type
+            except (ValueError, MediaType.DoesNotExist):
+                active_filters['selected_media_type'] = 'all'
+        else:
+            active_filters['selected_media_type'] = 'all'
+
         # Фильтрация по min_price
         if 'min_price' in request.GET and request.GET['min_price']:
             try:
@@ -120,11 +132,9 @@ class BaseView(CartMixin, NotificationsMixin, views.View):
             except (ValueError, DecimalException):
                 active_filters['min_price'] = None
 
-
         # Фильтрация по max_price
         if 'max_price' in request.GET and request.GET['max_price']:
             try:
-                # Replace comma with period for decimal parsing
                 max_price_str = request.GET['max_price'].replace(',', '.')
                 max_price = Decimal(max_price_str)
                 if active_pricelist:
@@ -147,14 +157,8 @@ class BaseView(CartMixin, NotificationsMixin, views.View):
                             default=F('annotated_current_price'),
                             output_field=DecimalField()
                         )
-                    )
-                    # Debug: Log albums with their discounted prices
-                    debug_query = albums_query.annotate(
-                        debug_price=F('annotated_discounted_price')
-                    ).values('id', 'name', 'debug_price')
-                    for item in debug_query:
-                        albums_query = albums_query.filter(annotated_discounted_price__lte=max_price)
-                    active_filters['max_price'] = float(max_price)
+                    ).filter(annotated_discounted_price__lte=max_price)
+                active_filters['max_price'] = float(max_price)
             except (ValueError, DecimalException):
                 active_filters['max_price'] = None
 
@@ -256,8 +260,8 @@ class BaseView(CartMixin, NotificationsMixin, views.View):
             'styles': styles,
             'conditions': conditions,
             'format_editions': format_editions,
-            'min_price': f"{min_price:.2f}", 
-            'max_price': f"{max_price:.2f}", 
+            'min_price': f"{min_price:.2f}",
+            'max_price': f"{max_price:.2f}",
             'min_year': min_year,
             'max_year': max_year,
             'min_price_default': min_price_default,
@@ -270,6 +274,7 @@ class BaseView(CartMixin, NotificationsMixin, views.View):
             'selected_format_editions': active_filters.get('selected_format_editions', []),
             'in_stock': active_filters.get('in_stock', False),
             'offer_of_the_week': active_filters.get('offer_of_the_week', False),
+            'selected_media_type': active_filters.get('selected_media_type', 'all'),
             'active_filters': active_filters,
             'cart': self.cart,
             'notifications': self.notifications(request.user),

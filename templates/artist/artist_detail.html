@@ -55,7 +55,7 @@
                 {% if artist.members.count > 1 %}
                     <li class="text-justify leading-relaxed">
                         <span class="font-medium">Участники:</span>
-                        <ul class="list-disc list-inside mt-2 space-y-1 text-gray-700">
+                        <ul class="list-disc list-inside mt-2 ml-6 space-y-1 text-gray-700">
                             {% for member in artist.members.all %}
                                 <li>
                                     <span class="font-bold">{{ member.first_name }} {{ member.last_name }}</span>

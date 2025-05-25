@@ -1,5 +1,27 @@
 {% load static %}
 
+<!-- Блок категорий -->
+<div class="flex flex-col tracking-wide ml-3 space-y-1 mb-3" x-data="{ selectedMedia: '{{ selected_media_type|default:"all" }}' }">
+    <a href="{% url 'base' %}?media_type=all" class="text-sm {% if selected_media_type == 'all' or not selected_media_type %}text-blue-600 font-semibold{% else %}text-gray-600 hover:text-blue-600{% endif %} transition-colors duration-200 flex items-center" @click="selectedMedia = 'all'">
+        <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+        </svg>
+        Музыка
+    </a>
+    <a href="{% url 'base' %}?media_type=1" class="text-sm ml-7 {% if selected_media_type == '1' %}text-blue-600 font-semibold{% else %}text-gray-600 hover:text-blue-600{% endif %} transition-colors duration-200 flex items-center" @click="selectedMedia = '1'">
+        Виниловые пластинки
+        <svg class="w-3 h-3 ml-1" :class="{ 'rotate-90': selectedMedia === '1' }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+    </a>
+    <a href="{% url 'base' %}?media_type=2" class="text-sm ml-7 {% if selected_media_type == '2' %}text-blue-600 font-semibold{% else %}text-gray-600 hover:text-blue-600{% endif %} transition-colors duration-200 flex items-center" @click="selectedMedia = '2'">
+        CD диски
+        <svg class="w-3 h-3 ml-1" :class="{ 'rotate-90': selectedMedia === '2' }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+    </a>
+</div>
+
 <!-- Контейнер фильтров -->
 <div class="filter-container bg-white p-5 rounded-lg shadow-sm border border-gray-200 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-gray-100">
     <form method="GET" action="" id="filter-form">
@@ -44,7 +66,7 @@
                 {% for genre in genres|slice:"3:" %}
                     <label class="hidden toggleable-genre">
                         <input type="checkbox" name="genres" value="{{ genre.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-0" {% if genre.id|stringformat:"s" in selected_genres %}checked{% endif %}>
-                        <span class="ml-2 text-sm text-gray-600">{{ genre.name }}</span>
+                        <span class="ml-1 text-sm text-gray-600">{{ genre.name }}</span>
                     </label>
                 {% endfor %}
             </div>
@@ -66,7 +88,7 @@
                 {% for style in styles|slice:"3:" %}
                     <label class="hidden toggleable-style">
                         <input type="checkbox" name="styles" value="{{ style.id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-0" {% if style.id|stringformat:"s" in selected_styles %}checked{% endif %}>
-                        <span class="ml-2 text-sm text-gray-600">{{ style.name }}</span>
+                        <span class="ml-1 text-sm text-gray-600">{{ style.name }}</span>
                     </label>
                 {% endfor %}
             </div>
